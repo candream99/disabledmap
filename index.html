@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>네이버 지도 기반 광화문 교보빌딩 실내 지도 (일반 지도 및 라벨 제거)</title>
+    <title>네이버 지도 기반 광화문 교보빌딩 실내 지도 (라벨 제거 최종 수정본)</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <meta charset="utf-8">
     
@@ -168,8 +168,8 @@
         const floorOverlays = {}; 
         
         // ⭐ 커스텀 지도 타입 ID 정의: 라벨 없는 일반 지도
-        const LABELLESS_MAP_TYPE_ID = 'LABELLESS_NORMAL';
-
+        const LABELLESS_MAP_TYPE_ID = 'LABELLESS_NORMAL_CLEAN'; 
+        
         // 층별 오버레이를 설정하고 활성화/비활성화하는 함수
         function setFloorOverlay(floorId) {
             const overlayKey = `${activeBuildingId}_${floorId}`;
@@ -192,7 +192,7 @@
             }
         }
 
-        // ⭐ 실내 모드로 진입할 때 컨트롤을 표시하고 지도를 조정하는 함수 (핵심 수정 부분)
+        // ⭐ 실내 모드로 진입할 때 컨트롤을 표시하고 지도를 조정하는 함수 (수정)
         function showIndoorControls(map, buildingId) {
             if (!buildingId || !BUILDING_CONFIGS[buildingId]) {
                  console.error(`[오류 방지] 유효하지 않은 건물 ID: ${buildingId}`);
@@ -256,8 +256,8 @@
             
             document.getElementById('floor-picker').style.display = 'none';
             
-            // ⭐ 지도 타입 복원: 라벨 없는 일반 지도 타입으로 복귀 (일관성 유지)
-            map.setMapTypeId(LABELLESS_MAP_TYPE_ID);
+            // ⭐ 지도 타입 복원: 일반 지도 타입으로 복귀
+            map.setMapTypeId(naver.maps.MapTypeId.NORMAL); // 일반 네이버 지도로 복귀
 
             map.setCenter(BUILDING_CONFIGS['kyobo'].center); 
             map.setZoom(19); 
@@ -375,12 +375,18 @@
         function initMap() {
             const kyoboCenter = BUILDING_CONFIGS['kyobo'].center;
 
-            // ⭐ 1. 레이블 없는 일반 지도 타입 정의 (Clean Map 구현)
-            // Naver Maps API에서 기본 NORMAL 맵 타입을 가져옵니다.
+            // ⭐ 1. 레이블 없는 일반 지도 타입 정의 (Clean Map 구현 - 공식 MapType 정의 활용)
+            
+            // naver.maps.NaverMap.getMapTypes()가 정의되지 않은 문제를 해결하기 위해,
+            // 기본 일반 지도 타입을 가져온 후 layers 속성을 직접 수정하여 사용합니다.
+            
+            // 1.1 기본 일반 지도 타입 정의 복사
             const baseNormalType = naver.maps.NaverMap.getMapTypes(naver.maps.MapTypeId.NORMAL);
             
-            // 텍스트(POI, 도로명 등)를 제거하기 위해 'symbol', 'label' 레이어를 제외한 레이어 목록
-            const cleanLayers = ['background', 'road', 'traffic']; 
+            // 1.2 커스텀 지도 타입 정의: 'symbol' (POI) 및 'label' (도로명, POI 이름 등) 레이어 제거
+            const cleanLayers = baseNormalType.layers.filter(layer => 
+                layer !== 'symbol' && layer !== 'label'
+            );
             
             const labelLessMap = {
                 name: '레이블 없는 일반 지도',
@@ -390,19 +396,17 @@
                 tileSet: baseNormalType.tileSet,
                 layers: cleanLayers // 텍스트 레이어 제외 적용
             };
-
+            
 
             // 2. Naver Maps 초기화 및 커스텀 타입 추가
             mapInstance = new naver.maps.Map('map', {
                 center: kyoboCenter,
                 zoom: 19, 
-                mapTypeId: LABELLESS_MAP_TYPE_ID, // 초기 지도 타입도 레이블 없는 일반 지도 사용
+                mapTypeId: naver.maps.MapTypeId.NORMAL, // 초기 지도 타입은 기본 일반 지도를 사용
                 
-                // 커스텀 지도 타입 등록
+                // 커스텀 지도 타입 등록 (LABELLESS_MAP_TYPE_ID에 라벨 없는 지도 타입을 할당)
                 mapTypes: new naver.maps.MapTypeRegistry({
                     [LABELLESS_MAP_TYPE_ID]: labelLessMap,
-                    [naver.maps.MapTypeId.NORMAL]: naver.maps.NaverMap.getMapTypes(naver.maps.MapTypeId.NORMAL),
-                    [naver.maps.MapTypeId.SATELLITE]: naver.maps.NaverMap.getMapTypes(naver.maps.MapTypeId.SATELLITE)
                 }),
                 
                 mapTypeControl: true, 
