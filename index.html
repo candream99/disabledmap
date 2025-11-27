@@ -24,10 +24,9 @@
     <div id="map"></div>
 
     <!-- 1. 네이버 지도 API 로드 -->
-    <!-- 'ncpKeyId' 뒤에 '&vsm=1'을 추가하여 WebGL 기반 벡터 맵을 활성화합니다. -->
+    <!-- Client ID (q1d23mmkof) 및 벡터 맵 활성화 옵션 '&vsm=1' 적용 -->
     <script type="text/javascript" 
         src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof&vsm=1">
-        // !!! 중요: YOUR_NCP_CLIENT_ID_HERE를 실제 클라이언트 ID로 교체하세요 !!!
     </script>
 
     <!-- 2. 지도 초기화 JavaScript -->
@@ -40,11 +39,11 @@
             // 지도 인스턴스 생성
             const map = new naver.maps.Map('map', {
                 center: KYOBODB_CENTER, // 지도 중심 좌표
-                zoom: 19, // 초기 줌 레벨 (건물을 보기 적합한 확대 레벨)
+                zoom: 19, // 초기 줌 레벨
                 mapTypeId: naver.maps.MapTypeId.NORMAL, // 일반 지도 타입
                 
-                // ⭐ 벡터 맵(WebGL) 렌더링을 명시적으로 설정
-                renderType: naver.maps.RenderType.WEBGL, 
+                // ⭐ 핵심 수정: vsm=1이 이미 URL에 있으므로 충돌 방지를 위해 renderType 옵션을 제거합니다.
+                // renderType: naver.maps.RenderType.WEBGL, 
 
                 // 지도 컨트롤 표시 설정
                 mapTypeControl: true, 
@@ -58,7 +57,7 @@
             map.setTilt(45);
         }
 
-        // API 로드가 완료되면 initMap 함수 호출 (naver.maps.onJSContentLoaded는 API가 로드된 후에 실행될 것을 보장합니다.)
+        // API 로드가 완료되면 initMap 함수 호출
         naver.maps.onJSContentLoaded = initMap;
     </script>
 </body>
