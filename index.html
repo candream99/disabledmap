@@ -22,7 +22,8 @@
         #labelToggleBtn {
             position: absolute;
             top: 10px;
-            right: 10px; /* 오른쪽 위에 배치 */
+            /* ⭐ 여기 수정됨! right 대신 left로! ⭐ */
+            left: 170px; /* status 박스 옆에 놓기 위해 left 값 조절 */
             background: #4A90E2; /* 버튼 색상 */
             color: white;
             padding: 10px 15px;
@@ -41,8 +42,9 @@
 </head>
 <body>
     <div id="status">API 키 확인 중...</div>
-    <div id="map"></div>
     <button id="labelToggleBtn">라벨 숨기기</button> <!-- 라벨 제어 버튼 추가 -->
+    <div id="map"></div>
+    
 
     <script>
         // 호랭이 Key ID 박제!
