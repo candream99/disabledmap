@@ -71,8 +71,8 @@
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
         script.onload = function() {
-            document.getElementById('status').textContent = 'API 로드 성공!
-            벡터 지도 초기화 중...';
+            // ⭐ 오타/줄바꿈 수정: 문자열을 한 줄로 수정
+            document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...'; 
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
             // 지도 초기 옵션 설정
             const mapOptions = {
@@ -160,15 +160,6 @@
                 }
             });
 
-            // 4. 클릭 이벤트 제한 추가 (다각형 내부 클릭 시 지도 이벤트 전파 중단) - **아래 GroundOverlay 기능으로 대체 또는 통합됨**
-            /* naver.maps.Event.addListener(polygon, 'click', function(e) {
-                e.stop(); 
-                document.getElementById('coordDisplay').textContent = '🚫 다각형 
-                내부 클릭! 좌표 표시 기능이 제한됩니다.';
-                console.log("다각형 내부 클릭 감지: 지도 좌표 표시 기능 중단됨.");
-            });
-            */
-
             // -------------------------------------------------------------------
             // ⭐⭐ GroundOverlay(평면도) 및 실내 모드 추가 기능 ⭐⭐
             // -------------------------------------------------------------------
@@ -242,8 +233,8 @@
             console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 및 좌표 표시 기능, 실내 모드 추가됨.");
         };
         script.onerror = function() {
-            document.getElementById('status').textContent = 'API 로드 실패!
-            네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
+            // ⭐ 오타/줄바꿈 수정: 문자열을 한 줄로 수정
+            document.getElementById('status').textContent = 'API 로드 실패! 네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
             document.getElementById('status').style.background = 'red';
             console.error("네이버 지도 API 로드 실패!");
         };
