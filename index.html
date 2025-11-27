@@ -71,7 +71,6 @@
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
         script.onload = function() {
-            // ⭐ 줄바꿈 오류 수정
             document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...'; 
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
             // 지도 초기 옵션 설정
@@ -99,6 +98,8 @@
             // 라벨 토글 버튼 기능
             const labelToggleBtn = document.getElementById('labelToggleBtn');
             let isLabelVisible = true;
+            // ⭐ 추가: 실내 모드 진입 전 라벨 상태 저장 변수
+            let wasLabelVisibleBeforeIndoorMode = true; 
 
             labelToggleBtn.addEventListener('click', function() {
                 if (isLabelVisible) {
@@ -165,6 +166,7 @@
             // -------------------------------------------------------------------
             
             // 이미지 정보
+            // ⭐ 이미지 경로 수정 (Raw GitHub URL로 변경)
             const imageUrl = 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg';
             const swLatLng = new naver.maps.LatLng(37.570535, 126.977631); // 남서쪽 (좌측 하단)
             const neLatLng = new naver.maps.LatLng(37.571365, 126.978099); // 북동쪽 (우측 상단)
@@ -182,11 +184,16 @@
 
                 // 🌟 GroundOverlay 클릭 이벤트: 이미지 클릭 시 제거
                 naver.maps.Event.addListener(groundOverlay, 'click', function(e) {
-                    // 🚨 수정: e.stop() 대신 e.stopOverlays 사용
                     e.stopOverlays = true; 
                     
                     // 이미지 제거 (실내 모드 종료)
                     groundOverlay.setMap(null); 
+                    
+                    // ⭐ 수정: 실내 모드 진입 전 상태로 라벨 복구
+                    if (wasLabelVisibleBeforeIndoorMode) {
+                        labelLayer.setMap(map);
+                    }
+                    
                     polygon.setOptions({ // 다각형 색상 투명하게 복구
                         fillColor: 'transparent' 
                     });
@@ -197,20 +204,23 @@
 
             // 다각형(Polygon) 클릭 이벤트 수정: 실내 모드 진입
             naver.maps.Event.addListener(polygon, 'click', function(e) {
-                // 🚨 수정: e.stop() 대신 e.stopOverlays 사용
                 e.stopOverlays = true; // 다각형 내부 클릭 시 지도 클릭 이벤트 전파 중단
 
                 if (!groundOverlay) {
                     createGroundOverlay();
                 }
 
+                // ⭐ 수정: 현재 라벨 상태를 저장하고 라벨을 숨김 (실내 모드 요구사항)
+                wasLabelVisibleBeforeIndoorMode = isLabelVisible; 
+                labelLayer.setMap(null); 
+                
                 // GroundOverlay 표시 (실내 모드 시작)
                 groundOverlay.setMap(map);
                 polygon.setOptions({ // 다각형을 채워진 상태로 유지
                     fillColor: '#C490E4' 
                 });
                 document.getElementById('coordDisplay').textContent = '🏢 실내 모드 활성화. 이미지를 클릭하면 일반 지도로 돌아갑니다.';
-                console.log("다각형 내부 클릭: 실내 모드 진입.");
+                console.log("다각형 내부 클릭: 실내 모드 진입. 라벨 숨김.");
             });
 
             // ⭐ 지도 클릭 이벤트 (다각형 밖을 클릭했을 때만 작동)
@@ -223,7 +233,7 @@
                     document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
                     console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
                 } else {
-                    // 실내 모드일 경우 지도 클릭 무시 (별도 처리 필요 없음, GroundOverlay 클릭이 먼저 발생)
+                    // 실내 모드일 경우 지도 클릭 무시 (GroundOverlay 클릭이 먼저 발생)
                     console.log("실내 모드 중: 지도 클릭 무시됨.");
                 }
             });
@@ -234,7 +244,6 @@
             console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 및 좌표 표시 기능, 실내 모드 추가됨.");
         };
         script.onerror = function() {
-            // ⭐ 줄바꿈 오류 수정
             document.getElementById('status').textContent = 'API 로드 실패! 네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
             document.getElementById('status').style.background = 'red';
             console.error("네이버 지도 API 로드 실패!");
@@ -243,4 +252,3 @@
     </script>
 </body>
 </html>
-
