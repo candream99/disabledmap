@@ -44,6 +44,7 @@
             font-size: 15px;
             font-weight: 600;
             transition: background-color 0.2s, transform 0.1s;
+            user-select: none;
         }
         .floor-button:hover {
             background-color: #e0e0e0;
@@ -221,9 +222,11 @@
                 button.textContent = floor.label;
                 button.dataset.floorId = floorId;
                 
-                naver.maps.Event.addListener(button, 'click', function() {
+                // <-- 수정된 부분: DOM 요소에는 표준 addEventListener 사용
+                button.addEventListener('click', function() {
                     setFloorOverlay(floorId);
                 });
+
                 floorPicker.appendChild(button);
             });
             
@@ -466,4 +469,3 @@
     </script>
 </body>
 </html>
-
