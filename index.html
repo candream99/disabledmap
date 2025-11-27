@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>네이버 지도 기반 광화문 교보빌딩 실내 지도</title>
+    <title>네이버 지도 기반 광화문 교보빌딩 실내 지도 (일반 지도 및 라벨 제거)</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <meta charset="utf-8">
     
@@ -44,7 +44,6 @@
             font-size: 15px;
             font-weight: 600;
             transition: background-color 0.2s, transform 0.1s;
-            user-select: none;
         }
         .floor-button:hover {
             background-color: #e0e0e0;
@@ -71,6 +70,7 @@
             font-weight: bold;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             cursor: pointer;
+            display: none; 
         }
 
         /* 네이버 지도의 기본 컨트롤 숨김 (깔끔한 UI를 위해) */
@@ -93,17 +93,18 @@
 
     <!-- 1. 네이버 지도 API 로드 -->
     <script type="text/javascript" 
-        src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof">
+        src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=YOUR_NCP_CLIENT_ID_HERE">
+        // !!! 중요: YOUR_NCP_CLIENT_ID_HERE를 실제 클라이언트 ID로 교체하세요 !!!
     </script>
 
     <!-- 2. 사용자 JavaScript 코드 (API 로드 완료 후 실행) -->
     <script>
-        // 새로운 꼭짓점 좌표 정의
+        // 새로운 꼭짓점 좌표 정의 (광화문 교보빌딩 근처)
         const COORDS = {
             NW: { lat: 37.571346, lng: 126.977674 }, // 북서 (North-West)
             NE: { lat: 37.571349, lng: 126.978057 }, // 북동 (North-East)
             SE: { lat: 37.570542, lng: 126.978087 }, // 남동 (South-East)
-            SW: { lat: 37.570541, lng: 126.977699 }  // 남서 (South-West)
+            SW: { lat: 37.570541, lng: 126.977699 }  // 남서 (South-East)
         };
 
         // 중심 좌표 계산
@@ -113,15 +114,12 @@
         // 건물별 설정 데이터 (광화문 교보빌딩)
         const BUILDING_CONFIGS = {
             'kyobo': {
-                // 광화문 교보빌딩의 새로운 중심 좌표
                 center: new naver.maps.LatLng(centerLat, centerLng), 
-                // 지도 이미지 오버레이 경계 (NW와 SE로 정의)
                 bounds: new naver.maps.LatLngBounds( 
-                    new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), // 북서
-                    new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng)  // 남동
+                    new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
+                    new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng)
                 ),
                 polygonPaths: [
-                    // 광화문 교보빌딩의 새로운 외곽선 Path (빌딩 영역)
                     [
                         new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
                         new naver.maps.LatLng(COORDS.NE.lat, COORDS.NE.lng), 
@@ -132,7 +130,7 @@
                 floors: {
                     'B1': {
                         label: '지하 1층',
-                        // 이미지도 새로운 경계에 맞게 재정의
+                        // Image URL을 placehold.co로 대체 (실제 이미지 경로 필요)
                         imageUrl: 'https://placehold.co/1000x800/2962FF/FFFFFF?text=KYOBODB+B1',
                         imageBounds: new naver.maps.LatLngBounds(
                             new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
@@ -164,15 +162,19 @@
         let isIndoorModeActive = false;
         let activeBuildingId = null;
         let currentFloorId = null; 
-        let clickListener = null; // 좌표 추출 리스너를 저장할 변수
+        let clickListener = null; 
 
         const buildingPolygons = {}; 
         const floorOverlays = {}; 
         
+        // ⭐ 커스텀 지도 타입 ID 정의: 라벨 없는 일반 지도
+        const LABELLESS_MAP_TYPE_ID = 'LABELLESS_NORMAL';
+
         // 층별 오버레이를 설정하고 활성화/비활성화하는 함수
         function setFloorOverlay(floorId) {
             const overlayKey = `${activeBuildingId}_${floorId}`;
             
+            // 기존 층 오버레이 제거
             if (currentFloorId) {
                 const currentOverlayKey = `${activeBuildingId}_${currentFloorId}`;
                 const currentOverlay = floorOverlays[currentOverlayKey];
@@ -181,6 +183,7 @@
                 }
             }
             
+            // 새 층 오버레이 표시 및 상태 업데이트
             const newOverlay = floorOverlays[overlayKey];
             if (newOverlay) {
                 newOverlay.setMap(mapInstance);
@@ -189,31 +192,33 @@
             }
         }
 
-        // 실내 모드로 진입할 때 컨트롤을 표시하고 지도를 조정하는 함수
+        // ⭐ 실내 모드로 진입할 때 컨트롤을 표시하고 지도를 조정하는 함수 (핵심 수정 부분)
         function showIndoorControls(map, buildingId) {
             if (!buildingId || !BUILDING_CONFIGS[buildingId]) {
                  console.error(`[오류 방지] 유효하지 않은 건물 ID: ${buildingId}`);
                  return;
             }
 
-            // 좌표 추출 모드 비활성화
+            // 실내 모드 진입 시 좌표 추출 모드를 비활성화
             disableCoordExtraction(); 
 
             isIndoorModeActive = true;
             activeBuildingId = buildingId;
             
+            // 폴리곤 숨기기 및 선택된 폴리곤 강조
             hideAllPolygons(map, buildingId);
             
             const config = BUILDING_CONFIGS[buildingId];
             
-            // 실내 모드 진입 시 줌 레벨을 20으로 높이고 위성 지도로 변경
+            // ⭐⭐⭐ 요청 사항 반영: 실내 모드 진입 시 라벨 없는 일반 지도 타입으로 변경 ⭐⭐⭐
+            map.setMapTypeId(LABELLESS_MAP_TYPE_ID); 
             map.setCenter(config.center);
-            map.setZoom(20); // 줌 레벨을 20으로 더 확대하여 건물을 꽉 채우도록 변경
-            map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
+            map.setZoom(20); 
             
             const floorPicker = document.getElementById('floor-picker');
             floorPicker.innerHTML = '';
             
+            // 층 버튼 동적 생성 (역순)
             const floorKeys = Object.keys(config.floors).reverse();
             floorKeys.forEach(floorId => {
                 const floor = config.floors[floorId];
@@ -222,11 +227,9 @@
                 button.textContent = floor.label;
                 button.dataset.floorId = floorId;
                 
-                // <-- 수정된 부분: DOM 요소에는 표준 addEventListener 사용
-                button.addEventListener('click', function() {
+                naver.maps.Event.addListener(button, 'click', function() {
                     setFloorOverlay(floorId);
                 });
-
                 floorPicker.appendChild(button);
             });
             
@@ -236,10 +239,11 @@
             setFloorOverlay(initialFloorId);
         }
 
-        // 실내 모드에서 일반 지도로 복원하는 함수
+        // 실내 모드에서 복원하는 함수
         function hideIndoorControls(map) {
             isIndoorModeActive = false;
             
+            // 현재 활성화된 층 오버레이 제거
             if (currentFloorId) {
                 const currentOverlayKey = `${activeBuildingId}_${currentFloorId}`;
                 const currentOverlay = floorOverlays[currentOverlayKey];
@@ -252,15 +256,15 @@
             
             document.getElementById('floor-picker').style.display = 'none';
             
-            map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
-            
-            // 실내 모드에서 복귀 시 초기 줌 레벨 19로 변경
+            // ⭐ 지도 타입 복원: 라벨 없는 일반 지도 타입으로 복귀 (일관성 유지)
+            map.setMapTypeId(LABELLESS_MAP_TYPE_ID);
+
             map.setCenter(BUILDING_CONFIGS['kyobo'].center); 
             map.setZoom(19); 
             
             showAllPolygons(map);
             
-            // 지도 클릭 리스너 다시 활성화 (좌표 추출 모드 진입)
+            // 실내 모드 종료 시 좌표 추출 모드 다시 활성화
             enableCoordExtraction();
         }
 
@@ -281,6 +285,7 @@
                 if (id !== exceptId) {
                     buildingPolygons[id].setMap(null);
                 } else {
+                    // 활성 폴리곤 강조
                     buildingPolygons[id].setOptions({ 
                         fillColor: '#4A90E2', 
                         fillOpacity: 0.2, 
@@ -304,48 +309,35 @@
             });
         }
         
-        // ⭐⭐ 좌표 추출 기능을 활성화하는 함수 ⭐⭐
+        // 좌표 추출 기능을 활성화/비활성화하는 함수
         function enableCoordExtraction() {
-             // 1. mapInstance가 확실히 존재하는지 확인합니다.
-             if (!mapInstance) {
-                console.error("⛔ [오류] mapInstance가 초기화되지 않아 좌표 추출 기능을 활성화할 수 없습니다.");
-                return;
-            }
-
+             if (!mapInstance) return;
+             
             const guide = document.getElementById('coord-guide');
             guide.style.display = 'block';
             
-            // 기존 리스너가 있다면 제거
             if (clickListener) {
                 naver.maps.Event.removeListener(clickListener);
             }
 
-            // 2. mapInstance에 리스너 설정
             clickListener = naver.maps.Event.addListener(mapInstance, 'click', function(e) {
                 const lat = e.coord.y.toFixed(6);
                 const lng = e.coord.x.toFixed(6);
                 const message = `위도: ${lat}\n경도: ${lng}\n\n이 좌표를 복사하여 사용하세요.`;
-                
-                // 개발자 도구 콘솔에 출력 (복사하기 쉬움)
                 console.log('클릭한 위치의 좌표:', lat + ', ' + lng);
-                
-                // 화면에 커스텀 메시지 박스로 표시
                 showCustomMessage(message);
             });
-            console.log('✅ 지도 좌표 추출 모드가 활성화되었습니다. 지도를 클릭해 보세요.');
         }
 
-        // ⭐⭐ 좌표 추출 기능을 비활성화하는 함수 ⭐⭐
         function disableCoordExtraction() {
             if (clickListener) {
                 naver.maps.Event.removeListener(clickListener);
                 clickListener = null;
-                console.log('❌ 지도 좌표 추출 모드가 비활성화되었습니다.');
             }
             document.getElementById('coord-guide').style.display = 'none';
         }
 
-        // ⭐⭐ 커스텀 메시지 박스 구현 (alert() 대안) ⭐⭐
+        // 커스텀 메시지 박스 구현 (alert() 대안)
         function showCustomMessage(message) {
             const existingModal = document.getElementById('custom-modal');
             if (existingModal) existingModal.remove();
@@ -382,26 +374,49 @@
 
         function initMap() {
             const kyoboCenter = BUILDING_CONFIGS['kyobo'].center;
+
+            // ⭐ 1. 레이블 없는 일반 지도 타입 정의 (Clean Map 구현)
+            // Naver Maps API에서 기본 NORMAL 맵 타입을 가져옵니다.
+            const baseNormalType = naver.maps.NaverMap.getMapTypes(naver.maps.MapTypeId.NORMAL);
             
-            // ⭐ 1. Naver Maps 초기화 시 최종 줌 레벨(19)로 설정하여 불필요한 줌 변경 제거
+            // 텍스트(POI, 도로명 등)를 제거하기 위해 'symbol', 'label' 레이어를 제외한 레이어 목록
+            const cleanLayers = ['background', 'road', 'traffic']; 
+            
+            const labelLessMap = {
+                name: '레이블 없는 일반 지도',
+                minZoom: baseNormalType.minZoom,
+                maxZoom: baseNormalType.maxZoom,
+                projection: baseNormalType.projection,
+                tileSet: baseNormalType.tileSet,
+                layers: cleanLayers // 텍스트 레이어 제외 적용
+            };
+
+
+            // 2. Naver Maps 초기화 및 커스텀 타입 추가
             mapInstance = new naver.maps.Map('map', {
                 center: kyoboCenter,
-                zoom: 19, // 초기 줌 레벨을 19로 설정
-                mapTypeId: naver.maps.MapTypeId.NORMAL,
-                rotation: 0, 
-                tilt: 0, 
+                zoom: 19, 
+                mapTypeId: LABELLESS_MAP_TYPE_ID, // 초기 지도 타입도 레이블 없는 일반 지도 사용
+                
+                // 커스텀 지도 타입 등록
+                mapTypes: new naver.maps.MapTypeRegistry({
+                    [LABELLESS_MAP_TYPE_ID]: labelLessMap,
+                    [naver.maps.MapTypeId.NORMAL]: naver.maps.NaverMap.getMapTypes(naver.maps.MapTypeId.NORMAL),
+                    [naver.maps.MapTypeId.SATELLITE]: naver.maps.NaverMap.getMapTypes(naver.maps.MapTypeId.SATELLITE)
+                }),
+                
+                mapTypeControl: true, 
+                zoomControl: true,
                 scaleControl: false,
                 logoControl: false,
                 mapDataControl: false,
-                mapTypeControl: true, 
-                zoomControl: true,
             });
             
-            // 2. 지도 인스턴스가 생성된 후 좌표 추출 모드 활성화 및 이벤트 리스너 추가
+            // 3. 지도 인스턴스가 생성된 후 좌표 추출 모드 활성화 및 이벤트 리스너 추가
             enableCoordExtraction();
             document.getElementById('coord-guide').addEventListener('click', disableCoordExtraction);
             
-            // 3. 모든 건물 폴리곤 생성 및 지도에 추가 (광화문 교보빌딩)
+            // 4. 모든 건물 폴리곤 생성 및 지도에 추가 (광화문 교보빌딩)
             Object.keys(BUILDING_CONFIGS).forEach(buildingId => {
                 const config = BUILDING_CONFIGS[buildingId];
                 
@@ -420,25 +435,27 @@
                 buildingPolygon.buildingId = buildingId; 
                 buildingPolygons[buildingId] = buildingPolygon;
                 
-                // 4. 폴리곤 클릭 이벤트 설정 (실내 지도 진입/종료)
+                // 5. 폴리곤 클릭 이벤트 설정 (실내 지도 진입/종료)
                 naver.maps.Event.addListener(buildingPolygon, 'click', function(e) {
                     const clickedPolygon = e.overlay; 
                     const clickedId = clickedPolygon.buildingId;
                     
                     if (!isIndoorModeActive) {
+                        // 실내 모드 진입
                         showIndoorControls(mapInstance, clickedId);
                         
                     } else if (activeBuildingId === clickedId) {
+                        // 실내 모드 종료 (현재 활성 건물을 다시 클릭)
                         hideIndoorControls(mapInstance); 
                         
                     } else {
-                        // 다른 건물을 클릭한 경우 (현재 코드에서는 단일 건물이라 이 경우는 발생하지 않음)
+                        // 다른 건물을 클릭한 경우: 실내 모드 중이므로 무시
                         console.log(`[안내] 실내 모드 중에는 다른 건물(${clickedId})을 선택할 수 없습니다. 지도 상태로 돌아가세요.`);
                         return; 
                     }
                 });
 
-                // 5. 모든 층의 이미지 사전 로딩 (Pre-loading)
+                // 6. 모든 층의 이미지 사전 로딩 (Pre-loading)
                 Object.keys(config.floors).forEach(floorId => {
                     const floor = config.floors[floorId];
                     
@@ -456,12 +473,6 @@
                     overlay.setMap(null); 
                 });
             });
-            
-            // ⭐ 6. 지도의 중심만 설정하고 줌 레벨은 초기화 시에 19로 이미 설정되었으므로 제거
-            mapInstance.setCenter(BUILDING_CONFIGS['kyobo'].center);
-            
-            // ⭐ 참고: 초기화 시 줌 레벨을 19로 설정하여 크기 불일치 문제를 해결했습니다.
-            // 실내 모드 진입 시에는 줌 레벨을 20으로 더 확대하도록 `showIndoorControls`를 수정했습니다.
         }
         
         // API 로드가 완료되면 initMap 함수 호출
