@@ -51,11 +51,31 @@
             min-width: 250px;
             text-align: center;
         }
+        /* 실내모드 전환을 위한 버튼 스타일 */
+        #indoorModeBtn {
+            position: absolute;
+            top: 10px;
+            left: 300px;
+            background: #9C27B0;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.3s ease;
+        }
+        #indoorModeBtn:hover {
+            background: #7B1FA2;
+        }
     </style>
 </head>
 <body>
     <div id="status">API 키 확인 중...</div>
     <button id="labelToggleBtn">라벨 숨기기</button>
+    <button id="indoorModeBtn">실내모드 켜기</button>
     <div id="coordDisplay">지도를 클릭하면 좌표가 나와요!</div>
     <div id="map"></div>
 
@@ -66,6 +86,7 @@
         // 실내모드 상태 변수
         let isIndoorMode = false;
         let imageOverlay = null;
+        let map, polygon;
 
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
@@ -85,7 +106,7 @@
                     'normal': naver.maps.NaverStyleMapTypeOptions.getVectorMap()
                 })
             };
-            const map = new naver.maps.Map('map', mapOptions);
+            map = new naver.maps.Map('map', mapOptions);
             map.setMapTypeId('normal');
             
             // 라벨 레이어 설정
@@ -113,7 +134,7 @@
             });
 
             // -------------------------------------------------------------------
-            // ⭐⭐ 다각형(Polygon) 기능 최종 수정 ⭐⭐
+            // ⭐⭐ 다각형(Polygon) 및 실내모드 기능 ⭐⭐
             // -------------------------------------------------------------------
 
             // 1. 다각형의 꼭짓점 좌표 정의
@@ -125,7 +146,7 @@
             ];
 
             // 2. Polygon 객체 생성
-            const polygon = new naver.maps.Polygon({
+            polygon = new naver.maps.Polygon({
                 map: map,
                 paths: [polygonCoords],
                 fillColor: 'transparent',
@@ -137,8 +158,6 @@
             });
 
             // 3. 마우스 오버(Hover) 효과 추가
-            
-            // 마우스 오버 시: 반투명 보라색으로 채우기
             naver.maps.Event.addListener(polygon, 'mouseover', function() {
                 polygon.setOptions({
                     fillColor: '#C490E4'
@@ -146,7 +165,6 @@
                 document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다! (마우스 오버)';
             });
 
-            // 마우스 아웃 시: 채우기 색상 제거 (transparent)
             naver.maps.Event.addListener(polygon, 'mouseout', function() {
                 polygon.setOptions({
                     fillColor: 'transparent'
@@ -154,11 +172,21 @@
                 document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
             });
 
-            // 4. 다각형 클릭 시 평면도 이미지 표시 (실내모드)
-            naver.maps.Event.addListener(polygon, 'click', function(e) {
-                e.stop();
-                
-                // 실내모드 활성화
+            // 4. 실내모드 토글 버튼
+            const indoorModeBtn = document.getElementById('indoorModeBtn');
+            
+            indoorModeBtn.addEventListener('click', function() {
+                if (!isIndoorMode) {
+                    // 실내모드 활성화
+                    activateIndoorMode();
+                } else {
+                    // 실내모드 비활성화
+                    deactivateIndoorMode();
+                }
+            });
+
+            // 5. 실내모드 활성화 함수
+            function activateIndoorMode() {
                 isIndoorMode = true;
                 
                 // 평면도 이미지 오버레이 생성
@@ -172,16 +200,50 @@
                 
                 // 좌표 표시 메시지 변경
                 document.getElementById('coordDisplay').textContent = '실내모드: 평면도 표시 중. 평면도를 클릭하면 지도로 돌아갑니다.';
+                indoorModeBtn.textContent = '실내모드 끄기';
                 
                 console.log("실내모드 활성화: 평면도 이미지 표시");
+            }
+
+            // 6. 실내모드 비활성화 함수
+            function deactivateIndoorMode() {
+                if (imageOverlay) {
+                    imageOverlay.setMap(null);
+                    imageOverlay = null;
+                }
+                
+                isIndoorMode = false;
+                document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
+                indoorModeBtn.textContent = '실내모드 켜기';
+                
+                console.log("실내모드 비활성화: 평면도 이미지 제거");
+            }
+
+            // 7. 이미지 오버레이 클릭 이벤트
+            // 이미지 오버레이가 생성된 후에 이벤트 리스너를 추가해야 함
+            function addImageClickListener() {
+                if (imageOverlay) {
+                    naver.maps.Event.addListener(imageOverlay, 'click', function() {
+                        deactivateIndoorMode();
+                    });
+                }
+            }
+
+            // 8. 다각형 클릭 이벤트 - 실내모드 전환
+            naver.maps.Event.addListener(polygon, 'click', function(e) {
+                // 이벤트 전파 중단 - 올바른 방법으로 수정
+                if (e.stopPropagation) {
+                    e.stopPropagation();
+                }
+                
+                if (!isIndoorMode) {
+                    activateIndoorMode();
+                    // 이미지 클릭 리스너 추가
+                    setTimeout(addImageClickListener, 100);
+                }
             });
 
-            // 5. 이미지 오버레이 클릭 이벤트 - 실내모드 종료
-            // 이미지 오버레이가 생성된 후에 이벤트 리스너 추가
-            // 이 부분은 이미지 오버레이가 생성될 때마다 이벤트 리스너를 추가해야 함
-            // 따라서 이미지 오버레이 생성 시점에 이벤트 리스너를 추가하는 방식으로 수정
-            
-            // 6. 지도 클릭 이벤트 - 실내모드일 때는 좌표 표시하지 않음
+            // 9. 지도 클릭 이벤트 - 실내모드일 때는 좌표 표시하지 않음
             naver.maps.Event.addListener(map, 'click', function(e) {
                 // 실내모드일 때는 좌표 표시하지 않음
                 if (isIndoorMode) {
@@ -192,25 +254,6 @@
                 const lng = e.latlng.lng().toFixed(6);
                 document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
                 console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
-            });
-
-            // 7. 이미지 오버레이 클릭 이벤트를 위한 전역 이벤트 리스너
-            // 이미지 오버레이가 클릭되면 실내모드 종료
-            naver.maps.Event.addListener(map, 'click', function(e) {
-                // 실내모드이고 이미지 오버레이가 존재할 때
-                if (isIndoorMode && imageOverlay) {
-                    // 이미지 오버레이 제거
-                    imageOverlay.setMap(null);
-                    imageOverlay = null;
-                    
-                    // 실내모드 비활성화
-                    isIndoorMode = false;
-                    
-                    // 좌표 표시 메시지 복원
-                    document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
-                    
-                    console.log("실내모드 비활성화: 평면도 이미지 제거");
-                }
             });
 
             console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글, 좌표 표시, 실내모드 기능 추가됨.");
