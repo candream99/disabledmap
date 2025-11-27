@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>네이버 벡터맵 테스트 (feat. 호랭이) - KeyId 적용</title>
+    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 라벨 온오프</title>
     <style>
         body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
         #map { width: 100%; height: 100%; }
@@ -11,7 +11,7 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background: rgba(255, 99, 71, 0.9); /* 토마토 색상으로 더 힙하게! */
+            background: rgba(255, 99, 71, 0.9); /* 시작은 여전히 힙한 토마토 */
             color: white;
             padding: 10px 15px;
             border-radius: 5px;
@@ -19,24 +19,44 @@
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
+        #labelToggleBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px; /* 오른쪽 위에 배치 */
+            background: #4A90E2; /* 버튼 색상 */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.3s ease;
+        }
+        #labelToggleBtn:hover {
+            background: #357ABD;
+        }
     </style>
 </head>
 <body>
     <div id="status">API 키 확인 중...</div>
     <div id="map"></div>
+    <button id="labelToggleBtn">라벨 숨기기</button> <!-- 라벨 제어 버튼 추가 -->
 
     <script>
         // 호랭이 Key ID 박제!
-        // 네이버가 ncpKeyId를 쓰라고 했으니 변수명도 NAY_KEY_ID로 바꿈! 😎
-        const NCP_KEY_ID = 'q1d23mmkof'; // 여기에 호랭이의 NCP Key ID를 넣어줘! (q1d23mmkof가 맞음!)
+        const NCP_KEY_ID = 'q1d23mmkof';
 
         const script = document.createElement('script');
-        // ⭐ 여기! ncpClientId 대신 ncpKeyId로 변경했어! vmode=3은 벡터맵을 위해 그대로 유지!
+        // ncpKeyId와 vmode=3 (벡터맵) 유지!
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
+
         script.onload = function() {
             document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...';
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)'; /* 성공은 그린그린하게~ */
 
+            // 네이버 예제에 맞게 mapTypes를 NaverStyleMapTypeOptions.getVectorMap()으로 설정!
             const mapOptions = {
                 center: new naver.maps.LatLng(37.5665, 126.9780), // 서울시청 위경도
                 zoom: 15,
@@ -44,40 +64,43 @@
                 zoomControlOptions: {
                     position: naver.maps.Position.TOP_RIGHT
                 },
-                mapTypeControl: true,
-                mapTypeControlOptions: {
-                    style: naver.maps.MapTypeControlStyle.BUTTON,
-                    position: naver.maps.Position.TOP_LEFT
-                }
+                // mapTypes 설정으로 벡터맵을 'normal' 타입으로 등록
+                mapTypes: new naver.maps.MapTypeRegistry({
+                    'normal': naver.maps.NaverStyleMapTypeOptions.getVectorMap()
+                })
             };
 
             const map = new naver.maps.Map('map', mapOptions);
 
-            const styledMapType = new naver.maps.StyledMapType({
-                name: "스타일 지도",
-                mapStyles: naver.maps.StyleMapTypeOptions.getBasicStyle() // 오타도 이미 고쳤지롱!
-                /* 커스텀 스타일 예시 (주석 처리됨)
-                mapStyles: [
-                    {
-                        featureType: "all",
-                        elementType: "labels",
-                        stylers: [{ visibility: "off" }]
-                    },
-                    {
-                        featureType: "poi",
-                        elementType: "all",
-                        stylers: [{ color: "#ff8c00" }]
-                    }
-                ]
-                */
-            });
+            // 초기 지도를 등록된 'normal' (벡터맵) 타입으로 설정
+            map.setMapTypeId('normal');
+            
+            // 라벨 레이어 생성 및 초기 설정 (보통은 기본적으로 라벨이 보이도록 함)
+            const labelLayer = new naver.maps.LabelLayer();
+            labelLayer.setMap(map); // 초기에 라벨을 보이도록 설정
 
-            map.mapTypes.set('ho_vector_map', styledMapType);
-            map.setMapTypeId('ho_vector_map');
-
+            // 로딩 완료 후 상태창 숨기기
             document.getElementById('status').style.display = 'none';
 
-            console.log("네이버 벡터맵 로드 및 초기화 성공!");
+            // 라벨 온/오프 버튼 이벤트 리스너 (jQuery 없이 바닐라 JS로!)
+            const labelToggleBtn = document.getElementById('labelToggleBtn');
+            let isLabelVisible = true; // 초기 라벨 상태는 보이는 걸로
+
+            labelToggleBtn.addEventListener('click', function() {
+                if (isLabelVisible) { // 라벨이 현재 보이면 숨기기
+                    labelLayer.setMap(null);
+                    labelToggleBtn.textContent = '라벨 보이기';
+                    isLabelVisible = false;
+                    console.log("라벨 숨김!");
+                } else { // 라벨이 현재 숨겨져 있으면 보이기
+                    labelLayer.setMap(map);
+                    labelToggleBtn.textContent = '라벨 숨기기';
+                    isLabelVisible = true;
+                    console.log("라벨 보임!");
+                }
+            });
+
+            console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 버튼 추가됨.");
         };
 
         script.onerror = function() {
