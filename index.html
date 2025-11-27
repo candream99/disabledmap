@@ -27,7 +27,7 @@
 
     <script>
         // 호랭이 클라이언트 ID 박제!
-        const NCP_CLIENT_ID = 'q1d23mmkof';
+        const NCP_CLIENT_ID = 'q1d23mmkof'; // 여기에 호랭이 클라이언트 ID를 넣어줘!
 
         const script = document.createElement('script');
         // vmode=3 를 추가해서 무조건! WebGL 기반(벡터) 지도를 불러오도록 함!
@@ -36,7 +36,6 @@
             document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...';
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)'; /* 성공은 그린그린하게~ */
 
-            // 맵 초기화 옵션: center는 서울시청으로!
             const mapOptions = {
                 center: new naver.maps.LatLng(37.5665, 126.9780), // 서울시청 위경도
                 zoom: 15,
@@ -44,7 +43,7 @@
                 zoomControlOptions: {
                     position: naver.maps.Position.TOP_RIGHT
                 },
-                mapTypeControl: true, // 일반/위성 전환 컨트롤
+                mapTypeControl: true,
                 mapTypeControlOptions: {
                     style: naver.maps.MapTypeControlStyle.BUTTON,
                     position: naver.maps.Position.TOP_LEFT
@@ -53,12 +52,10 @@
 
             const map = new naver.maps.Map('map', mapOptions);
 
-            // 중요! 여기부터가 벡터맵 스타일 적용하는 부분!
-            // 기본 스타일 (BASIC)을 가져와서 적용하거나, 호랭이 입맛대로 커스텀 스타일 JSON 만들면 돼!
-            // 지금은 기본 "NORMAL" 벡터 스타일 사용!
             const styledMapType = new naver.maps.StyledMapType({
                 name: "스타일 지도",
-                mapStyles: naver.maps.StyleMapTypeOptions.getBaisicStyle() // basic -> basic 오타인듯. naver.maps.StyleMapTypeOptions.getBasicStyle()
+                // getBaisicStyle -> getBasicStyle 로 오타 수정!
+                mapStyles: naver.maps.StyleMapTypeOptions.getBasicStyle()
                 // 만약 완전 커스텀하고 싶다면 mapStyles에 JSON으로 직접 넣어도 돼!
                 /*
                 mapStyles: [
@@ -76,13 +73,9 @@
                 */
             });
 
-            // 지도에 '호랭이_벡터맵'이라는 이름으로 등록!
             map.mapTypes.set('ho_vector_map', styledMapType);
-            // 등록된 지도를 활성화! 이제 호랭이가 원하는 벡터맵으로 뿅! ✨
             map.setMapTypeId('ho_vector_map');
 
-
-            // 로딩 완료 후 상태창 숨기기
             document.getElementById('status').style.display = 'none';
 
             console.log("네이버 벡터맵 로드 및 초기화 성공!");
