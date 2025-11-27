@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>네이버 지도 기반 광화문 교보빌딩 실내 지도 (벡터 맵 전환)</title>
+    <title>네이버 벡터 지도 기본 로드 (광화문)</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <meta charset="utf-8">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
+        /* 지도가 화면 전체를 차지하도록 스타일 설정 */
         html, body {
             height: 100%;
             margin: 0;
@@ -15,476 +14,51 @@
             font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
         }
         #map {
+            width: 100%;
             height: 100%;
         }
-        
-        /* 층 선택 버튼 스타일 (좌측 하단) */
-        #floor-picker {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            z-index: 999; 
-            background-color: white;
-            border-radius: 8px;
-            padding: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            display: none;
-            transition: all 0.3s ease;
-        }
-        .floor-button {
-            display: block;
-            padding: 10px 15px;
-            margin: 5px 0;
-            cursor: pointer;
-            border: none;
-            background-color: #f7f7f7;
-            color: #333;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 15px;
-            font-weight: 600;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-        .floor-button:hover {
-            background-color: #e0e0e0;
-        }
-        .floor-button.active {
-            background-color: #4A90E2;
-            color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .floor-button:active {
-            transform: scale(0.98);
-        }
-        
-        /* 좌표 획득 안내 메시지 스타일 (우측 상단) */
-        #coord-guide {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            background-color: #f44336;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-weight: bold;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            cursor: pointer;
-            display: none; 
-        }
-
-        /* 네이버 지도의 기본 컨트롤 숨김 (깔끔한 UI를 위해) */
-        .naver-control, .nmap_logo, .nmap_copyright {
-            display: none !important;
-        }
-        
     </style>
 </head>
 <body>
+    <!-- 지도 컨테이너 -->
     <div id="map"></div>
-    <div id="floor-picker">
-        <!-- 층 선택 버튼들이 여기에 동적으로 삽입됩니다. -->
-    </div>
-    
-    <!-- 좌표 획득 안내 메시지 -->
-    <div id="coord-guide" title="클릭하면 좌표 추출 모드가 종료됩니다.">
-        <i class="fas fa-crosshairs"></i> 좌표 추출 모드 활성화됨. 지도 클릭 시 좌표 표시.
-    </div>
 
-    <!-- 1. 네이버 지도 API 로드 (vsm=1 옵션을 추가하여 WebGL 기반 벡터 맵을 로드) -->
+    <!-- 1. 네이버 지도 API 로드 -->
+    <!-- 'ncpKeyId' 뒤에 '&vsm=1'을 추가하여 WebGL 기반 벡터 맵을 활성화합니다. -->
     <script type="text/javascript" 
         src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof&vsm=1">
         // !!! 중요: YOUR_NCP_CLIENT_ID_HERE를 실제 클라이언트 ID로 교체하세요 !!!
-        // vsm=1: WebGL 기반 벡터 맵 사용 옵션
     </script>
 
-    <!-- 2. 사용자 JavaScript 코드 (API 로드 완료 후 실행) -->
+    <!-- 2. 지도 초기화 JavaScript -->
     <script>
-        // 새로운 꼭짓점 좌표 정의 (광화문 교보빌딩 근처)
-        const COORDS = {
-            NW: { lat: 37.571346, lng: 126.977674 }, // 북서 (North-West)
-            NE: { lat: 37.571349, lng: 126.978057 }, // 북동 (North-East)
-            SE: { lat: 37.570542, lng: 126.978087 }, // 남동 (South-East)
-            SW: { lat: 37.570541, lng: 126.977699 }  // 남서 (South-East)
-        };
+        // 광화문 교보빌딩의 중심 좌표
+        const KYOBODB_CENTER = new naver.maps.LatLng(37.57094, 126.97788);
 
-        // 중심 좌표 계산
-        const centerLat = (COORDS.NW.lat + COORDS.SE.lat) / 2;
-        const centerLng = (COORDS.NW.lng + COORDS.SE.lng) / 2;
-
-        // 건물별 설정 데이터 (광화문 교보빌딩)
-        const BUILDING_CONFIGS = {
-            'kyobo': {
-                center: new naver.maps.LatLng(centerLat, centerLng), 
-                bounds: new naver.maps.LatLngBounds( 
-                    new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
-                    new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng)
-                ),
-                polygonPaths: [
-                    [
-                        new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
-                        new naver.maps.LatLng(COORDS.NE.lat, COORDS.NE.lng), 
-                        new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng), 
-                        new naver.maps.LatLng(COORDS.SW.lat, COORDS.SW.lng)
-                    ]
-                ],
-                floors: {
-                    'B1': {
-                        label: '지하 1층',
-                        // Image URL을 placehold.co로 대체 (실제 이미지 경로 필요)
-                        imageUrl: 'https://placehold.co/1000x800/2962FF/FFFFFF?text=KYOBODB+B1',
-                        imageBounds: new naver.maps.LatLngBounds(
-                            new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
-                            new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng)
-                        ),
-                    },
-                    '1F': {
-                        label: '1층',
-                        imageUrl: 'https://placehold.co/1000x800/1DE9B6/333333?text=KYOBODB+1F', 
-                        imageBounds: new naver.maps.LatLngBounds(
-                            new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
-                            new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng)
-                        ),
-                    },
-                    '2F': {
-                        label: '2층',
-                        imageUrl: 'https://placehold.co/1000x800/FFEA00/333333?text=KYOBODB+2F',
-                        imageBounds: new naver.maps.LatLngBounds(
-                            new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
-                            new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng)
-                        ),
-                    }
-                }
-            },
-        };
-
-        // 전역 상태 변수
-        let mapInstance = null;
-        let isIndoorModeActive = false;
-        let activeBuildingId = null;
-        let currentFloorId = null; 
-        let clickListener = null; 
-
-        const buildingPolygons = {}; 
-        const floorOverlays = {}; 
-        
-        // ⭐ 커스텀 지도 타입 ID 정의: 라벨 없는 일반 지도
-        const LABELLESS_MAP_TYPE_ID = 'LABELLESS_NORMAL_CLEAN'; 
-        
-        // 층별 오버레이를 설정하고 활성화/비활성화하는 함수
-        function setFloorOverlay(floorId) {
-            const overlayKey = `${activeBuildingId}_${floorId}`;
-            
-            // 기존 층 오버레이 제거
-            if (currentFloorId) {
-                const currentOverlayKey = `${activeBuildingId}_${currentFloorId}`;
-                const currentOverlay = floorOverlays[currentOverlayKey];
-                if (currentOverlay) {
-                    currentOverlay.setMap(null);
-                }
-            }
-            
-            // 새 층 오버레이 표시 및 상태 업데이트
-            const newOverlay = floorOverlays[overlayKey];
-            if (newOverlay) {
-                newOverlay.setMap(mapInstance);
-                currentFloorId = floorId;
-                updateFloorButtonState(floorId);
-            }
-        }
-
-        // ⭐ 실내 모드로 진입할 때 컨트롤을 표시하고 지도를 조정하는 함수 (수정)
-        function showIndoorControls(map, buildingId) {
-            if (!buildingId || !BUILDING_CONFIGS[buildingId]) {
-                 console.error(`[오류 방지] 유효하지 않은 건물 ID: ${buildingId}`);
-                 return;
-            }
-
-            // 실내 모드 진입 시 좌표 추출 모드를 비활성화
-            disableCoordExtraction(); 
-
-            isIndoorModeActive = true;
-            activeBuildingId = buildingId;
-            
-            // 폴리곤 숨기기 및 선택된 폴리곤 강조
-            hideAllPolygons(map, buildingId);
-            
-            const config = BUILDING_CONFIGS[buildingId];
-            
-            // ⭐⭐⭐ 요청 사항 반영: 실내 모드 진입 시 라벨 없는 일반 지도 타입으로 변경 ⭐⭐⭐
-            map.setMapTypeId(LABELLESS_MAP_TYPE_ID); 
-            map.setCenter(config.center);
-            map.setZoom(20); 
-            
-            // 벡터 맵의 장점을 활용하여 건물을 약간 기울여서 볼 수 있도록 설정
-            map.setTilt(45); 
-            
-            const floorPicker = document.getElementById('floor-picker');
-            floorPicker.innerHTML = '';
-            
-            // 층 버튼 동적 생성 (역순)
-            const floorKeys = Object.keys(config.floors).reverse();
-            floorKeys.forEach(floorId => {
-                const floor = config.floors[floorId];
-                const button = document.createElement('div');
-                button.className = 'floor-button';
-                button.textContent = floor.label;
-                button.dataset.floorId = floorId;
-                
-                naver.maps.Event.addListener(button, 'click', function() {
-                    setFloorOverlay(floorId);
-                });
-                floorPicker.appendChild(button);
-            });
-            
-            floorPicker.style.display = 'block';
-            
-            const initialFloorId = floorKeys[0];
-            setFloorOverlay(initialFloorId);
-        }
-
-        // 실내 모드에서 복원하는 함수
-        function hideIndoorControls(map) {
-            isIndoorModeActive = false;
-            
-            // 현재 활성화된 층 오버레이 제거
-            if (currentFloorId) {
-                const currentOverlayKey = `${activeBuildingId}_${currentFloorId}`;
-                const currentOverlay = floorOverlays[currentOverlayKey];
-                if (currentOverlay) {
-                    currentOverlay.setMap(null);
-                }
-            }
-            currentFloorId = null;
-            activeBuildingId = null;
-            
-            document.getElementById('floor-picker').style.display = 'none';
-            
-            // ⭐ 지도 타입 복원: 일반 지도 타입으로 복귀
-            map.setMapTypeId(naver.maps.MapTypeId.NORMAL); // 일반 네이버 지도로 복귀
-
-            map.setCenter(BUILDING_CONFIGS['kyobo'].center); 
-            map.setZoom(19); 
-            
-            // 벡터 맵 기울임 초기화
-            map.setTilt(0); 
-            
-            showAllPolygons(map);
-            
-            // 실내 모드 종료 시 좌표 추출 모드 다시 활성화
-            enableCoordExtraction();
-        }
-
-        // 층 버튼의 활성 상태를 업데이트하는 함수
-        function updateFloorButtonState(activeFloorId) {
-            document.querySelectorAll('.floor-button').forEach(btn => {
-                if (btn.dataset.floorId === activeFloorId) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
-        
-        // 특정 건물 폴리곤만 제외하고 모두 숨기거나 활성 폴리곤 강조
-        function hideAllPolygons(map, exceptId = null) {
-            Object.keys(buildingPolygons).forEach(id => {
-                if (id !== exceptId) {
-                    buildingPolygons[id].setMap(null);
-                } else {
-                    // 활성 폴리곤 강조
-                    buildingPolygons[id].setOptions({ 
-                        fillColor: '#4A90E2', 
-                        fillOpacity: 0.2, 
-                        strokeColor: '#4A90E2', 
-                        strokeWeight: 4 
-                    });
-                }
-            });
-        }
-        
-        // 모든 폴리곤을 다시 표시하고 스타일 복원
-        function showAllPolygons(map) {
-            Object.keys(buildingPolygons).forEach(id => {
-                buildingPolygons[id].setMap(map);
-                buildingPolygons[id].setOptions({ 
-                    fillColor: '#FFC107', 
-                    fillOpacity: 0.15, 
-                    strokeColor: '#FFC107', 
-                    strokeWeight: 2 
-                });
-            });
-        }
-        
-        // 좌표 추출 기능을 활성화/비활성화하는 함수
-        function enableCoordExtraction() {
-             if (!mapInstance) return;
-             
-            const guide = document.getElementById('coord-guide');
-            guide.style.display = 'block';
-            
-            if (clickListener) {
-                naver.maps.Event.removeListener(clickListener);
-            }
-
-            clickListener = naver.maps.Event.addListener(mapInstance, 'click', function(e) {
-                const lat = e.coord.y.toFixed(6);
-                const lng = e.coord.x.toFixed(6);
-                const message = `위도: ${lat}\n경도: ${lng}\n\n이 좌표를 복사하여 사용하세요.`;
-                console.log('클릭한 위치의 좌표:', lat + ', ' + lng);
-                showCustomMessage(message);
-            });
-        }
-
-        function disableCoordExtraction() {
-            if (clickListener) {
-                naver.maps.Event.removeListener(clickListener);
-                clickListener = null;
-            }
-            document.getElementById('coord-guide').style.display = 'none';
-        }
-
-        // 커스텀 메시지 박스 구현 (alert() 대안)
-        function showCustomMessage(message) {
-            const existingModal = document.getElementById('custom-modal');
-            if (existingModal) existingModal.remove();
-
-            const modal = document.createElement('div');
-            modal.id = 'custom-modal';
-            modal.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background-color: rgba(0,0,0,0.5); z-index: 2000;
-                display: flex; justify-content: center; align-items: center;
-            `;
-
-            const content = document.createElement('div');
-            content.style.cssText = `
-                background-color: white; padding: 25px; border-radius: 10px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-width: 90%; width: 350px;
-                font-family: Arial, sans-serif; text-align: center;
-                white-space: pre-wrap;
-            `;
-            content.innerHTML = `
-                <h3 style="margin-top:0; color:#4A90E2;"><i class="fas fa-map-marker-alt"></i> 좌표 획득</h3>
-                <pre style="background:#f7f7f7; padding:10px; border-radius:5px; border:1px solid #ddd; text-align:left;">${message}</pre>
-                <button id="modal-close" style="
-                    margin-top: 15px; padding: 8px 20px; border: none; border-radius: 5px;
-                    background-color: #4A90E2; color: white; cursor: pointer; font-weight: bold;
-                ">확인</button>
-            `;
-            
-            modal.appendChild(content);
-            document.body.appendChild(modal);
-
-            document.getElementById('modal-close').onclick = () => modal.remove();
-        }
-
+        // 지도 초기화 함수
         function initMap() {
-            const kyoboCenter = BUILDING_CONFIGS['kyobo'].center;
-
-            // 1. Naver Maps 초기화 (커스텀 타입 등록 없이 먼저 인스턴스 생성)
-            mapInstance = new naver.maps.Map('map', {
-                center: kyoboCenter,
-                zoom: 19, 
-                mapTypeId: naver.maps.MapTypeId.NORMAL, 
+            // 지도 인스턴스 생성
+            const map = new naver.maps.Map('map', {
+                center: KYOBODB_CENTER, // 지도 중심 좌표
+                zoom: 19, // 초기 줌 레벨 (건물을 보기 적합한 확대 레벨)
+                mapTypeId: naver.maps.MapTypeId.NORMAL, // 일반 지도 타입
                 
-                // ⭐⭐⭐ 벡터 맵 활성화를 위한 설정 ⭐⭐⭐
+                // ⭐ 벡터 맵(WebGL) 렌더링을 명시적으로 설정
                 renderType: naver.maps.RenderType.WEBGL, 
 
+                // 지도 컨트롤 표시 설정
                 mapTypeControl: true, 
                 zoomControl: true,
-                scaleControl: false,
-                logoControl: false,
-                mapDataControl: false,
+                scaleControl: true,
             });
 
-            // ⭐ 2. 레이블 없는 일반 지도 타입 정의 및 등록 (Initialization 후 진행)
-            // 지도가 생성된 후 MapTypeRegistry에서 기본 타입을 안전하게 가져옵니다.
-            const mapTypeRegistry = mapInstance.getMapTypes();
-            const baseNormalType = mapTypeRegistry.get(naver.maps.MapTypeId.NORMAL);
+            console.log("네이버 벡터 맵이 광화문 교보빌딩을 중심으로 로드되었습니다.");
             
-            // 기존 지도 타입에서 'symbol'(아이콘)과 'label'(글자) 레이어를 제거하여 Clean Map 생성
-            const cleanLayers = baseNormalType.layers.filter(layer => 
-                layer !== 'symbol' && layer !== 'label'
-            );
-            
-            const labelLessMap = {
-                name: '레이블 없는 일반 지도',
-                minZoom: baseNormalType.minZoom,
-                maxZoom: baseNormalType.maxZoom,
-                projection: baseNormalType.projection,
-                tileSet: baseNormalType.tileSet,
-                layers: cleanLayers 
-            };
-
-            // 커스텀 지도 타입 등록
-            mapTypeRegistry.set(LABELLESS_MAP_TYPE_ID, labelLessMap);
-            
-            // 3. 지도 인스턴스가 생성된 후 좌표 추출 모드 활성화 및 이벤트 리스너 추가
-            enableCoordExtraction();
-            document.getElementById('coord-guide').addEventListener('click', disableCoordExtraction);
-            
-            // 4. 모든 건물 폴리곤 생성 및 지도에 추가 (광화문 교보빌딩)
-            Object.keys(BUILDING_CONFIGS).forEach(buildingId => {
-                const config = BUILDING_CONFIGS[buildingId];
-                
-                // naver.maps.Polygon은 벡터 맵 환경에서도 정상적으로 렌더링됩니다.
-                const buildingPolygon = new naver.maps.Polygon({
-                    map: mapInstance,
-                    paths: config.polygonPaths,
-                    fillColor: '#FFC107',
-                    fillOpacity: 0.15,
-                    strokeColor: '#FFC107',
-                    strokeWeight: 2,
-                    strokeOpacity: 0.8,
-                    clickable: true,
-                    zIndex: 100 
-                });
-                
-                buildingPolygon.buildingId = buildingId; 
-                buildingPolygons[buildingId] = buildingPolygon;
-                
-                // 5. 폴리곤 클릭 이벤트 설정 (실내 지도 진입/종료)
-                naver.maps.Event.addListener(buildingPolygon, 'click', function(e) {
-                    const clickedPolygon = e.overlay; 
-                    const clickedId = clickedPolygon.buildingId;
-                    
-                    if (!isIndoorModeActive) {
-                        // 실내 모드 진입
-                        showIndoorControls(mapInstance, clickedId);
-                        
-                    } else if (activeBuildingId === clickedId) {
-                        // 실내 모드 종료 (현재 활성 건물을 다시 클릭)
-                        hideIndoorControls(mapInstance); 
-                        
-                    } else {
-                        // 다른 건물을 클릭한 경우: 실내 모드 중이므로 무시
-                        console.log(`[안내] 실내 모드 중에는 다른 건물(${clickedId})을 선택할 수 없습니다. 지도 상태로 돌아가세요.`);
-                        return; 
-                    }
-                });
-
-                // 6. 모든 층의 이미지 사전 로딩 (GroundOverlay는 벡터 맵 위에서도 작동합니다.)
-                Object.keys(config.floors).forEach(floorId => {
-                    const floor = config.floors[floorId];
-                    
-                    const overlay = new naver.maps.GroundOverlay(
-                        floor.imageUrl, 
-                        floor.imageBounds, 
-                        {
-                            opacity: 0.8,
-                            map: mapInstance 
-                        }
-                    );
-                    
-                    floorOverlays[`${buildingId}_${floorId}`] = overlay;
-                    
-                    overlay.setMap(null); 
-                });
-            });
+            // 벡터 맵의 특징인 기울임(Tilt)을 적용하여 입체감을 줍니다.
+            map.setTilt(45);
         }
-        
-        // API 로드가 완료되면 initMap 함수 호출
+
+        // API 로드가 완료되면 initMap 함수 호출 (naver.maps.onJSContentLoaded는 API가 로드된 후에 실행될 것을 보장합니다.)
         naver.maps.onJSContentLoaded = initMap;
     </script>
 </body>
