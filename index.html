@@ -382,10 +382,28 @@
         function initMap() {
             const kyoboCenter = BUILDING_CONFIGS['kyobo'].center;
 
-            // ⭐ 1. 레이블 없는 일반 지도 타입 정의 (Clean Map 구현 - 공식 MapType 정의 활용)
-            // 벡터 맵에서도 이 MapType 정의는 유효하게 동작합니다.
-            const baseNormalType = naver.maps.NaverMap.getMapTypes(naver.maps.MapTypeId.NORMAL);
+            // 1. Naver Maps 초기화 (커스텀 타입 등록 없이 먼저 인스턴스 생성)
+            mapInstance = new naver.maps.Map('map', {
+                center: kyoboCenter,
+                zoom: 19, 
+                mapTypeId: naver.maps.MapTypeId.NORMAL, 
+                
+                // ⭐⭐⭐ 벡터 맵 활성화를 위한 설정 ⭐⭐⭐
+                renderType: naver.maps.RenderType.WEBGL, 
+
+                mapTypeControl: true, 
+                zoomControl: true,
+                scaleControl: false,
+                logoControl: false,
+                mapDataControl: false,
+            });
+
+            // ⭐ 2. 레이블 없는 일반 지도 타입 정의 및 등록 (Initialization 후 진행)
+            // 지도가 생성된 후 MapTypeRegistry에서 기본 타입을 안전하게 가져옵니다.
+            const mapTypeRegistry = mapInstance.getMapTypes();
+            const baseNormalType = mapTypeRegistry.get(naver.maps.MapTypeId.NORMAL);
             
+            // 기존 지도 타입에서 'symbol'(아이콘)과 'label'(글자) 레이어를 제거하여 Clean Map 생성
             const cleanLayers = baseNormalType.layers.filter(layer => 
                 layer !== 'symbol' && layer !== 'label'
             );
@@ -398,29 +416,9 @@
                 tileSet: baseNormalType.tileSet,
                 layers: cleanLayers 
             };
-            
 
-            // 2. Naver Maps 초기화 및 커스텀 타입 추가
-            mapInstance = new naver.maps.Map('map', {
-                center: kyoboCenter,
-                zoom: 19, 
-                mapTypeId: naver.maps.MapTypeId.NORMAL, 
-                
-                // ⭐⭐⭐ 벡터 맵 활성화를 위한 설정 추가 ⭐⭐⭐
-                // renderType을 WebGL로 설정하여 벡터 맵 엔진을 사용하도록 지정합니다.
-                renderType: naver.maps.RenderType.WEBGL, 
-
-                // 커스텀 지도 타입 등록 
-                mapTypes: new naver.maps.MapTypeRegistry({
-                    [LABELLESS_MAP_TYPE_ID]: labelLessMap,
-                }),
-                
-                mapTypeControl: true, 
-                zoomControl: true,
-                scaleControl: false,
-                logoControl: false,
-                mapDataControl: false,
-            });
+            // 커스텀 지도 타입 등록
+            mapTypeRegistry.set(LABELLESS_MAP_TYPE_ID, labelLessMap);
             
             // 3. 지도 인스턴스가 생성된 후 좌표 추출 모드 활성화 및 이벤트 리스너 추가
             enableCoordExtraction();
