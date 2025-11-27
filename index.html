@@ -43,7 +43,7 @@
 
         const script = document.createElement('script');
         // 벡터맵을 명시적으로 사용하도록 vmode=3 추가
-        script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NCP_CLIENT_ID}&vmode=3`;
+        script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_CLIENT_ID}&vmode=3`;
         script.onload = function() {
             document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...';
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
@@ -106,3 +106,4 @@
     </script>
 </body>
 </html>
+
