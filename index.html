@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>네이버 벡터맵 테스트 (feat. 호랭이)</title>
+    <title>네이버 벡터맵 테스트 (feat. 호랭이) - KeyId 적용</title>
     <style>
         body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
         #map { width: 100%; height: 100%; }
@@ -11,7 +11,7 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background: rgba(255, 99, 71, 0.9);
+            background: rgba(255, 99, 71, 0.9); /* 토마토 색상으로 더 힙하게! */
             color: white;
             padding: 10px 15px;
             border-radius: 5px;
@@ -19,38 +19,26 @@
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        #map-type-info {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 14px;
-            z-index: 1000;
-        }
     </style>
 </head>
 <body>
     <div id="status">API 키 확인 중...</div>
-    <div id="map-type-info">지도 타입: 확인 중...</div>
     <div id="map"></div>
 
     <script>
-        // 호랭이 클라이언트 ID
-        const NCP_CLIENT_ID = 'q1d23mmkof';
+        // 호랭이 Key ID 박제!
+        // 네이버가 ncpKeyId를 쓰라고 했으니 변수명도 NAY_KEY_ID로 바꿈! 😎
+        const NCP_KEY_ID = 'q1d23mmkof'; // 여기에 호랭이의 NCP Key ID를 넣어줘! (q1d23mmkof가 맞음!)
 
         const script = document.createElement('script');
-        // 벡터맵을 명시적으로 사용하도록 vmode=3 추가
-        script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_CLIENT_ID}&vmode=3`;
+        // ⭐ 여기! ncpClientId 대신 ncpKeyId로 변경했어! vmode=3은 벡터맵을 위해 그대로 유지!
+        script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
         script.onload = function() {
             document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...';
-            document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
+            document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)'; /* 성공은 그린그린하게~ */
 
-            // 지도 생성
-            const map = new naver.maps.Map('map', {
-                center: new naver.maps.LatLng(37.5665, 126.9780), // 서울시청
+            const mapOptions = {
+                center: new naver.maps.LatLng(37.5665, 126.9780), // 서울시청 위경도
                 zoom: 15,
                 zoomControl: true,
                 zoomControlOptions: {
@@ -60,45 +48,40 @@
                 mapTypeControlOptions: {
                     style: naver.maps.MapTypeControlStyle.BUTTON,
                     position: naver.maps.Position.TOP_LEFT
-                },
-                // 명시적으로 벡터맵 사용
-                mapTypeId: naver.maps.MapTypeId.VECTOR
-            });
+                }
+            };
 
-            // 지도 타입 정보 표시
-            document.getElementById('map-type-info').textContent = 
-                '지도 타입: ' + map.getMapTypeId() + ' (벡터맵)';
+            const map = new naver.maps.Map('map', mapOptions);
 
-            // 벡터맵 스타일 적용
             const styledMapType = new naver.maps.StyledMapType({
-                name: "벡터 스타일 지도",
-                // 기본 스타일 사용 (오타 수정: getBaisicStyle -> getBasicStyle)
-                mapStyles: naver.maps.NaverStyleMapTypeOptions.getVectorMap()
+                name: "스타일 지도",
+                mapStyles: naver.maps.StyleMapTypeOptions.getBasicStyle() // 오타도 이미 고쳤지롱!
+                /* 커스텀 스타일 예시 (주석 처리됨)
+                mapStyles: [
+                    {
+                        featureType: "all",
+                        elementType: "labels",
+                        stylers: [{ visibility: "off" }]
+                    },
+                    {
+                        featureType: "poi",
+                        elementType: "all",
+                        stylers: [{ color: "#ff8c00" }]
+                    }
+                ]
+                */
             });
 
-            // 스타일드 맵 타입 등록 및 적용
-            map.mapTypes.set('styled_vector', styledMapType);
-            map.setMapTypeId('styled_vector');
+            map.mapTypes.set('ho_vector_map', styledMapType);
+            map.setMapTypeId('ho_vector_map');
 
-            // 지도 로드 완료 후 상태 표시 숨기기
-            naver.maps.Event.addListener(map, 'init', function() {
-                document.getElementById('status').style.display = 'none';
-                console.log("네이버 벡터맵 로드 및 초기화 성공!");
-                
-                // 벡터맵 확인을 위한 테스트
-                console.log("현재 지도 타입:", map.getMapTypeId());
-                console.log("지도 객체:", map);
-            });
+            document.getElementById('status').style.display = 'none';
 
-            // 지도 타입 변경 시 정보 업데이트
-            naver.maps.Event.addListener(map, 'mapTypeId_changed', function() {
-                document.getElementById('map-type-info').textContent = 
-                    '지도 타입: ' + map.getMapTypeId() + ' (벡터맵)';
-            });
+            console.log("네이버 벡터맵 로드 및 초기화 성공!");
         };
 
         script.onerror = function() {
-            document.getElementById('status').textContent = 'API 로드 실패! 클라이언트 ID 또는 URL을 확인해주세요.';
+            document.getElementById('status').textContent = 'API 로드 실패! 네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
             document.getElementById('status').style.background = 'red';
             console.error("네이버 지도 API 로드 실패!");
         };
@@ -106,4 +89,3 @@
     </script>
 </body>
 </html>
-
