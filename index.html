@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지도 테스트</title>
+    <title>네이버 벡터맵 테스트 (feat. 호랭이)</title>
     <style>
-        body { margin: 0; padding: 0; height: 100vh; }
+        body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
         #map { width: 100%; height: 100%; }
-        #status { 
-            position: absolute; 
-            top: 10px; 
-            left: 10px; 
-            background: red; 
-            color: white; 
-            padding: 10px; 
+        #status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 99, 71, 0.9); /* 토마토 색상으로 더 힙하게! */
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
             z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -23,23 +26,72 @@
     <div id="map"></div>
 
     <script>
-        // API 로드 시도
+        // 호랭이 클라이언트 ID 박제!
+        const NCP_CLIENT_ID = 'q1d23mmkof';
+
         const script = document.createElement('script');
-        script.src = 'https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof';
+        // vmode=3 를 추가해서 무조건! WebGL 기반(벡터) 지도를 불러오도록 함!
+        script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NCP_CLIENT_ID}&vmode=3`;
         script.onload = function() {
-            document.getElementById('status').textContent = 'API 로드 성공! 지도 초기화 중...';
-            document.getElementById('status').style.background = 'green';
-            
-            // 지도 초기화
-            const map = new naver.maps.Map('map', {
-                center: new naver.maps.LatLng(37.570, 126.978),
-                zoom: 15
+            document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...';
+            document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)'; /* 성공은 그린그린하게~ */
+
+            // 맵 초기화 옵션: center는 서울시청으로!
+            const mapOptions = {
+                center: new naver.maps.LatLng(37.5665, 126.9780), // 서울시청 위경도
+                zoom: 15,
+                zoomControl: true,
+                zoomControlOptions: {
+                    position: naver.maps.Position.TOP_RIGHT
+                },
+                mapTypeControl: true, // 일반/위성 전환 컨트롤
+                mapTypeControlOptions: {
+                    style: naver.maps.MapTypeControlStyle.BUTTON,
+                    position: naver.maps.Position.TOP_LEFT
+                }
+            };
+
+            const map = new naver.maps.Map('map', mapOptions);
+
+            // 중요! 여기부터가 벡터맵 스타일 적용하는 부분!
+            // 기본 스타일 (BASIC)을 가져와서 적용하거나, 호랭이 입맛대로 커스텀 스타일 JSON 만들면 돼!
+            // 지금은 기본 "NORMAL" 벡터 스타일 사용!
+            const styledMapType = new naver.maps.StyledMapType({
+                name: "스타일 지도",
+                mapStyles: naver.maps.StyleMapTypeOptions.getBaisicStyle() // basic -> basic 오타인듯. naver.maps.StyleMapTypeOptions.getBasicStyle()
+                // 만약 완전 커스텀하고 싶다면 mapStyles에 JSON으로 직접 넣어도 돼!
+                /*
+                mapStyles: [
+                    {
+                        featureType: "all",
+                        elementType: "labels",
+                        stylers: [{ visibility: "off" }] // 모든 라벨 숨기기
+                    },
+                    {
+                        featureType: "poi",
+                        elementType: "all",
+                        stylers: [{ color: "#ff8c00" }] // POI 색상 변경
+                    }
+                ]
+                */
             });
-            
+
+            // 지도에 '호랭이_벡터맵'이라는 이름으로 등록!
+            map.mapTypes.set('ho_vector_map', styledMapType);
+            // 등록된 지도를 활성화! 이제 호랭이가 원하는 벡터맵으로 뿅! ✨
+            map.setMapTypeId('ho_vector_map');
+
+
+            // 로딩 완료 후 상태창 숨기기
             document.getElementById('status').style.display = 'none';
+
+            console.log("네이버 벡터맵 로드 및 초기화 성공!");
         };
+
         script.onerror = function() {
-            document.getElementById('status').textContent = 'API 로드 실패! API 키를 확인해주세요.';
+            document.getElementById('status').textContent = 'API 로드 실패! 클라이언트 ID 또는 URL을 확인해주세요. ㅠㅠ';
+            document.getElementById('status').style.background = 'red';
+            console.error("네이버 지도 API 로드 실패!");
         };
         document.head.appendChild(script);
     </script>
