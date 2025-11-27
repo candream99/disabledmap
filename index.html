@@ -1,181 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <title>네이버 벡터 지도 기본 로드 (광화문) - 2D 평면 모드</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <meta charset="utf-8">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>광화문 교보빌딩 - 네이버 벡터 지도</title>
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof"></script>
     <style>
-        /* 지도가 화면 전체를 차지하도록 스타일 설정 */
-        html, body {
-            height: 100%;
+        * {
             margin: 0;
             padding: 0;
-            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
-        }
-        #map {
-            width: 100%;
-            height: 100%;
+            box-sizing: border-box;
         }
         
-        /* 맵 컨트롤 버튼 컨테이너 스타일 */
-        #map-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 100;
-            padding: 10px;
-            background-color: transparent;
-        }
-
-        /* 라벨 켜기/끄기 버튼 스타일 */
-        .map-control-button {
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            height: 100vh;
             display: flex;
-            align-items: center;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 8px;
-            background-color: #fff;
-            color: #333;
-            font-size: 14px;
+            flex-direction: column;
+        }
+        
+        header {
+            background-color: #2DB400;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 1.5rem;
             font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: background-color 0.2s, box-shadow 0.2s;
         }
-
-        .map-control-button:hover {
-            background-color: #f0f0f0;
+        
+        #map {
+            flex: 1;
+            width: 100%;
         }
-
-        .map-control-button i {
-            margin-right: 5px;
-            font-size: 16px;
+        
+        .info-box {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            max-width: 300px;
+            z-index: 1000;
+        }
+        
+        .info-box h2 {
+            color: #2DB400;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .info-box p {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        footer {
+            background-color: #f5f5f5;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <!-- 지도 컨테이너 -->
+    <header>
+        <h1>광화문 교보빌딩 - 네이버 벡터 지도</h1>
+    </header>
+    
     <div id="map"></div>
-
-    <!-- 라벨 제어 컨트롤 -->
-    <div id="map-controls">
-        <button id="toggle-label" class="map-control-button">
-            <i class="fas fa-tags"></i> 라벨 끄기 <!-- 초기 상태: 라벨이 켜져 있으므로 "끄기" 버튼 표시 -->
-        </button>
+    
+    <div class="info-box">
+        <h2>광화문 교보빌딩</h2>
+        <p><strong>주소:</strong> 서울특별시 종로구 종로 1</p>
+        <p><strong>특징:</strong> 교보문고 본점이 위치한 대표적인 도서 문화 공간</p>
+        <p><strong>좌표:</strong> 위도 37.570, 경도 126.978</p>
     </div>
+    
+    <footer>
+        <p>© 2023 네이버 지도 API를 이용한 광화문 교보빌딩 지도</p>
+    </footer>
 
-    <!-- 1. 네이버 지도 API 로드 -->
-    <!-- Client ID (q1d23mmkof) 및 벡터 맵 활성화 옵션 '&vsm=1' 적용 -->
-    <script type="text/javascript" 
-        src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof&vsm=1">
-    </script>
-
-    <!-- 2. 지도 초기화 JavaScript -->
     <script>
-        // 광화문 교보빌딩의 중심 좌표
-        const KYOBODB_CENTER = new naver.maps.LatLng(37.57094, 126.97788);
-        
-        let map;
-        // 2D 평면 모드를 위한 커스텀 맵 ID 정의
-        const LABELLESS_MAP_ID = 'LABELLESS_NORMAL_CLEAN'; 
-        // 초기 상태는 라벨이 보이는 상태(false)로 시작합니다.
-        let isLabelHidden = false; 
-
         // 지도 초기화 함수
         function initMap() {
-            // 지도 인스턴스 생성
-            map = new naver.maps.Map('map', {
-                center: KYOBODB_CENTER, // 지도 중심 좌표
-                zoom: 19, // 초기 줌 레벨
-                mapTypeId: naver.maps.MapTypeId.NORMAL, // 일반 지도 타입 (라벨 보임)
-                
-                // 지도 컨트롤 표시 설정
-                mapTypeControl: true, 
+            // 광화문 교보빌딩 중심 좌표
+            const kyoboLocation = new naver.maps.LatLng(37.570, 126.978);
+            
+            // 지도 옵션 설정
+            const mapOptions = {
+                center: kyoboLocation,
+                zoom: 17,
                 zoomControl: true,
+                zoomControlOptions: {
+                    position: naver.maps.Position.TOP_RIGHT
+                },
+                mapTypeControl: true,
                 scaleControl: true,
-                // 회전을 막아 완벽한 2D 모드 유지
-                rotationControl: false,
+                mapDataControl: true,
+                logoControl: false, // 네이버 로고 숨김
+                mapTypeId: naver.maps.MapTypeId.VECTOR // 벡터 지도 사용
+            };
+            
+            // 지도 생성
+            const map = new naver.maps.Map('map', mapOptions);
+            
+            // 광화문 교보빌딩 마커 추가
+            const marker = new naver.maps.Marker({
+                position: kyoboLocation,
+                map: map,
+                icon: {
+                    content: `
+                        <div style="background-color:#2DB400; color:white; padding:8px 12px; border-radius:20px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">
+                            광화문 교보빌딩
+                        </div>
+                    `,
+                    anchor: new naver.maps.Point(12, 35)
+                }
             });
             
-            // 라벨 버튼 이벤트 리스너 등록
-            document.getElementById('toggle-label').addEventListener('click', toggleLabelLayer);
-
-            // 지도의 'init' 이벤트가 발생할 때까지 기다렸다가 getMapTypes()를 호출합니다.
-            naver.maps.Event.once(map, 'init', function() {
-                
-                // 기울임(Tilt)을 제거하여 완벽한 2D 평면 모드를 유지합니다.
-                map.setTilt(0); 
-                
-                // 2. 벡터 맵에서 라벨과 음영을 제거하기 위해 커스텀 맵 타입을 등록합니다.
-                register2DMapType(map);
-                
-                // 초기 상태를 기본 지도 타입(NORMAL)으로 유지합니다. 
-
-                console.log("네이버 벡터 맵이 2D 평면 모드로 로드되었고, 모든 설정이 완료되었습니다.");
+            // 마커 클릭 시 정보창 표시
+            const infoWindow = new naver.maps.InfoWindow({
+                content: `
+                    <div style="padding:10px; max-width:200px;">
+                        <h3 style="margin:0 0 5px; color:#2DB400;">광화문 교보빌딩</h3>
+                        <p style="margin:0;">교보문고 본점이 위치한 대표적인 도서 문화 공간입니다.</p>
+                    </div>
+                `
+            });
+            
+            naver.maps.Event.addListener(marker, 'click', function() {
+                if (infoWindow.getMap()) {
+                    infoWindow.close();
+                } else {
+                    infoWindow.open(map, marker);
+                }
+            });
+            
+            // 지도 클릭 시 정보창 닫기
+            naver.maps.Event.addListener(map, 'click', function() {
+                infoWindow.close();
             });
         }
         
-        /**
-         * 벡터 맵에서 라벨, 심볼을 제거하여 완벽한 2D 평면 모드를 만드는 커스텀 지도 타입을 등록합니다.
-         * (음영 제거는 vectorColorMap: false 및 setTilt(0)으로 처리합니다.)
-         * @param {naver.maps.Map} mapInstance - 지도 인스턴스
-         */
-        function register2DMapType(mapInstance) {
-            // 기본 일반 지도 타입을 복사합니다.
-            const normalMapType = mapInstance.getMapTypes().get(naver.maps.MapTypeId.NORMAL);
-            
-            if (!normalMapType) {
-                console.error("일반 지도 타입(NORMAL)을 찾을 수 없습니다.");
-                return;
-            }
-
-            // ⭐ 수정: 지도 타입의 레이어 목록에서 'symbol' (POI 마커)와 'label'만 제거하여 
-            // 내부 VSM 구조 오류를 피하고 안정성을 높입니다.
-            const cleanLayers = normalMapType.layers.filter(layer => 
-                layer.name !== 'symbol' && layer.name !== 'label'
-            );
-            
-            // 라벨 및 심볼이 없는 새로운 지도 타입 객체를 정의합니다.
-            const labelLessMapType = new naver.maps.MapType({
-                name: '완벽한 2D 일반 지도',
-                minZoom: normalMapType.minZoom,
-                maxZoom: normalMapType.maxZoom,
-                projection: normalMapType.projection,
-                layers: cleanLayers, // 필터링된 레이어 적용
-                // 벡터 맵의 색상 보정을 비활성화하여 음영을 제거합니다. (평면 효과)
-                vectorColorMap: false
-            });
-
-            // 지도 타입 레지스트리에 새로운 커스텀 맵 타입을 등록합니다.
-            mapInstance.getMapTypes().set(LABELLESS_MAP_ID, labelLessMapType);
-            console.log("커스텀 지도 타입 (2D 평면/라벨 제거)이 등록되었습니다:", LABELLESS_MAP_ID);
-        }
-
-        /**
-         * 라벨 레이어의 표시 상태를 토글하는 함수 (지도 타입 전환 방식)
-         */
-        function toggleLabelLayer() {
-            const button = document.getElementById('toggle-label');
-            
-            if (!isLabelHidden) {
-                // 현재 라벨이 표시되어 있으면 -> 라벨 없는 2D 평면 커스텀 지도로 변경 (라벨/심볼 숨김)
-                map.setMapTypeId(LABELLESS_MAP_ID);
-                isLabelHidden = true;
-                button.innerHTML = '<i class="fas fa-tags"></i> 라벨 켜기';
-                console.log("라벨 끄기: 2D 평면 지도 타입으로 전환 (라벨/심볼 숨김)");
-            } else {
-                // 현재 라벨이 숨겨져 있으면 -> 일반 라벨 있는 맵으로 변경 (라벨/심볼 표시)
-                map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
-                isLabelHidden = false;
-                button.innerHTML = '<i class="fas fa-tags"></i> 라벨 끄기';
-                console.log("라벨 켜기: 일반 지도 타입으로 전환 (라벨/심볼 표시)");
-            }
-        }
-
-        // API 로드가 완료되면 initMap 함수 호출
+        // API 로드 완료 후 지도 초기화
         naver.maps.onJSContentLoaded = initMap;
     </script>
 </body>
