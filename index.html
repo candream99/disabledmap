@@ -73,6 +73,8 @@ z-index: 1000;
         script.onload = function() {
             document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...';
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
+            
+            // 지도 초기 옵션 설정
             const mapOptions = {
                 center: new naver.maps.LatLng(37.5665, 126.9780), // 서울시청 위경도
                 zoom: 15,
@@ -85,14 +87,15 @@ z-index: 1000;
                 })
             };
             const map = new naver.maps.Map('map', mapOptions);
-
             map.setMapTypeId('normal');
             
+            // 라벨 레이어 설정
             const labelLayer = new naver.maps.LabelLayer();
             labelLayer.setMap(map);
 
             document.getElementById('status').style.display = 'none';
 
+            // 라벨 토글 버튼 기능
             const labelToggleBtn = document.getElementById('labelToggleBtn');
             let isLabelVisible = true;
 
@@ -120,7 +123,7 @@ z-index: 1000;
 
 
             // -------------------------------------------------------------------
-            // ⭐⭐ 요청하신 다각형(Polygon) 기능 추가 시작 ⭐⭐
+            // ⭐⭐ 요청하신 다각형(Polygon) 기능 구현 ⭐⭐
             // -------------------------------------------------------------------
 
             // 1. 다각형의 꼭짓점 좌표 정의
@@ -131,7 +134,7 @@ z-index: 1000;
                 new naver.maps.LatLng(37.570538, 126.977698)
             ];
 
-            // 2. Polygon 객체 생성 (연한 보라색 외곽선, 채우기 없음)
+            // 2. Polygon 객체 생성 (연한 보라색 외곽선, 초기에는 채우기 없음)
             const polygon = new naver.maps.Polygon({
                 map: map,
                 paths: [polygonCoords], // 다각형 경로 설정
@@ -149,7 +152,7 @@ z-index: 1000;
                 polygon.setOptions({
                     fillColor: '#C490E4' // 반투명의 보라색
                 });
-                document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다!';
+                document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다! (마우스 오버)';
             });
 
             // 마우스 아웃 시: 채우기 색상 제거 (transparent)
@@ -161,15 +164,15 @@ z-index: 1000;
             });
 
             // 클릭 이벤트 시: 지도 클릭 이벤트가 **작동하지 않도록** 전파 중단
+            // 'e.stop()'이 핵심입니다.
             naver.maps.Event.addListener(polygon, 'click', function(e) {
-                // 다각형 내부를 클릭하면 map의 'click' 이벤트가 발생하지 않도록 막습니다.
                 e.stop(); 
                 document.getElementById('coordDisplay').textContent = '🚫 다각형 내부 클릭! 좌표 표시 기능이 제한됩니다.';
                 console.log("다각형 내부 클릭 감지: 지도 좌표 표시 기능 중단됨.");
             });
 
             // -------------------------------------------------------------------
-            // ⭐⭐ 요청하신 다각형(Polygon) 기능 추가 끝 ⭐⭐
+            // ⭐⭐ 다각형(Polygon) 기능 구현 완료 ⭐⭐
             // -------------------------------------------------------------------
 
             console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 및 좌표 표시 기능 추가됨.");
