@@ -5,52 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>네이버 벡터맵 테스트 (feat. 호랭이) - 라벨 온오프 & 좌표 표시</title>
     <style>
-        body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
-        #map { width: 100%; height: 100%; }
+        body { margin: 0;
+padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
+        #map { width: 100%;
+height: 100%; }
         #status {
             position: absolute;
-            top: 10px;
+top: 10px;
             left: 10px;
             background: rgba(255, 99, 71, 0.9); /* 시작은 여전히 힙한 토마토 */
             color: white;
-            padding: 10px 15px;
+padding: 10px 15px;
             border-radius: 5px;
             font-size: 14px;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
+}
         #labelToggleBtn {
             position: absolute;
-            top: 10px;
+top: 10px;
             left: 170px; /* status 박스 옆에 놓기 위해 left 값 조절 */
-            background: #4A90E2; /* 버튼 색상 */
+            background: #4A90E2;
+/* 버튼 색상 */
             color: white;
             padding: 10px 15px;
-            border: none;
+border: none;
             border-radius: 5px;
             font-size: 14px;
             cursor: pointer;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             transition: background 0.3s ease;
-        }
+}
         #labelToggleBtn:hover {
             background: #357ABD;
-        }
+}
         #coordDisplay {
             position: absolute;
-            top: 50px; /* 라벨 버튼 아래에 표시 */
+top: 50px; /* 라벨 버튼 아래에 표시 */
             left: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            color: #FFC107; /* 밝은 노랑색으로 눈에 띄게! */
+background: rgba(0, 0, 0, 0.7);
+            color: #FFC107; /* 밝은 노랑색으로 눈에 띄게!
+*/
             padding: 10px 15px;
             border-radius: 5px;
             font-size: 14px;
-            z-index: 1000;
+z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             min-width: 250px; /* 최소 너비로 내용 없어도 형태 유지 */
             text-align: center;
-        }
+}
     </style>
 </head>
 <body>
@@ -66,11 +70,9 @@
 
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
-
         script.onload = function() {
             document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...';
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
-
             const mapOptions = {
                 center: new naver.maps.LatLng(37.5665, 126.9780), // 서울시청 위경도
                 zoom: 15,
@@ -82,7 +84,6 @@
                     'normal': naver.maps.NaverStyleMapTypeOptions.getVectorMap()
                 })
             };
-
             const map = new naver.maps.Map('map', mapOptions);
 
             map.setMapTypeId('normal');
@@ -109,7 +110,7 @@
                 }
             });
 
-            // ⭐ 여기! naver.maps.Event.addListener로 수정! ⭐
+            // ⭐ 기존 지도 클릭 이벤트 (좌표 표시)
             naver.maps.Event.addListener(map, 'click', function(e) {
                 const lat = e.latlng.lat().toFixed(6); // 위도를 소수점 6째자리까지
                 const lng = e.latlng.lng().toFixed(6); // 경도를 소수점 6째자리까지
@@ -117,9 +118,62 @@
                 console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
             });
 
+
+            // -------------------------------------------------------------------
+            // ⭐⭐ 요청하신 다각형(Polygon) 기능 추가 시작 ⭐⭐
+            // -------------------------------------------------------------------
+
+            // 1. 다각형의 꼭짓점 좌표 정의
+            const polygonCoords = [
+                new naver.maps.LatLng(37.571348, 126.977671),
+                new naver.maps.LatLng(37.571354, 126.978059),
+                new naver.maps.LatLng(37.570541, 126.978091),
+                new naver.maps.LatLng(37.570538, 126.977698)
+            ];
+
+            // 2. Polygon 객체 생성 (연한 보라색 외곽선, 채우기 없음)
+            const polygon = new naver.maps.Polygon({
+                map: map,
+                paths: [polygonCoords], // 다각형 경로 설정
+                fillColor: 'transparent', // 초기에는 채우기 없음
+                fillOpacity: 0.5, // 채우기 투명도 (마우스 오버 시 사용)
+                strokeColor: '#C490E4', // 연한 보라색 외곽선
+                strokeOpacity: 1,
+                strokeWeight: 3 // 외곽선 두께
+            });
+
+            // 3. 마우스 오버(Hover) 효과 및 클릭 이벤트 제한 추가
+            
+            // 마우스 오버 시: 반투명 보라색으로 채우기
+            naver.maps.Event.addListener(polygon, 'mouseover', function() {
+                polygon.setOptions({
+                    fillColor: '#C490E4' // 반투명의 보라색
+                });
+                document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다!';
+            });
+
+            // 마우스 아웃 시: 채우기 색상 제거 (transparent)
+            naver.maps.Event.addListener(polygon, 'mouseout', function() {
+                polygon.setOptions({
+                    fillColor: 'transparent'
+                });
+                document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
+            });
+
+            // 클릭 이벤트 시: 지도 클릭 이벤트가 **작동하지 않도록** 전파 중단
+            naver.maps.Event.addListener(polygon, 'click', function(e) {
+                // 다각형 내부를 클릭하면 map의 'click' 이벤트가 발생하지 않도록 막습니다.
+                e.stop(); 
+                document.getElementById('coordDisplay').textContent = '🚫 다각형 내부 클릭! 좌표 표시 기능이 제한됩니다.';
+                console.log("다각형 내부 클릭 감지: 지도 좌표 표시 기능 중단됨.");
+            });
+
+            // -------------------------------------------------------------------
+            // ⭐⭐ 요청하신 다각형(Polygon) 기능 추가 끝 ⭐⭐
+            // -------------------------------------------------------------------
+
             console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 및 좌표 표시 기능 추가됨.");
         };
-
         script.onerror = function() {
             document.getElementById('status').textContent = 'API 로드 실패! 네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
             document.getElementById('status').style.background = 'red';
