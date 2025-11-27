@@ -1,60 +1,379 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>기본 네이버 지도 로드 테스트</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>네이버 지도 기반 다중 건물 실내 지도</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <meta charset="utf-8">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* 지도가 화면 전체를 차지하도록 설정 */
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            font-family: 'Malgun Gothic', sans-serif;
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
         }
         #map {
-            width: 100%;
             height: 100%;
         }
+        
+        /* 층 선택 버튼 스타일 (좌측 하단) */
+        #floor-picker {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 999; 
+            background-color: white;
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            transition: all 0.3s ease;
+        }
+        .floor-button {
+            display: block;
+            padding: 10px 15px;
+            margin: 5px 0;
+            cursor: pointer;
+            border: none;
+            background-color: #f7f7f7;
+            color: #333;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .floor-button:hover {
+            background-color: #e0e0e0;
+        }
+        .floor-button.active {
+            background-color: #4A90E2;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .floor-button:active {
+            transform: scale(0.98);
+        }
+        
+        /* 네이버 지도의 기본 컨트롤 숨김 (깔끔한 UI를 위해) */
+        .naver-control, .nmap_logo, .nmap_copyright {
+            display: none !important;
+        }
+        
     </style>
 </head>
 <body>
-    <!-- 지도를 표시할 영역 -->
     <div id="map"></div>
-
-    <!-- 1. 네이버 지도 API 로드 -->
-    <!-- 클라이언트 ID 파라미터를 ncpClientId에서 ncpKeyId로 변경했습니다. -->
-    <script type="text/javascript" 
-        src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof">
-    </script>
+    <div id="floor-picker">
+        <!-- 층 선택 버튼들이 여기에 동적으로 삽입됩니다. -->
+    </div>
     
-    <!-- 2. 지도 초기화 및 이벤트 리스너 설정 -->
-    <script>
-        function initMap() {
-            // 지도 중심 좌표 설정 (예: 강남역)
-            const mapCenter = new naver.maps.LatLng(37.497942, 127.027621);
-            
-            // 네이버 지도 객체 초기화
-            const mapInstance = new naver.maps.Map('map', {
-                center: mapCenter, // 지도 중심 좌표
-                zoom: 15,          // 초기 줌 레벨
-                mapTypeId: naver.maps.MapTypeId.NORMAL,
-                zoomControl: true, // 줌 컨트롤 표시
-                zoomControlOptions: { // 줌 컨트롤 위치 설정
-                    position: naver.maps.Position.TOP_RIGHT
-                }
-            });
+    <!-- 1. 네이버 지도 API 로드 -->
+    <script type="text/javascript" 
+        src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=q1d23mmkof">
+    </script>
 
-            // 지도가 성공적으로 로드되었는지 확인하는 마커 추가 (선택 사항)
-            new naver.maps.Marker({
-                position: mapCenter,
-                map: mapInstance
-            });
+    <!-- 2. 사용자 JavaScript 코드 (API 로드 완료 후 실행) -->
+    <script>
+        // 건물별 설정 데이터 (좌표, 폴리곤 경로, 층별 정보 등)
+        const BUILDING_CONFIGS = {
+            'kyobo': {
+                center: new naver.maps.LatLng(37.502802, 127.025340), // 교보타워 중심
+                bounds: new naver.maps.LatLngBounds( 
+                    new naver.maps.LatLng(37.503700, 127.024000), 
+                    new naver.maps.LatLng(37.501900, 127.026700) 
+                ),
+                polygonPaths: [
+                    // 교보빌딩 외곽선 Path (간단하게 직사각형으로 설정)
+                    [
+                        new naver.maps.LatLng(37.5035, 127.0245),
+                        new naver.maps.LatLng(37.5035, 127.0261),
+                        new naver.maps.LatLng(37.5021, 127.0261),
+                        new naver.maps.LatLng(37.5021, 127.0245)
+                    ]
+                ],
+                floors: {
+                    'B1': {
+                        label: '지하 1층',
+                        imageUrl: 'https://placehold.co/1000x800/2962FF/FFFFFF?text=KYOBODB1',
+                        imageBounds: new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.5035, 127.0245), 
+                            new naver.maps.LatLng(37.5021, 127.0261)
+                        ),
+                    },
+                    '1F': {
+                        label: '1층',
+                        imageUrl: 'https://placehold.co/1000x800/1DE9B6/333333?text=KYOBOD1F', 
+                        imageBounds: new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.5035, 127.0245), 
+                            new naver.maps.LatLng(37.5021, 127.0261)
+                        ),
+                    },
+                    '2F': {
+                        label: '2층',
+                        imageUrl: 'https://placehold.co/1000x800/FFEA00/333333?text=KYOBOD2F',
+                        imageBounds: new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.5035, 127.0245), 
+                            new naver.maps.LatLng(37.5021, 127.0261)
+                        ),
+                    }
+                }
+            },
+            'gaepo': {
+                center: new naver.maps.LatLng(37.491223, 127.033621), // 개포타워 중심
+                bounds: new naver.maps.LatLngBounds(
+                    new naver.maps.LatLng(37.4915, 127.0330), 
+                    new naver.maps.LatLng(37.4905, 127.0343)
+                ),
+                polygonPaths: [
+                    // 개포타워 외곽선 Path
+                    [
+                        new naver.maps.LatLng(37.4914, 127.0332),
+                        new naver.maps.LatLng(37.4914, 127.0340),
+                        new naver.maps.LatLng(37.4907, 127.0340),
+                        new naver.maps.LatLng(37.4907, 127.0332)
+                    ]
+                ],
+                floors: {
+                    '1F': {
+                        label: '1층',
+                        imageUrl: 'https://placehold.co/1000x800/448AFF/FFFFFF?text=GAEPOD1F',
+                        imageBounds: new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.4914, 127.0332),
+                            new naver.maps.LatLng(37.4907, 127.0340)
+                        ),
+                    }
+                }
+            }
+        };
+
+        // 전역 상태 변수
+        let mapInstance = null;
+        let isIndoorModeActive = false;
+        let activeBuildingId = null;
+        let currentFloorId = null; 
+
+        const buildingPolygons = {}; 
+        const floorOverlays = {}; 
+        
+        // 층별 오버레이를 설정하고 활성화/비활성화하는 함수
+        function setFloorOverlay(floorId) {
+            const overlayKey = `${activeBuildingId}_${floorId}`;
             
-            console.log("✅ 네이버 지도 로드 및 초기화 성공.");
+            // 1. 현재 활성화된 Ground Overlay를 숨깁니다.
+            if (currentFloorId) {
+                const currentOverlayKey = `${activeBuildingId}_${currentFloorId}`;
+                const currentOverlay = floorOverlays[currentOverlayKey];
+                if (currentOverlay) {
+                    currentOverlay.setMap(null);
+                }
+            }
+            
+            // 2. 새 Ground Overlay를 표시합니다.
+            const newOverlay = floorOverlays[overlayKey];
+            if (newOverlay) {
+                newOverlay.setMap(mapInstance);
+                currentFloorId = floorId;
+                
+                // 3. 버튼 상태 업데이트
+                updateFloorButtonState(floorId);
+            }
         }
 
-        // 네이버 지도 API 스크립트 로딩이 완료되면 initMap 함수를 호출합니다.
+        // 실내 모드로 진입할 때 컨트롤을 표시하고 지도를 조정하는 함수
+        function showIndoorControls(map, buildingId) {
+            isIndoorModeActive = true;
+            activeBuildingId = buildingId;
+            
+            // 1. 모든 폴리곤 숨김 (현재 건물 폴리곤만 제외)
+            hideAllPolygons(map, buildingId);
+            
+            // 2. 지도 중심을 건물 중심으로 이동 및 줌 레벨 조정 (실내에 맞게)
+            const config = BUILDING_CONFIGS[buildingId];
+            map.setCenter(config.center);
+            map.setZoom(19); 
+            
+            // 3. 맵 타입 변경 (Satellite 맵으로 변경하여 3D 건물 음영 회피)
+            map.setMapTypeId(naver.maps.MapTypeId.SATELLITE);
+            
+            // 4. 층 선택 버튼 컨트롤 생성 및 표시
+            const floorPicker = document.getElementById('floor-picker');
+            floorPicker.innerHTML = '';
+            
+            const floorKeys = Object.keys(config.floors).reverse(); // 높은 층부터 표시
+            floorKeys.forEach(floorId => {
+                const floor = config.floors[floorId];
+                const button = document.createElement('div');
+                button.className = 'floor-button';
+                button.textContent = floor.label;
+                button.dataset.floorId = floorId;
+                
+                naver.maps.Event.addListener(button, 'click', function() {
+                    setFloorOverlay(floorId);
+                });
+                floorPicker.appendChild(button);
+            });
+            
+            floorPicker.style.display = 'block';
+            
+            // 5. 첫 번째 층을 기본으로 표시
+            const initialFloorId = floorKeys[0];
+            setFloorOverlay(initialFloorId);
+        }
+
+        // 실내 모드에서 일반 지도로 복원하는 함수
+        function hideIndoorControls(map) {
+            isIndoorModeActive = false;
+            
+            // 1. 현재 활성 Ground Overlay 숨김
+            if (currentFloorId) {
+                const currentOverlayKey = `${activeBuildingId}_${currentFloorId}`;
+                const currentOverlay = floorOverlays[currentOverlayKey];
+                if (currentOverlay) {
+                    currentOverlay.setMap(null);
+                }
+            }
+            currentFloorId = null;
+            activeBuildingId = null;
+            
+            // 2. 층 선택 컨트롤 숨김
+            document.getElementById('floor-picker').style.display = 'none';
+            
+            // 3. 지도 유형 복원 (일반 지도)
+            map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
+            
+            // 4. 지도 중심 및 줌 레벨 복원
+            map.setCenter(BUILDING_CONFIGS['kyobo'].center); 
+            map.setZoom(17);
+            
+            // 5. 모든 폴리곤 다시 표시
+            showAllPolygons(map);
+        }
+
+        // 층 버튼의 활성 상태를 업데이트하는 함수
+        function updateFloorButtonState(activeFloorId) {
+            document.querySelectorAll('.floor-button').forEach(btn => {
+                if (btn.dataset.floorId === activeFloorId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+        
+        // 특정 건물 폴리곤만 제외하고 모두 숨기거나 활성 폴리곤 강조
+        function hideAllPolygons(map, exceptId = null) {
+            Object.keys(buildingPolygons).forEach(id => {
+                if (id !== exceptId) {
+                    buildingPolygons[id].setMap(null); // 다른 폴리곤 숨김
+                } else {
+                    // 활성 폴리곤은 스타일을 변경하여 강조
+                    buildingPolygons[id].setOptions({ 
+                        fillColor: '#4A90E2', 
+                        fillOpacity: 0.2, 
+                        strokeColor: '#4A90E2', 
+                        strokeWeight: 4 
+                    });
+                }
+            });
+        }
+        
+        // 모든 폴리곤을 다시 표시하고 스타일 복원
+        function showAllPolygons(map) {
+            Object.keys(buildingPolygons).forEach(id => {
+                buildingPolygons[id].setMap(map);
+                // 스타일 복원
+                buildingPolygons[id].setOptions({ 
+                    fillColor: '#FFC107', 
+                    fillOpacity: 0.15, 
+                    strokeColor: '#FFC107', 
+                    strokeWeight: 2 
+                });
+            });
+        }
+
+
+        function initMap() {
+            // 네이버 맵 중심 좌표 (교보타워 중심)
+            const kyoboCenter = BUILDING_CONFIGS['kyobo'].center;
+            
+            // 1. Naver Maps 초기화
+            mapInstance = new naver.maps.Map('map', {
+                center: kyoboCenter,
+                zoom: 17,
+                mapTypeId: naver.maps.MapTypeId.NORMAL,
+                rotation: 0, 
+                tilt: 0, 
+                scaleControl: false,
+                logoControl: false,
+                mapDataControl: false,
+                mapTypeControl: true, 
+                zoomControl: true,
+            });
+            
+            // 2. 모든 건물 폴리곤 생성 및 지도에 추가
+            Object.keys(BUILDING_CONFIGS).forEach(buildingId => {
+                const config = BUILDING_CONFIGS[buildingId];
+                
+                const buildingPolygon = new naver.maps.Polygon({
+                    map: mapInstance,
+                    paths: config.polygonPaths,
+                    fillColor: '#FFC107',
+                    fillOpacity: 0.15,
+                    strokeColor: '#FFC107',
+                    strokeWeight: 2,
+                    strokeOpacity: 0.8,
+                    clickable: true,
+                    zIndex: 100 
+                });
+                
+                buildingPolygon.buildingId = buildingId; 
+                buildingPolygons[buildingId] = buildingPolygon;
+                
+                // 3. 폴리곤 클릭 이벤트 설정
+                naver.maps.Event.addListener(buildingPolygon, 'click', function() {
+                    const clickedId = this.buildingId; 
+                    
+                    if (!isIndoorModeActive) {
+                        // 실내 모드 진입
+                        showIndoorControls(mapInstance, clickedId);
+                        
+                    } else if (activeBuildingId === clickedId) {
+                        // 실내 모드 종료 (현재 활성 건물을 다시 클릭)
+                        hideIndoorControls(mapInstance); 
+                        
+                    } else {
+                        // 다른 건물을 클릭한 경우: 실내 모드 중이므로 경고
+                        console.log(`[안내] 실내 모드 중에는 다른 건물(${clickedId})을 선택할 수 없습니다. 지도 상태로 돌아가세요.`);
+                        return; 
+                    }
+                });
+
+                // 4. 모든 층의 이미지 사전 로딩 (Pre-loading)
+                Object.keys(config.floors).forEach(floorId => {
+                    const floor = config.floors[floorId];
+                    
+                    // Naver Maps의 GroundOverlay 사용
+                    const overlay = new naver.maps.GroundOverlay(
+                        floor.imageUrl, 
+                        floor.imageBounds, 
+                        {
+                            opacity: 0.8,
+                            map: mapInstance // 지도에 연결하여 로딩 시작
+                        }
+                    );
+                    
+                    floorOverlays[`${buildingId}_${floorId}`] = overlay;
+                    
+                    // 중요: 다운로드를 시작한 후 즉시 숨깁니다.
+                    overlay.setMap(null); 
+                });
+            });
+        }
+        
+        // API 로드가 완료되면 initMap 함수 호출
         naver.maps.onJSContentLoaded = initMap;
     </script>
 </body>
