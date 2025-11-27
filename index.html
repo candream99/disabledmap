@@ -165,6 +165,7 @@
         let activeBuildingId = null;
         let currentFloorId = null; 
         let clickListener = null; // 좌표 추출 리스너를 저장할 변수
+        let labelLayer = null; // 라벨 레이어를 저장할 변수 추가
 
         const buildingPolygons = {}; 
         const floorOverlays = {}; 
@@ -206,10 +207,18 @@
             
             const config = BUILDING_CONFIGS[buildingId];
             
-            // 실내 모드 진입 시 줌 레벨을 20으로 높이고 위성 지도로 변경
+            // 실내 모드 진입 시 줌 레벨을 20으로 높이고 벡터맵으로 변경
             map.setCenter(config.center);
             map.setZoom(20); // 줌 레벨을 20으로 더 확대하여 건물을 꽉 채우도록 변경
+            
+            // 벡터맵 사용 및 라벨 제거
             map.setMapTypeId(naver.maps.MapTypeId.VECTOR);
+            
+            // 라벨 레이어 생성 및 제거
+            if (!labelLayer) {
+                labelLayer = new naver.maps.LabelLayer();
+            }
+            labelLayer.setMap(null); // 라벨 제거
             
             const floorPicker = document.getElementById('floor-picker');
             floorPicker.innerHTML = '';
@@ -222,7 +231,6 @@
                 button.textContent = floor.label;
                 button.dataset.floorId = floorId;
                 
-                // <-- 수정된 부분: DOM 요소에는 표준 addEventListener 사용
                 button.addEventListener('click', function() {
                     setFloorOverlay(floorId);
                 });
@@ -252,7 +260,13 @@
             
             document.getElementById('floor-picker').style.display = 'none';
             
-            map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
+            // 일반 벡터맵으로 복원 (라벨 포함)
+            map.setMapTypeId(naver.maps.MapTypeId.VECTOR);
+            
+            // 라벨 레이어 다시 표시
+            if (labelLayer) {
+                labelLayer.setMap(map);
+            }
             
             // 실내 모드에서 복귀 시 초기 줌 레벨 19로 변경
             map.setCenter(BUILDING_CONFIGS['kyobo'].center); 
@@ -383,11 +397,11 @@
         function initMap() {
             const kyoboCenter = BUILDING_CONFIGS['kyobo'].center;
             
-            // ⭐ 1. Naver Maps 초기화 시 최종 줌 레벨(19)로 설정하여 불필요한 줌 변경 제거
+            // ⭐ 1. Naver Maps 초기화 시 벡터맵 사용
             mapInstance = new naver.maps.Map('map', {
                 center: kyoboCenter,
                 zoom: 19, // 초기 줌 레벨을 19로 설정
-                mapTypeId: naver.maps.MapTypeId.NORMAL,
+                mapTypeId: naver.maps.MapTypeId.VECTOR, // 벡터맵 사용
                 rotation: 0, 
                 tilt: 0, 
                 scaleControl: false,
@@ -397,11 +411,15 @@
                 zoomControl: true,
             });
             
-            // 2. 지도 인스턴스가 생성된 후 좌표 추출 모드 활성화 및 이벤트 리스너 추가
+            // 2. 라벨 레이어 초기화
+            labelLayer = new naver.maps.LabelLayer();
+            labelLayer.setMap(mapInstance); // 초기에는 라벨 표시
+            
+            // 3. 지도 인스턴스가 생성된 후 좌표 추출 모드 활성화 및 이벤트 리스너 추가
             enableCoordExtraction();
             document.getElementById('coord-guide').addEventListener('click', disableCoordExtraction);
             
-            // 3. 모든 건물 폴리곤 생성 및 지도에 추가 (광화문 교보빌딩)
+            // 4. 모든 건물 폴리곤 생성 및 지도에 추가 (광화문 교보빌딩)
             Object.keys(BUILDING_CONFIGS).forEach(buildingId => {
                 const config = BUILDING_CONFIGS[buildingId];
                 
@@ -420,7 +438,7 @@
                 buildingPolygon.buildingId = buildingId; 
                 buildingPolygons[buildingId] = buildingPolygon;
                 
-                // 4. 폴리곤 클릭 이벤트 설정 (실내 지도 진입/종료)
+                // 5. 폴리곤 클릭 이벤트 설정 (실내 지도 진입/종료)
                 naver.maps.Event.addListener(buildingPolygon, 'click', function(e) {
                     const clickedPolygon = e.overlay; 
                     const clickedId = clickedPolygon.buildingId;
@@ -438,7 +456,7 @@
                     }
                 });
 
-                // 5. 모든 층의 이미지 사전 로딩 (Pre-loading)
+                // 6. 모든 층의 이미지 사전 로딩 (Pre-loading)
                 Object.keys(config.floors).forEach(floorId => {
                     const floor = config.floors[floorId];
                     
@@ -457,11 +475,8 @@
                 });
             });
             
-            // ⭐ 6. 지도의 중심만 설정하고 줌 레벨은 초기화 시에 19로 이미 설정되었으므로 제거
+            // ⭐ 7. 지도의 중심 설정
             mapInstance.setCenter(BUILDING_CONFIGS['kyobo'].center);
-            
-            // ⭐ 참고: 초기화 시 줌 레벨을 19로 설정하여 크기 불일치 문제를 해결했습니다.
-            // 실내 모드 진입 시에는 줌 레벨을 20으로 더 확대하도록 `showIndoorControls`를 수정했습니다.
         }
         
         // API 로드가 완료되면 initMap 함수 호출
@@ -469,4 +484,3 @@
     </script>
 </body>
 </html>
-
