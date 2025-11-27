@@ -19,11 +19,10 @@
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        /* 기존 #labelToggleBtn 스타일 제거 */
         
         #coordDisplay {
             position: absolute;
-            top: 50px; /* 기존 라벨 버튼 위치에 따라 50px로 유지 */
+            top: 50px; /* status 박스 아래에 표시 */
             left: 10px;
             background: rgba(0, 0, 0, 0.7);
             color: #FFC107; /* 밝은 노랑색으로 눈에 띄게! */
@@ -74,10 +73,6 @@
             labelLayer.setMap(map); // 라벨을 초기부터 보이게 설정
 
             document.getElementById('status').style.display = 'none';
-
-            // -------------------------------------------------------------------
-            // ⭐⭐ 기존 라벨 토글 버튼 관련 로직 제거 ⭐⭐
-            // -------------------------------------------------------------------
             
             // -------------------------------------------------------------------
             // ⭐⭐ 다각형(Polygon) 기능 ⭐⭐
@@ -90,7 +85,7 @@
                 new naver.maps.LatLng(37.570541, 126.978091),
                 new naver.maps.LatLng(37.570538, 126.977698)
             ];
-            // 2. Polygon 객체 생성: clickable: true가 핵심입니다.
+            // 2. Polygon 객체 생성
             const polygon = new naver.maps.Polygon({
                 map: map,
                 paths: [polygonCoords],
@@ -99,9 +94,12 @@
                 strokeColor: '#C490E4', // 연한 보라색 외곽선
                 strokeOpacity: 1,
                 strokeWeight: 3,
-                clickable: true // 이 객체가 클릭 이벤트를 받을 수 있도록 명시적으로 설정
+                clickable: true 
             });
             
+            // GroundOverlay 객체를 함수 밖에서 선언하여 전역적으로 사용 가능하게 함
+            let groundOverlay = null; 
+
             // 3. 마우스 오버(Hover) 효과 추가
             
             // 마우스 오버 시: 반투명 보라색으로 채우기
@@ -113,7 +111,6 @@
             });
 
             // 마우스 아웃 시: 채우기 색상 제거 (transparent)
-            let groundOverlay = null; // 함수 밖에서 선언하여 전역적으로 사용 가능하게 함 (GroundOverlay 섹션에 있음)
             naver.maps.Event.addListener(polygon, 'mouseout', function() {
                 // GroundOverlay가 활성화 상태가 아니라면 원래 메시지로 복귀
                 if (!groundOverlay || groundOverlay.getMap() === null) { 
@@ -138,27 +135,26 @@
             function createGroundOverlay() {
                 groundOverlay = new naver.maps.GroundOverlay(imageUrl, imageBounds, {
                     map: null, // 초기에는 지도에 표시하지 않음
-                    clickable: true, // 이미지 자체 클릭 가능하도록 설정
+                    clickable: true, 
                     opacity: 1
                 });
-                // 🌟 GroundOverlay 클릭 이벤트: 이미지 클릭 시 제거
+                // 🌟 GroundOverlay 클릭 이벤트: 이미지 클릭 시 제거 (실내 모드 종료)
                 naver.maps.Event.addListener(groundOverlay, 'click', function(e) {
-                    // 🚨 수정: e.stop() 대신 e.stopOverlays 사용
                     e.stopOverlays = true; 
                     
                     // 이미지 제거 (실내 모드 종료)
                     groundOverlay.setMap(null); 
+                    labelLayer.setMap(map); // ⭐ 라벨 다시 보이게 설정 ⭐
                     polygon.setOptions({ // 다각형 색상 투명하게 복구
                         fillColor: 'transparent' 
                     });
                     document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
-                    console.log("평면도 클릭: 실내 모드 종료.");
+                    console.log("평면도 클릭: 실내 모드 종료. 지도 라벨 복구.");
                 });
             }
 
             // 다각형(Polygon) 클릭 이벤트 수정: 실내 모드 진입
             naver.maps.Event.addListener(polygon, 'click', function(e) {
-                // 🚨 수정: e.stop() 대신 e.stopOverlays 사용
                 e.stopOverlays = true; // 다각형 내부 클릭 시 지도 클릭 이벤트 전파 중단
 
                 if (!groundOverlay) {
@@ -167,11 +163,12 @@
 
                 // GroundOverlay 표시 (실내 모드 시작)
                 groundOverlay.setMap(map);
+                labelLayer.setMap(null); // ⭐ 라벨 숨김 설정 ⭐
                 polygon.setOptions({ // 다각형을 채워진 상태로 유지
                     fillColor: '#C490E4' 
                 });
                 document.getElementById('coordDisplay').textContent = '🏢 실내 모드 활성화. 이미지를 클릭하면 일반 지도로 돌아갑니다.';
-                console.log("다각형 내부 클릭: 실내 모드 진입.");
+                console.log("다각형 내부 클릭: 실내 모드 진입. 지도 라벨 숨김.");
             });
 
             // ⭐ 지도 클릭 이벤트 (다각형 밖을 클릭했을 때만 작동)
@@ -183,7 +180,7 @@
                     document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
                     console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
                 } else {
-                    // 실내 모드일 경우 지도 클릭 무시 (별도 처리 필요 없음, GroundOverlay 클릭이 먼저 발생)
+                    // 실내 모드 중: 지도 클릭 무시됨.
                     console.log("실내 모드 중: 지도 클릭 무시됨.");
                 }
             });
@@ -192,7 +189,7 @@
             // ⭐⭐ GroundOverlay(평면도) 및 실내 모드 추가 기능 완료 ⭐⭐
             // -------------------------------------------------------------------
 
-            console.log("네이버 벡터맵 로드 및 초기화 성공! 좌표 표시 기능, 실내 모드 추가됨.");
+            console.log("네이버 벡터맵 로드 및 초기화 성공! 좌표 표시 기능, 실내 모드 라벨 제어 기능 추가됨.");
         };
         script.onerror = function() {
             // ⭐ 줄바꿈 오류 수정
