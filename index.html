@@ -81,7 +81,7 @@
         let map;
         // 2D 평면 모드를 위한 커스텀 맵 ID 정의
         const LABELLESS_MAP_ID = 'LABELLESS_NORMAL_CLEAN'; 
-        // ⭐ 수정: 초기 상태는 라벨이 보이는 상태(false)로 시작합니다.
+        // 초기 상태는 라벨이 보이는 상태(false)로 시작합니다.
         let isLabelHidden = false; 
 
         // 지도 초기화 함수
@@ -112,15 +112,15 @@
                 // 2. 벡터 맵에서 라벨과 음영을 제거하기 위해 커스텀 맵 타입을 등록합니다.
                 register2DMapType(map);
                 
-                // ⭐ 수정: 초기 상태를 기본 지도 타입(NORMAL)으로 유지합니다. 
-                // 즉, 라벨이 켜진 상태(isLabelHidden = false)로 시작합니다.
+                // 초기 상태를 기본 지도 타입(NORMAL)으로 유지합니다. 
 
                 console.log("네이버 벡터 맵이 2D 평면 모드로 로드되었고, 모든 설정이 완료되었습니다.");
             });
         }
         
         /**
-         * 벡터 맵에서 라벨, 심볼, 음영을 제거하여 완벽한 2D 평면 모드를 만드는 커스텀 지도 타입을 등록합니다.
+         * 벡터 맵에서 라벨, 심볼을 제거하여 완벽한 2D 평면 모드를 만드는 커스텀 지도 타입을 등록합니다.
+         * (음영 제거는 vectorColorMap: false 및 setTilt(0)으로 처리합니다.)
          * @param {naver.maps.Map} mapInstance - 지도 인스턴스
          */
         function register2DMapType(mapInstance) {
@@ -132,20 +132,20 @@
                 return;
             }
 
-            // 지도 타입의 레이어 목록에서 'symbol', 'label', 'tone' 관련 레이어를 제거합니다.
+            // ⭐ 수정: 지도 타입의 레이어 목록에서 'symbol' (POI 마커)와 'label'만 제거하여 
+            // 내부 VSM 구조 오류를 피하고 안정성을 높입니다.
             const cleanLayers = normalMapType.layers.filter(layer => 
-                layer.name !== 'symbol' && layer.name !== 'label' && 
-                layer.name !== 'tone_terrain' && layer.name !== 'tone_building'
+                layer.name !== 'symbol' && layer.name !== 'label'
             );
             
-            // 라벨 및 음영이 없는 새로운 지도 타입 객체를 정의합니다.
+            // 라벨 및 심볼이 없는 새로운 지도 타입 객체를 정의합니다.
             const labelLessMapType = new naver.maps.MapType({
                 name: '완벽한 2D 일반 지도',
                 minZoom: normalMapType.minZoom,
                 maxZoom: normalMapType.maxZoom,
                 projection: normalMapType.projection,
                 layers: cleanLayers, // 필터링된 레이어 적용
-                // 벡터 맵의 색상 보정을 비활성화하여 음영을 제거합니다.
+                // 벡터 맵의 색상 보정을 비활성화하여 음영을 제거합니다. (평면 효과)
                 vectorColorMap: false
             });
 
@@ -161,17 +161,17 @@
             const button = document.getElementById('toggle-label');
             
             if (!isLabelHidden) {
-                // 현재 라벨이 표시되어 있으면 -> 라벨 없는 2D 평면 커스텀 지도로 변경 (라벨/심볼/음영 숨김)
+                // 현재 라벨이 표시되어 있으면 -> 라벨 없는 2D 평면 커스텀 지도로 변경 (라벨/심볼 숨김)
                 map.setMapTypeId(LABELLESS_MAP_ID);
                 isLabelHidden = true;
                 button.innerHTML = '<i class="fas fa-tags"></i> 라벨 켜기';
-                console.log("라벨 끄기: 2D 평면 지도 타입으로 전환 (라벨/심볼/음영 숨김)");
+                console.log("라벨 끄기: 2D 평면 지도 타입으로 전환 (라벨/심볼 숨김)");
             } else {
-                // 현재 라벨이 숨겨져 있으면 -> 일반 라벨 있는 맵으로 변경 (음영 복원)
+                // 현재 라벨이 숨겨져 있으면 -> 일반 라벨 있는 맵으로 변경 (라벨/심볼 표시)
                 map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
                 isLabelHidden = false;
                 button.innerHTML = '<i class="fas fa-tags"></i> 라벨 끄기';
-                console.log("라벨 켜기: 일반 지도 타입으로 전환 (라벨/심볼 표시, 기본 음영 복원)");
+                console.log("라벨 켜기: 일반 지도 타입으로 전환 (라벨/심볼 표시)");
             }
         }
 
