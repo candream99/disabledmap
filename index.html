@@ -204,9 +204,10 @@
             hideAllPolygons(map, buildingId);
             
             const config = BUILDING_CONFIGS[buildingId];
-            map.setCenter(config.center);
-            map.setZoom(19); 
             
+            // 실내 모드 진입 시 줌 레벨을 20으로 높이고 위성 지도로 변경
+            map.setCenter(config.center);
+            map.setZoom(20); // 줌 레벨을 20으로 더 확대하여 건물을 꽉 채우도록 변경
             map.setMapTypeId(naver.maps.MapTypeId.SATELLITE);
             
             const floorPicker = document.getElementById('floor-picker');
@@ -250,8 +251,9 @@
             
             map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
             
+            // 실내 모드에서 복귀 시 초기 줌 레벨 19로 변경
             map.setCenter(BUILDING_CONFIGS['kyobo'].center); 
-            map.setZoom(17);
+            map.setZoom(19); 
             
             showAllPolygons(map);
             
@@ -378,10 +380,10 @@
         function initMap() {
             const kyoboCenter = BUILDING_CONFIGS['kyobo'].center;
             
-            // 1. Naver Maps 초기화 및 mapInstance 할당
+            // ⭐ 1. Naver Maps 초기화 시 최종 줌 레벨(19)로 설정하여 불필요한 줌 변경 제거
             mapInstance = new naver.maps.Map('map', {
                 center: kyoboCenter,
-                zoom: 17, 
+                zoom: 19, // 초기 줌 레벨을 19로 설정
                 mapTypeId: naver.maps.MapTypeId.NORMAL,
                 rotation: 0, 
                 tilt: 0, 
@@ -392,7 +394,7 @@
                 zoomControl: true,
             });
             
-            // ⭐ 2. 지도 인스턴스가 생성된 후 좌표 추출 모드 활성화 및 이벤트 리스너 추가
+            // 2. 지도 인스턴스가 생성된 후 좌표 추출 모드 활성화 및 이벤트 리스너 추가
             enableCoordExtraction();
             document.getElementById('coord-guide').addEventListener('click', disableCoordExtraction);
             
@@ -452,9 +454,11 @@
                 });
             });
             
-            // 지도 초기화 후 바로 새로운 좌표로 이동 및 줌 레벨 조정
+            // ⭐ 6. 지도의 중심만 설정하고 줌 레벨은 초기화 시에 19로 이미 설정되었으므로 제거
             mapInstance.setCenter(BUILDING_CONFIGS['kyobo'].center);
-            mapInstance.setZoom(19); 
+            
+            // ⭐ 참고: 초기화 시 줌 레벨을 19로 설정하여 크기 불일치 문제를 해결했습니다.
+            // 실내 모드 진입 시에는 줌 레벨을 20으로 더 확대하도록 `showIndoorControls`를 수정했습니다.
         }
         
         // API 로드가 완료되면 initMap 함수 호출
