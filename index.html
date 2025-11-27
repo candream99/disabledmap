@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 라벨 온오프 & 좌표 표시</title>
+    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 좌표 표시 & 이미지 표시</title>
     <style>
-        body { margin: 0;
-            padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
-        #map { width: 100%;
-            height: 100%; }
+        body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
+        #map { width: 100%; height: 100%; }
         #status {
             position: absolute;
             top: 10px;
@@ -21,32 +19,14 @@
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        #labelToggleBtn {
-            position: absolute;
-            top: 10px;
-            left: 170px; /* status 박스 옆에 놓기 위해 left 값 조절 */
-            background: #4A90E2;
-            /* 버튼 색상 */
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: background 0.3s ease;
-        }
-        #labelToggleBtn:hover {
-            background: #357ABD;
-        }
+        /* 기존 #labelToggleBtn 스타일 제거 */
+        
         #coordDisplay {
             position: absolute;
-            top: 50px; /* 라벨 버튼 아래에 표시 */
+            top: 50px; /* 기존 라벨 버튼 위치에 따라 50px로 유지 */
             left: 10px;
             background: rgba(0, 0, 0, 0.7);
-            color: #FFC107; /* 밝은 노랑색으로 눈에 띄게!
-            */
+            color: #FFC107; /* 밝은 노랑색으로 눈에 띄게! */
             padding: 10px 15px;
             border-radius: 5px;
             font-size: 14px;
@@ -59,7 +39,6 @@
 </head>
 <body>
     <div id="status">API 키 확인 중...</div>
-    <button id="labelToggleBtn">라벨 숨기기</button>
     <div id="coordDisplay">지도를 클릭하면 좌표가 나와요!</div>
     <div id="map"></div>
     
@@ -71,15 +50,16 @@
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
         script.onload = function() {
-            document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...'; 
+            // ⭐ 줄바꿈 오류 수정
+            document.getElementById('status').textContent = 'API 로드 성공!\n벡터 지도 초기화 중...'; 
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
+            
             // 지도 초기 옵션 설정
             const mapOptions = {
                 center: new naver.maps.LatLng(37.570946, 126.97788), // 서울시청 위경도
                 zoom: 18,
                 zoomControl: true,
                 zoomControlOptions: {
-        
                     position: naver.maps.Position.TOP_RIGHT
                 },
                 mapTypes: new naver.maps.MapTypeRegistry({
@@ -88,34 +68,17 @@
             };
             const map = new naver.maps.Map('map', mapOptions);
             map.setMapTypeId('normal');
-            
-            // 라벨 레이어 설정
+
+            // 라벨 레이어 설정 (초기값: 지도에 표시 - 보이기)
             const labelLayer = new naver.maps.LabelLayer();
-            labelLayer.setMap(map);
+            labelLayer.setMap(map); // 라벨을 초기부터 보이게 설정
 
             document.getElementById('status').style.display = 'none';
 
-            // 라벨 토글 버튼 기능
-            const labelToggleBtn = document.getElementById('labelToggleBtn');
-            let isLabelVisible = true;
-            // ⭐ 추가: 실내 모드 진입 전 라벨 상태 저장 변수
-            let wasLabelVisibleBeforeIndoorMode = true; 
-
-            labelToggleBtn.addEventListener('click', function() {
-                if (isLabelVisible) {
-                    labelLayer.setMap(null);
-                    labelToggleBtn.textContent = '라벨 보이기';
-                    isLabelVisible = false;
-           
-                    console.log("라벨 숨김!");
-                } else {
-                    labelLayer.setMap(map);
-                    labelToggleBtn.textContent = '라벨 숨기기';
-                    isLabelVisible = true;
-       
-                    console.log("라벨 보임!");
-                }
-            });
+            // -------------------------------------------------------------------
+            // ⭐⭐ 기존 라벨 토글 버튼 관련 로직 제거 ⭐⭐
+            // -------------------------------------------------------------------
+            
             // -------------------------------------------------------------------
             // ⭐⭐ 다각형(Polygon) 기능 ⭐⭐
             // -------------------------------------------------------------------
@@ -123,8 +86,7 @@
             // 1. 다각형의 꼭짓점 좌표 정의
             const polygonCoords = [
                 new naver.maps.LatLng(37.571348, 126.977671),
-                new naver.maps.LatLng(37.571354, 
-                    126.978059),
+                new naver.maps.LatLng(37.571354, 126.978059),
                 new naver.maps.LatLng(37.570541, 126.978091),
                 new naver.maps.LatLng(37.570538, 126.977698)
             ];
@@ -134,25 +96,26 @@
                 paths: [polygonCoords],
                 fillColor: 'transparent', // 초기에는 채우기 없음
                 fillOpacity: 0.5,
-                
                 strokeColor: '#C490E4', // 연한 보라색 외곽선
                 strokeOpacity: 1,
                 strokeWeight: 3,
                 clickable: true // 이 객체가 클릭 이벤트를 받을 수 있도록 명시적으로 설정
             });
+            
             // 3. 마우스 오버(Hover) 효과 추가
             
             // 마우스 오버 시: 반투명 보라색으로 채우기
             naver.maps.Event.addListener(polygon, 'mouseover', function() {
                 polygon.setOptions({
                     fillColor: '#C490E4' // 반투명의 보라색
-          
                 });
                 document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다! (마우스 오버)';
             });
+
             // 마우스 아웃 시: 채우기 색상 제거 (transparent)
+            let groundOverlay = null; // 함수 밖에서 선언하여 전역적으로 사용 가능하게 함 (GroundOverlay 섹션에 있음)
             naver.maps.Event.addListener(polygon, 'mouseout', function() {
-                // **GroundOverlay가 활성화 상태가 아니라면** 원래 메시지로 복귀
+                // GroundOverlay가 활성화 상태가 아니라면 원래 메시지로 복귀
                 if (!groundOverlay || groundOverlay.getMap() === null) { 
                     polygon.setOptions({
                         fillColor: 'transparent'
@@ -166,13 +129,10 @@
             // -------------------------------------------------------------------
             
             // 이미지 정보
-            // ⭐ 이미지 경로 수정 (Raw GitHub URL로 변경)
             const imageUrl = 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg';
             const swLatLng = new naver.maps.LatLng(37.570535, 126.977631); // 남서쪽 (좌측 하단)
             const neLatLng = new naver.maps.LatLng(37.571365, 126.978099); // 북동쪽 (우측 상단)
             const imageBounds = new naver.maps.LatLngBounds(swLatLng, neLatLng);
-
-            let groundOverlay = null; // GroundOverlay 객체를 담을 변수
 
             // GroundOverlay 객체 생성 함수
             function createGroundOverlay() {
@@ -181,19 +141,13 @@
                     clickable: true, // 이미지 자체 클릭 가능하도록 설정
                     opacity: 1
                 });
-
                 // 🌟 GroundOverlay 클릭 이벤트: 이미지 클릭 시 제거
                 naver.maps.Event.addListener(groundOverlay, 'click', function(e) {
+                    // 🚨 수정: e.stop() 대신 e.stopOverlays 사용
                     e.stopOverlays = true; 
                     
                     // 이미지 제거 (실내 모드 종료)
                     groundOverlay.setMap(null); 
-                    
-                    // ⭐ 수정: 실내 모드 진입 전 상태로 라벨 복구
-                    if (wasLabelVisibleBeforeIndoorMode) {
-                        labelLayer.setMap(map);
-                    }
-                    
                     polygon.setOptions({ // 다각형 색상 투명하게 복구
                         fillColor: 'transparent' 
                     });
@@ -204,23 +158,20 @@
 
             // 다각형(Polygon) 클릭 이벤트 수정: 실내 모드 진입
             naver.maps.Event.addListener(polygon, 'click', function(e) {
+                // 🚨 수정: e.stop() 대신 e.stopOverlays 사용
                 e.stopOverlays = true; // 다각형 내부 클릭 시 지도 클릭 이벤트 전파 중단
 
                 if (!groundOverlay) {
                     createGroundOverlay();
                 }
 
-                // ⭐ 수정: 현재 라벨 상태를 저장하고 라벨을 숨김 (실내 모드 요구사항)
-                wasLabelVisibleBeforeIndoorMode = isLabelVisible; 
-                labelLayer.setMap(null); 
-                
                 // GroundOverlay 표시 (실내 모드 시작)
                 groundOverlay.setMap(map);
                 polygon.setOptions({ // 다각형을 채워진 상태로 유지
                     fillColor: '#C490E4' 
                 });
                 document.getElementById('coordDisplay').textContent = '🏢 실내 모드 활성화. 이미지를 클릭하면 일반 지도로 돌아갑니다.';
-                console.log("다각형 내부 클릭: 실내 모드 진입. 라벨 숨김.");
+                console.log("다각형 내부 클릭: 실내 모드 진입.");
             });
 
             // ⭐ 지도 클릭 이벤트 (다각형 밖을 클릭했을 때만 작동)
@@ -228,23 +179,24 @@
                 // GroundOverlay가 표시되지 않았을 때만 좌표 표시 기능 실행
                 if (!groundOverlay || groundOverlay.getMap() === null) {
                     const lat = e.latlng.lat().toFixed(6);
-         
                     const lng = e.latlng.lng().toFixed(6);
                     document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
                     console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
                 } else {
-                    // 실내 모드일 경우 지도 클릭 무시 (GroundOverlay 클릭이 먼저 발생)
+                    // 실내 모드일 경우 지도 클릭 무시 (별도 처리 필요 없음, GroundOverlay 클릭이 먼저 발생)
                     console.log("실내 모드 중: 지도 클릭 무시됨.");
                 }
             });
+
             // -------------------------------------------------------------------
             // ⭐⭐ GroundOverlay(평면도) 및 실내 모드 추가 기능 완료 ⭐⭐
             // -------------------------------------------------------------------
 
-            console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 및 좌표 표시 기능, 실내 모드 추가됨.");
+            console.log("네이버 벡터맵 로드 및 초기화 성공! 좌표 표시 기능, 실내 모드 추가됨.");
         };
         script.onerror = function() {
-            document.getElementById('status').textContent = 'API 로드 실패! 네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
+            // ⭐ 줄바꿈 오류 수정
+            document.getElementById('status').textContent = 'API 로드 실패!\n네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
             document.getElementById('status').style.background = 'red';
             console.error("네이버 지도 API 로드 실패!");
         };
