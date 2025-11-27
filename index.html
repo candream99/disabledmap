@@ -71,7 +71,7 @@
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
         script.onload = function() {
-            // ⭐ 오타/줄바꿈 수정: 문자열을 한 줄로 수정
+            // ⭐ 줄바꿈 오류 수정
             document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...'; 
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
             // 지도 초기 옵션 설정
@@ -182,7 +182,8 @@
 
                 // 🌟 GroundOverlay 클릭 이벤트: 이미지 클릭 시 제거
                 naver.maps.Event.addListener(groundOverlay, 'click', function(e) {
-                    e.stop(); // 이미지 클릭 시 이벤트 전파 방지
+                    // 🚨 수정: e.stop() 대신 e.stopOverlays 사용
+                    e.stopOverlays = true; 
                     
                     // 이미지 제거 (실내 모드 종료)
                     groundOverlay.setMap(null); 
@@ -196,7 +197,8 @@
 
             // 다각형(Polygon) 클릭 이벤트 수정: 실내 모드 진입
             naver.maps.Event.addListener(polygon, 'click', function(e) {
-                e.stop(); // 다각형 내부 클릭 시 지도 클릭 이벤트 전파 중단
+                // 🚨 수정: e.stop() 대신 e.stopOverlays 사용
+                e.stopOverlays = true; // 다각형 내부 클릭 시 지도 클릭 이벤트 전파 중단
 
                 if (!groundOverlay) {
                     createGroundOverlay();
@@ -221,8 +223,7 @@
                     document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
                     console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
                 } else {
-                    // 실내 모드일 경우 지도 클릭 무시
-                    e.stop();
+                    // 실내 모드일 경우 지도 클릭 무시 (별도 처리 필요 없음, GroundOverlay 클릭이 먼저 발생)
                     console.log("실내 모드 중: 지도 클릭 무시됨.");
                 }
             });
@@ -233,7 +234,7 @@
             console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 및 좌표 표시 기능, 실내 모드 추가됨.");
         };
         script.onerror = function() {
-            // ⭐ 오타/줄바꿈 수정: 문자열을 한 줄로 수정
+            // ⭐ 줄바꿈 오류 수정
             document.getElementById('status').textContent = 'API 로드 실패! 네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
             document.getElementById('status').style.background = 'red';
             console.error("네이버 지도 API 로드 실패!");
