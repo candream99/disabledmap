@@ -23,9 +23,9 @@
     <div id="map"></div>
 
     <!-- 1. 네이버 지도 API 로드 -->
-    <!-- 이전에 사용하신 클라이언트 ID(q1d23mmkof)를 적용했습니다. -->
+    <!-- 클라이언트 ID 파라미터를 ncpClientId에서 ncpKeyId로 변경했습니다. -->
     <script type="text/javascript" 
-        src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=q1d23mmkof">
+        src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof">
     </script>
     
     <!-- 2. 지도 초기화 및 이벤트 리스너 설정 -->
@@ -55,7 +55,6 @@
         }
 
         // 네이버 지도 API 스크립트 로딩이 완료되면 initMap 함수를 호출합니다.
-        // 이것이 'naver is not defined' 오류를 방지하는 표준 방법입니다.
         naver.maps.onJSContentLoaded = initMap;
     </script>
 </body>
