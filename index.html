@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 라벨 온오프 & 좌표 표시</title>
+    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 라벨 온오프 & 좌표 표시 & 실내모드</title>
     <style>
         body { margin: 0;
 padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
@@ -114,7 +114,7 @@ z-index: 1000;
             });
 
             // -------------------------------------------------------------------
-            // ⭐⭐ 다각형(Polygon) 기능 최종 수정 ⭐⭐
+            // ⭐⭐ 다각형 및 실내모드 기능 구현 ⭐⭐
             // -------------------------------------------------------------------
 
             // 1. 다각형의 꼭짓점 좌표 정의
@@ -125,48 +125,102 @@ z-index: 1000;
                 new naver.maps.LatLng(37.570538, 126.977698)
             ];
 
-            // 2. Polygon 객체 생성: clickable: true가 핵심입니다.
+            // 2. Polygon 객체 생성
             const polygon = new naver.maps.Polygon({
                 map: map,
                 paths: [polygonCoords],
-                fillColor: 'transparent', // 초기에는 채우기 없음
+                fillColor: 'transparent',
                 fillOpacity: 0.5,
-                strokeColor: '#C490E4', // 연한 보라색 외곽선
+                strokeColor: '#C490E4',
                 strokeOpacity: 1,
                 strokeWeight: 3,
-                clickable: true // 이 객체가 클릭 이벤트를 받을 수 있도록 명시적으로 설정
+                clickable: true 
             });
 
-            // 3. 마우스 오버(Hover) 효과 추가
+            // 3. GroundOverlay(평면도 이미지) 객체 정의
+            const IMAGE_URL = 'https://github.com/candream99/disabledmap/kb/ky_1.jpg';
+            // 이미지 경계: 다각형의 최소/최대 위경도를 사용 (Bounding Box)
+            const imageBounds = new naver.maps.LatLngBounds(
+                new naver.maps.LatLng(37.570538, 126.977671), // SW (좌하단: 최소 위도, 최소 경도)
+                new naver.maps.LatLng(37.571354, 126.978091)  // NE (우상단: 최대 위도, 최대 경도)
+            );
+
+            // GroundOverlay 객체를 생성하되, 초기에는 지도에 표시하지 않습니다.
+            const floorPlanOverlay = new naver.maps.GroundOverlay(
+                IMAGE_URL,
+                imageBounds,
+                {
+                    map: null, // 초기에는 null로 설정하여 숨김
+                    opacity: 1,
+                    clickable: true // 이미지 자체를 클릭하여 닫을 수 있도록 설정
+                }
+            );
+
+            // 4. Polygon 이벤트 리스너: 실내모드 ON/OFF 기능 추가
             
-            // 마우스 오버 시: 반투명 보라색으로 채우기
+            // 마우스 오버(Hover) 효과
             naver.maps.Event.addListener(polygon, 'mouseover', function() {
-                polygon.setOptions({
-                    fillColor: '#C490E4' // 반투명의 보라색
-                });
-                document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다! (마우스 오버)';
+                if(floorPlanOverlay.getMap() === null) { // 실내모드가 아닐 때만 효과 적용
+                    polygon.setOptions({
+                        fillColor: '#C490E4'
+                    });
+                    document.getElementById('coordDisplay').textContent = '다각형 클릭 시 평면도(실내모드) ON!';
+                }
             });
 
-            // 마우스 아웃 시: 채우기 색상 제거 (transparent)
+            // 마우스 아웃 시 채우기 색상 제거 
             naver.maps.Event.addListener(polygon, 'mouseout', function() {
-                polygon.setOptions({
-                    fillColor: 'transparent'
-                });
-                document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
+                if(floorPlanOverlay.getMap() === null) { // 실내모드가 아닐 때만 효과 제거
+                    polygon.setOptions({
+                        fillColor: 'transparent'
+                    });
+                    document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
+                }
             });
 
-            // 4. 클릭 이벤트 제한 추가 (다각형 내부 클릭 시 지도 이벤트 전파 중단)
+            // ⭐ 다각형 클릭 이벤트: 실내모드 ON
             naver.maps.Event.addListener(polygon, 'click', function(e) {
-                // 다각형 내부 클릭 시 지도 클릭 이벤트 전파를 무조건 막습니다.
-                e.stop(); 
-                document.getElementById('coordDisplay').textContent = '🚫 다각형 내부 클릭! 좌표 표시 기능이 제한됩니다.';
-                console.log("다각형 내부 클릭 감지: 지도 좌표 표시 기능 중단됨.");
+                e.stop(); // 지도 클릭 이벤트 전파 중단 (좌표 표시 방지)
+
+                if(floorPlanOverlay.getMap() === null) {
+                    // 실내모드 ON
+                    floorPlanOverlay.setMap(map); // GroundOverlay를 지도에 표시
+                    polygon.setOptions({ 
+                        fillColor: '#C490E4', // 다각형 채우기 유지
+                        strokeWeight: 0 // 외곽선 숨기기 (선택 사항)
+                    }); 
+                    // 지도의 중심과 줌 레벨을 이미지 경계에 맞게 조정 (선택 사항)
+                    map.fitBounds(imageBounds); 
+                    document.getElementById('coordDisplay').textContent = '✅ 실내모드 ON! 평면도를 클릭하면 원래 지도로 돌아갑니다.';
+                    console.log("다각형 클릭: 실내모드 ON.");
+                } else {
+                    // 이미 실내모드인데 클릭한 경우 (이중 클릭 방지 및 정보 메시지)
+                    document.getElementById('coordDisplay').textContent = '이미 실내모드입니다. 이미지를 클릭하여 종료하세요.';
+                }
             });
 
-            // ⭐ 지도 클릭 이벤트 (다각형 밖을 클릭했을 때만 작동)
+
+            // ⭐ GroundOverlay 클릭 이벤트: 실내모드 OFF (이미지 클릭 시)
+            naver.maps.Event.addListener(floorPlanOverlay, 'click', function(e) {
+                e.stop(); // 이벤트 전파 중단
+
+                // 실내모드 OFF
+                floorPlanOverlay.setMap(null); // GroundOverlay 숨기기
+                polygon.setOptions({ 
+                    fillColor: 'transparent', // 다각형 채우기 제거
+                    strokeWeight: 3 // 외곽선 다시 표시
+                }); 
+                
+                // 원래 지도의 중심 및 줌 레벨로 돌아가려면 여기에 map.setCenter() 등을 추가
+                document.getElementById('coordDisplay').textContent = '❌ 실내모드 OFF. 지도를 클릭하면 좌표가 나와요!';
+                console.log("평면도 클릭: 실내모드 OFF.");
+            });
+
+            // ⭐ 지도 클릭 이벤트 (다각형/이미지 밖을 클릭했을 때만 작동)
             naver.maps.Event.addListener(map, 'click', function(e) {
-                // 다각형 내부 클릭은 위에서 e.stop()으로 막았기 때문에, 
-                // 이 리스너는 다각형 밖 영역을 클릭했을 때만 실행됩니다.
+                // 실내모드 ON일 때는 지도 클릭 시 좌표 표시 안함 (GroundOverlay가 지도 이벤트를 막지 못할 경우 대비)
+                if (floorPlanOverlay.getMap() !== null) return; 
+
                 const lat = e.latlng.lat().toFixed(6);
                 const lng = e.latlng.lng().toFixed(6);
                 document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
@@ -174,10 +228,10 @@ z-index: 1000;
             });
 
             // -------------------------------------------------------------------
-            // ⭐⭐ 다각형(Polygon) 기능 최종 수정 완료 ⭐⭐
+            // ⭐⭐ 기능 구현 완료 ⭐⭐
             // -------------------------------------------------------------------
 
-            console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 및 좌표 표시 기능 추가됨.");
+            console.log("네이버 벡터맵 로드 및 초기화 성공! 모든 기능 추가됨.");
         };
         script.onerror = function() {
             document.getElementById('status').textContent = 'API 로드 실패! 네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
