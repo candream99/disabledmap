@@ -209,7 +209,7 @@
             // 실내 모드 진입 시 줌 레벨을 20으로 높이고 위성 지도로 변경
             map.setCenter(config.center);
             map.setZoom(20); // 줌 레벨을 20으로 더 확대하여 건물을 꽉 채우도록 변경
-            map.setMapTypeId(naver.maps.MapTypeId.SATELLITE);
+            map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
             
             const floorPicker = document.getElementById('floor-picker');
             floorPicker.innerHTML = '';
@@ -469,3 +469,4 @@
     </script>
 </body>
 </html>
+
