@@ -77,50 +77,47 @@
 
     <!-- 2. 사용자 JavaScript 코드 (API 로드 완료 후 실행) -->
     <script>
-        // 건물별 설정 데이터 (광화문 교보빌딩으로 변경)
+        // 건물별 설정 데이터 (광화문 교보빌딩)
         const BUILDING_CONFIGS = {
             'kyobo': {
-                // ⭐ 수정됨: 광화문 교보빌딩의 정확한 중심 좌표
-                center: new naver.maps.LatLng(37.57017, 126.97495), 
+                // ⭐ 수정됨: 광화문 교보빌딩의 정밀 조정된 중심 좌표
+                center: new naver.maps.LatLng(37.57015, 126.97495), 
                 bounds: new naver.maps.LatLngBounds( 
-                    new naver.maps.LatLng(37.57060, 126.97420), // 북서
-                    new naver.maps.LatLng(37.56950, 126.97570)  // 남동
+                    new naver.maps.LatLng(37.57070, 126.97450), // 북서
+                    new naver.maps.LatLng(37.56960, 126.97540)  // 남동
                 ),
                 polygonPaths: [
-                    // ⭐ 수정됨: 광화문 교보빌딩 외곽선 Path (빌딩 영역)
+                    // ⭐ 수정됨: 광화문 교보빌딩의 정밀 조정된 외곽선 Path
                     [
-                        new naver.maps.LatLng(37.57060, 126.97420),
-                        new naver.maps.LatLng(37.57060, 126.97570),
-                        new naver.maps.LatLng(37.56950, 126.97570),
-                        new naver.maps.LatLng(37.56950, 126.97420)
+                        new naver.maps.LatLng(37.57070, 126.97450), // 북서
+                        new naver.maps.LatLng(37.57070, 126.97540), // 북동
+                        new naver.maps.LatLng(37.56960, 126.97540), // 남동
+                        new naver.maps.LatLng(37.56960, 126.97450)  // 남서
                     ]
                 ],
                 floors: {
                     'B1': {
                         label: '지하 1층',
-                        // 플레이스홀더 텍스트 변경
                         imageUrl: 'https://placehold.co/1000x800/2962FF/FFFFFF?text=GWANGHWAMUN+B1',
                         imageBounds: new naver.maps.LatLngBounds(
-                            new naver.maps.LatLng(37.57060, 126.97420), 
-                            new naver.maps.LatLng(37.56950, 126.97570)
+                            new naver.maps.LatLng(37.57070, 126.97450), 
+                            new naver.maps.LatLng(37.56960, 126.97540)
                         ),
                     },
                     '1F': {
                         label: '1층',
-                        // 플레이스홀더 텍스트 변경
                         imageUrl: 'https://placehold.co/1000x800/1DE9B6/333333?text=GWANGHWAMUN+1F', 
                         imageBounds: new naver.maps.LatLngBounds(
-                            new naver.maps.LatLng(37.57060, 126.97420), 
-                            new naver.maps.LatLng(37.56950, 126.97570)
+                            new naver.maps.LatLng(37.57070, 126.97450), 
+                            new naver.maps.LatLng(37.56960, 126.97540)
                         ),
                     },
                     '2F': {
                         label: '2층',
-                        // 플레이스홀더 텍스트 변경
                         imageUrl: 'https://placehold.co/1000x800/FFEA00/333333?text=GWANGHWAMUN+2F',
                         imageBounds: new naver.maps.LatLngBounds(
-                            new naver.maps.LatLng(37.57060, 126.97420), 
-                            new naver.maps.LatLng(37.56950, 126.97570)
+                            new naver.maps.LatLng(37.57070, 126.97450), 
+                            new naver.maps.LatLng(37.56960, 126.97540)
                         ),
                     }
                 }
@@ -227,7 +224,7 @@
             // 3. 지도 유형 복원 (일반 지도)
             map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
             
-            // 4. 지도 중심 및 줌 레벨 복원 (교보타워 중심으로 복원)
+            // 4. 지도 중심 및 줌 레벨 복원 (교보빌딩 중심으로 복원)
             map.setCenter(BUILDING_CONFIGS['kyobo'].center); 
             map.setZoom(17);
             
@@ -279,13 +276,13 @@
 
 
         function initMap() {
-            // 네이버 맵 중심 좌표 (교보타워 중심)
+            // 네이버 맵 중심 좌표 (광화문 교보빌딩 중심)
             const kyoboCenter = BUILDING_CONFIGS['kyobo'].center;
             
             // 1. Naver Maps 초기화
             mapInstance = new naver.maps.Map('map', {
                 center: kyoboCenter,
-                zoom: 17, // 광화문 지역을 잘 보이게 하기 위해 줌 레벨 유지
+                zoom: 17, 
                 mapTypeId: naver.maps.MapTypeId.NORMAL,
                 rotation: 0, 
                 tilt: 0, 
@@ -296,7 +293,7 @@
                 zoomControl: true,
             });
             
-            // 2. 모든 건물 폴리곤 생성 및 지도에 추가 (이제 광화문 교보빌딩만 생성됨)
+            // 2. 모든 건물 폴리곤 생성 및 지도에 추가 (광화문 교보빌딩)
             Object.keys(BUILDING_CONFIGS).forEach(buildingId => {
                 const config = BUILDING_CONFIGS[buildingId];
                 
