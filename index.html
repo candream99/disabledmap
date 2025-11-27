@@ -1,87 +1,48 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>광화문 교보빌딩 - 네이버 지도</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>네이버 지도 벡터맵 예제</title>
+    <!-- 맵 API 스크립트! 네 client ID q1d23mmkof 잘 넣어둠 ㅇㅇ -->
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=q1d23mmkof&submodules=panorama,data"></script>
     <style>
-        * {
+        html, body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        header {
-            background-color: #2DB400;
-            color: white;
-            padding: 15px 20px;
-            text-align: center;
-        }
-        
-        #map {
-            flex: 1;
             width: 100%;
+            height: 100%;
         }
-        
-        .api-key-instruction {
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 15px;
-            margin: 10px;
-            border-radius: 5px;
+        #map {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>광화문 교보빌딩 - 네이버 지도</h1>
-    </header>
-    
-    <div class="api-key-instruction">
-        <h3>⚠️ API 키 설정이 필요합니다</h3>
-        <p>아래 단계를 따라 네이버 지도 API 키를 발급받아주세요:</p>
-        <ol>
-            <li><a href="https://www.ncloud.com/" target="_blank">네이버 클라우드 플랫폼</a>에 가입</li>
-            <li>Console → Services → Application → Maps에서 애플리케이션 등록</li>
-            <li>발급받은 Client ID를 아래 script 태그의 ncpKeyId 값으로 변경</li>
-        </ol>
-    </div>
-    
     <div id="map"></div>
 
-    <!-- 네이버 지도 API - YOUR_CLIENT_ID_HERE를 발급받은 Client ID로 변경하세요 -->
-    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof"></script>
-    
     <script>
         function initMap() {
-            // 광화문 교보빌딩 좌표
-            const kyoboLocation = new naver.maps.LatLng(37.570, 126.978);
-            
-            // 지도 생성
-            const map = new naver.maps.Map('map', {
-                center: kyoboLocation,
-                zoom: 17,
-                mapTypeId: naver.maps.MapTypeId.NORMAL
-            });
-            
-            // 마커 추가
-            new naver.maps.Marker({
-                position: kyoboLocation,
-                map: map,
-                title: '광화문 교보빌딩'
-            });
+            // 지도 초기 옵션 설정!
+            var mapOptions = {
+                center: new naver.maps.LatLng(37.3595704, 127.105399), // 지도의 초기 중심 좌표 (이건 네이버 본사 좌표임!)
+                zoom: 16, // 초기 줌 레벨. 가까이 확대해둠.
+                mapTypeId: naver.maps.MapTypeId.NORMAL, // 일반 지도 타입
+                mapOptions: {
+                    raster: false // ⭐ 요게 찐 중요! 래스터맵 아니고 벡터맵 쓰는 핵심 설정임! ⭐
+                }
+            };
+
+            // 'map' ID를 가진 div에 지도를 띄운다!
+            var map = new naver.maps.Map('map', mapOptions);
         }
-        
-        // API 로드 완료 후 지도 초기화
-        naver.maps.onJSContentLoaded = initMap;
+
+        // 페이지 다 로드되면 initMap 함수 실행!
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+        });
     </script>
 </body>
 </html>
-
