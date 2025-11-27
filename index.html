@@ -73,7 +73,7 @@
             // 지도 초기 옵션 설정
             const mapOptions = {
                 center: new naver.maps.LatLng(37.570946, 126.97788), // 다각형 중앙으로 초기 센터 조정
-                zoom: 18, // 줌 레벨을 높여 다각형이 잘 보이도록 조정
+                zoom: 18, // 줌 레벨 조정
                 zoomControl: true,
                 zoomControlOptions: {
                     position: naver.maps.Position.TOP_RIGHT
@@ -110,7 +110,7 @@
             });
 
             // -------------------------------------------------------------------
-            // ⭐⭐ 다각형 및 실내모드 기능 최종 수정 적용 (e.stop() -> naver.maps.Event.stop(e)) ⭐⭐
+            // ⭐⭐ 다각형 및 실내모드 기능 최종 해결 적용 (e.stop() -> e.stopPropagation()) ⭐⭐
             // -------------------------------------------------------------------
 
             // 1. 다각형의 꼭짓점 좌표 정의
@@ -174,8 +174,10 @@
 
             // ⭐ 다각형 클릭 이벤트: 실내모드 ON & 지도 클릭 이벤트 차단
             naver.maps.Event.addListener(polygon, 'click', function(e) {
-                // e.stop() 대신 naver.maps.Event.stop(e) 사용! (핵심 해결)
-                naver.maps.Event.stop(e); 
+                // e.stopPropagation() 사용! (최종 해결)
+                if (e.stopPropagation) e.stopPropagation(); 
+                // 참고: e.stop()이 유효할 수도 있으나, 안전을 위해 if문으로 한 번 감싸는 것이 좋습니다.
+                if (e.stop) e.stop();
 
                 if(floorPlanOverlay.getMap() === null) {
                     // 실내모드 ON
@@ -195,8 +197,9 @@
 
             // ⭐ GroundOverlay 클릭 이벤트: 실내모드 OFF (이미지 클릭 시)
             naver.maps.Event.addListener(floorPlanOverlay, 'click', function(e) {
-                // e.stop() 대신 naver.maps.Event.stop(e) 사용! (핵심 해결)
-                naver.maps.Event.stop(e); 
+                // e.stopPropagation() 사용! (최종 해결)
+                if (e.stopPropagation) e.stopPropagation();
+                if (e.stop) e.stop();
 
                 // 실내모드 OFF
                 floorPlanOverlay.setMap(null);
