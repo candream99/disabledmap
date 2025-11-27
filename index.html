@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 라벨 온오프 & 좌표 표시</title>
+    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 실내 지도</title>
     <style>
         body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
         #map { width: 100%; height: 100%; }
@@ -11,7 +11,7 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background: rgba(255, 99, 71, 0.9); /* 시작은 여전히 힙한 토마토 */
+            background: rgba(255, 99, 71, 0.9);
             color: white;
             padding: 10px 15px;
             border-radius: 5px;
@@ -22,8 +22,8 @@
         #labelToggleBtn {
             position: absolute;
             top: 10px;
-            left: 170px; /* status 박스 옆에 놓기 위해 left 값 조절 */
-            background: #4A90E2; /* 버튼 색상 */
+            left: 170px;
+            background: #4A90E2;
             color: white;
             padding: 10px 15px;
             border: none;
@@ -39,16 +39,16 @@
         }
         #coordDisplay {
             position: absolute;
-            top: 50px; /* 라벨 버튼 아래에 표시 */
+            top: 50px;
             left: 10px;
             background: rgba(0, 0, 0, 0.7);
-            color: #FFC107; /* 밝은 노랑색으로 눈에 띄게! */
+            color: #FFC107;
             padding: 10px 15px;
             border-radius: 5px;
             font-size: 14px;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            min-width: 250px; /* 최소 너비로 내용 없어도 형태 유지 */
+            min-width: 250px;
             text-align: center;
         }
     </style>
@@ -61,19 +61,19 @@
     
 
     <script>
-        // 호랭이 Key ID 박제!
         const NCP_KEY_ID = 'q1d23mmkof';
+        const SCRIPT_URL = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
 
         const script = document.createElement('script');
-        script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
+        script.src = SCRIPT_URL;
 
         script.onload = function() {
             document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...';
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
 
             const mapOptions = {
-                center: new naver.maps.LatLng(37.5665, 126.9780), // 서울시청 위경도
-                zoom: 15,
+                center: new naver.maps.LatLng(37.570945, 126.97788), // 광화문 교보빌딩 중심으로!
+                zoom: 18, // 확대해서 건물 잘 보이게!
                 zoomControl: true,
                 zoomControlOptions: {
                     position: naver.maps.Position.TOP_RIGHT
@@ -84,7 +84,6 @@
             };
 
             const map = new naver.maps.Map('map', mapOptions);
-
             map.setMapTypeId('normal');
             
             const labelLayer = new naver.maps.LabelLayer();
@@ -109,15 +108,118 @@
                 }
             });
 
-            // ⭐ 여기! naver.maps.Event.addListener로 수정! ⭐
+            // ⭐ 지도 클릭 시 좌표 표시 기능 (수정 없이 그대로 사용) ⭐
             naver.maps.Event.addListener(map, 'click', function(e) {
-                const lat = e.latlng.lat().toFixed(6); // 위도를 소수점 6째자리까지
-                const lng = e.latlng.lng().toFixed(6); // 경도를 소수점 6째자리까지
+                const lat = e.latlng.lat().toFixed(6);
+                const lng = e.latlng.lng().toFixed(6);
                 document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
                 console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
             });
 
-            console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 및 좌표 표시 기능 추가됨.");
+            // ==============================================================================
+            // ⭐⭐⭐ 광화문 교보빌딩 실내 지도 기능 추가! ⭐⭐⭐
+            // ==============================================================================
+
+            // 1. 광화문 교보빌딩 폴리곤 좌표 (시계 반대 방향)
+            const kyoboBuildingCoords = [
+                new naver.maps.LatLng(37.571348, 126.977671), // 좌상
+                new naver.maps.LatLng(37.571354, 126.978059), // 우상
+                new naver.maps.LatLng(37.570541, 126.978091), // 우하
+                new naver.maps.LatLng(37.570538, 126.977698)  // 좌하
+            ];
+
+            // 폴리곤 객체 생성
+            const kyoboBuildingPolygon = new naver.maps.Polygon({
+                map: map,
+                paths: [kyoboBuildingCoords],
+                strokeColor: '#B388FF', // 연보라색 외곽선
+                strokeOpacity: 1,
+                strokeWeight: 3,
+                fillColor: '#FFFFFF', // 처음엔 투명하게 할 건데, 투명도는 fillOpacity로 조절
+                fillOpacity: 0 // 초기에는 채우기 투명
+            });
+
+            // 폴리곤의 LatLngBounds 계산 (GroundOverlay를 위한 범위)
+            let minLat = kyoboBuildingCoords[0].lat(), maxLat = kyoboBuildingCoords[0].lat();
+            let minLng = kyoboBuildingCoords[0].hasLng() ? kyoboBuildingCoords[0].lng() : 0, maxLng = kyoboBuildingCoords[0].hasLng() ? kyoboBuildingCoords[0].lng() : 0;
+            
+            kyoboBuildingCoords.forEach(coord => {
+                minLat = Math.min(minLat, coord.lat());
+                maxLat = Math.max(maxLat, coord.lat());
+                minLng = Math.min(minLng, coord.lng());
+                maxLng = Math.max(maxLng, coord.lng());
+            });
+            const kyoboBounds = new naver.maps.LatLngBounds(
+                new naver.maps.LatLng(minLat, minLng),
+                new naver.maps.LatLng(maxLat, maxLng)
+            );
+
+            // 평면도 이미지 GroundOverlay 생성 (초기에는 숨겨둠)
+            const floorPlanImageUrl = 'https://via.placeholder.com/600x400/B388FF/FFFFFF?text=Floor+Plan'; // 임의 이미지
+            const floorPlanOverlay = new naver.maps.GroundOverlay(
+                floorPlanImageUrl,
+                kyoboBounds, // 폴리곤 영역에 딱 맞게!
+                { map: null } // 처음엔 지도에 보이지 않게 (map: null)
+            );
+
+            let isFloorPlanVisible = false; // 평면도가 보이는지 상태 관리
+
+            // 2. 마우스 오버/아웃 효과
+            naver.maps.Event.addListener(kyoboBuildingPolygon, 'mouseover', function() {
+                if (!isFloorPlanVisible) { // 평면도가 보일 땐 호버 효과 무시
+                    kyoboBuildingPolygon.setOptions({
+                        fillColor: '#B388FF', // 보라색
+                        fillOpacity: 0.4 // 반투명
+                    });
+                }
+            });
+
+            naver.maps.Event.addListener(kyoboBuildingPolygon, 'mouseout', function() {
+                if (!isFloorPlanVisible) { // 평면도가 보일 땐 호버 효과 무시
+                    kyoboBuildingPolygon.setOptions({
+                        fillOpacity: 0 // 다시 투명
+                    });
+                }
+            });
+
+            // 3. 클릭 시 평면도 표시 & 4. 평면도 클릭 시 복귀
+            naver.maps.Event.addListener(kyoboBuildingPolygon, 'click', function(e) {
+                if (isFloorPlanVisible) {
+                    // 평면도가 보이는 상태에서 클릭하면 숨기기
+                    floorPlanOverlay.setMap(null);
+                    kyoboBuildingPolygon.setOptions({
+                        fillOpacity: 0 // 폴리곤 채우기 다시 투명하게
+                    });
+                    isFloorPlanVisible = false;
+                    console.log("평면도 숨기고 지도 복귀!");
+                } else {
+                    // 평면도가 안 보이는 상태에서 클릭하면 표시하기
+                    floorPlanOverlay.setMap(map);
+                    // 폴리곤 채우기는 평면도 위에 가려지므로 의미 없지만 일관성을 위해 설정
+                    kyoboBuildingPolygon.setOptions({
+                         fillColor: '#B388FF', // 보라색
+                         fillOpacity: 0.6 // 평면도 활성화 시 폴리곤 색상 좀 더 진하게
+                    });
+                    isFloorPlanVisible = true;
+                    console.log("평면도 표시!");
+                    // 지도를 평면도 중심으로 이동하여 더 잘 보이게
+                    map.setCenter(kyoboBounds.getCenter());
+                    map.setZoom(19); // 좀 더 확대
+                }
+            });
+
+            // GroundOverlay 자체를 클릭해도 원복되도록 이벤트 추가 (폴리곤 이벤트와 동일하게 작동)
+            naver.maps.Event.addListener(floorPlanOverlay, 'click', function() {
+                floorPlanOverlay.setMap(null);
+                kyoboBuildingPolygon.setOptions({
+                    fillOpacity: 0
+                });
+                isFloorPlanVisible = false;
+                console.log("평면도 클릭하여 숨김!");
+            });
+
+
+            console.log("광화문 교보빌딩 실내 지도 기능이 추가되었습니다.");
         };
 
         script.onerror = function() {
