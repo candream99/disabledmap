@@ -24,59 +24,83 @@
             top: 10px;
             /* ⭐ 여기 수정됨! right 대신 left로! ⭐ */
             left: 170px; /* status 박스 옆에 놓기 위해 left 값 조절 */
-            background: #4A90E2; /* 버튼 색상 */
+            background: #4A90E2; /* 버튼 배경색을 깔끔한 파란색으로 */
             color: white;
             padding: 10px 15px;
             border: none;
             border-radius: 5px;
-            font-size: 14px;
             cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: background 0.3s ease;
+            transition: background 0.2s;
         }
         #labelToggleBtn:hover {
-            background: #357ABD;
+            background: #3B82C4;
+        }
+        /* ⭐ 추가: 좌표 표시 영역 스타일 ⭐ */
+        #coordDisplay {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            min-width: 200px; /* 공간 확보 */
+            text-align: center;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
-    <div id="status">API 키 확인 중...</div>
-    <button id="labelToggleBtn">라벨 숨기기</button> <!-- 라벨 제어 버튼 추가 -->
+    <div id="status">네이버 지도 API 로딩 중...</div>
+    <div id="labelToggleBtn">라벨 숨기기</div>
     <div id="map"></div>
-    
+    <!-- ⭐ 추가: 좌표 표시 영역 HTML ⭐ -->
+    <div id="coordDisplay">
+        <span id="coordText">지도 위를 클릭하면 좌표가 표시됩니다.</span>
+    </div>
 
     <script>
-        // 호랭이 Key ID 박제!
-        const NCP_KEY_ID = 'q1d23mmkof';
+        // --- 네이버 지도 API 동적 로드 및 초기화 ---
+
+        // API Client ID 설정 (사용자 코드에 있던 값 그대로 유지)
+        const NAVER_CLIENT_ID = 'q1d23mmkof'; 
 
         const script = document.createElement('script');
-        // ncpKeyId와 vmode=3 (벡터맵) 유지!
-        script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
+        script.type = 'text/javascript';
+        // 'vsm=1'을 추가하여 벡터 맵을 활성화하고, Client ID를 설정합니다.
+        script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NAVER_CLIENT_ID}&vsm=1`;
+        document.head.appendChild(script);
 
         script.onload = function() {
-            document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...';
-            document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)'; /* 성공은 그린그린하게~ */
-
-            // 네이버 예제에 맞게 mapTypes를 NaverStyleMapTypeOptions.getVectorMap()으로 설정!
-            const mapOptions = {
-                center: new naver.maps.LatLng(37.5665, 126.9780), // 서울시청 위경도
+            let map = new naver.maps.Map('map', {
+                center: new naver.maps.LatLng(37.5665, 126.9780), // 서울 시청 근처
                 zoom: 15,
+                mapTypeId: naver.maps.MapTypeId.NORMAL,
+                
+                // ⭐ 라벨 레이어를 별도로 관리할 것이므로 지도 기본 설정을 간소화
+                mapTypeControl: true,
                 zoomControl: true,
-                zoomControlOptions: {
-                    position: naver.maps.Position.TOP_RIGHT
-                },
-                // mapTypes 설정으로 벡터맵을 'normal' 타입으로 등록
-                mapTypes: new naver.maps.MapTypeRegistry({
-                    'normal': naver.maps.NaverStyleMapTypeOptions.getVectorMap()
-                })
-            };
+                scaleControl: true
+            });
 
-            const map = new naver.maps.Map('map', mapOptions);
+            // ⭐ 기능 추가: 지도 클릭 시 좌표 표시 리스너 ⭐
+            const coordDisplay = document.getElementById('coordText');
+            naver.maps.Event.addListener(map, 'click', function(e) {
+                const lat = e.coord.lat().toFixed(5);
+                const lng = e.coord.lng().toFixed(5);
+                const latLngText = `위도: ${lat}, 경도: ${lng}`;
+                coordDisplay.textContent = latLngText;
+                console.log("클릭 좌표:", latLngText);
+            });
+            // ⭐ 추가된 기능 끝 ⭐
 
-            // 초기 지도를 등록된 'normal' (벡터맵) 타입으로 설정
-            map.setMapTypeId('normal');
-            
             // 라벨 레이어 생성 및 초기 설정 (보통은 기본적으로 라벨이 보이도록 함)
             const labelLayer = new naver.maps.LabelLayer();
             labelLayer.setMap(map); // 초기에 라벨을 보이도록 설정
@@ -102,15 +126,12 @@
                 }
             });
 
-            console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 버튼 추가됨.");
+            console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 버튼 및 좌표 표시 기능 추가됨.");
         };
 
         script.onerror = function() {
             document.getElementById('status').textContent = 'API 로드 실패! 네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
-            document.getElementById('status').style.background = 'red';
-            console.error("네이버 지도 API 로드 실패!");
         };
-        document.head.appendChild(script);
     </script>
 </body>
 </html>
