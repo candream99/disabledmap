@@ -37,7 +37,7 @@
         #labelToggleBtn:hover {
             background: #357ABD;
         }
-        #coordDisplay { /* ⭐ 새로 추가된 좌표 표시 UI 스타일! ⭐ */
+        #coordDisplay {
             position: absolute;
             top: 50px; /* 라벨 버튼 아래에 표시 */
             left: 10px;
@@ -56,7 +56,7 @@
 <body>
     <div id="status">API 키 확인 중...</div>
     <button id="labelToggleBtn">라벨 숨기기</button>
-    <div id="coordDisplay">지도를 클릭하면 좌표가 나와요!</div> <!-- ⭐ 새로 추가된 엘리먼트 ⭐ -->
+    <div id="coordDisplay">지도를 클릭하면 좌표가 나와요!</div>
     <div id="map"></div>
     
 
@@ -65,12 +65,11 @@
         const NCP_KEY_ID = 'q1d23mmkof';
 
         const script = document.createElement('script');
-        // ncpKeyId와 vmode=3 (벡터맵) 유지!
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
 
         script.onload = function() {
             document.getElementById('status').textContent = 'API 로드 성공! 벡터 지도 초기화 중...';
-            document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)'; /* 성공은 그린그린하게~ */
+            document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
 
             const mapOptions = {
                 center: new naver.maps.LatLng(37.5665, 126.9780), // 서울시청 위경도
@@ -89,7 +88,7 @@
             map.setMapTypeId('normal');
             
             const labelLayer = new naver.maps.LabelLayer();
-            labelLayer.setMap(map); // 초기에 라벨을 보이도록 설정
+            labelLayer.setMap(map);
 
             document.getElementById('status').style.display = 'none';
 
@@ -110,8 +109,8 @@
                 }
             });
 
-            // ⭐ 지도 클릭 이벤트 리스너 추가! ⭐
-            naver.maps.addListener(map, 'click', function(e) {
+            // ⭐ 여기! naver.maps.Event.addListener로 수정! ⭐
+            naver.maps.Event.addListener(map, 'click', function(e) {
                 const lat = e.latlng.lat().toFixed(6); // 위도를 소수점 6째자리까지
                 const lng = e.latlng.lng().toFixed(6); // 경도를 소수점 6째자리까지
                 document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
