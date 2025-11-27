@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>광화문 교보빌딩 - 네이버 벡터 지도</title>
-    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof"></script>
+    <title>광화문 교보빌딩 - 네이버 지도</title>
     <style>
         * {
             margin: 0;
@@ -24,12 +23,6 @@
             color: white;
             padding: 15px 20px;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
         }
         
         #map {
@@ -37,115 +30,52 @@
             width: 100%;
         }
         
-        .info-box {
-            position: absolute;
-            top: 80px;
-            left: 20px;
-            background-color: white;
+        .api-key-instruction {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
             padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            max-width: 300px;
-            z-index: 1000;
-        }
-        
-        .info-box h2 {
-            color: #2DB400;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-        }
-        
-        .info-box p {
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-        
-        footer {
-            background-color: #f5f5f5;
-            padding: 10px;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #666;
+            margin: 10px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>광화문 교보빌딩 - 네이버 벡터 지도</h1>
+        <h1>광화문 교보빌딩 - 네이버 지도</h1>
     </header>
     
-    <div id="map"></div>
-    
-    <div class="info-box">
-        <h2>광화문 교보빌딩</h2>
-        <p><strong>주소:</strong> 서울특별시 종로구 종로 1</p>
-        <p><strong>특징:</strong> 교보문고 본점이 위치한 대표적인 도서 문화 공간</p>
-        <p><strong>좌표:</strong> 위도 37.570, 경도 126.978</p>
+    <div class="api-key-instruction">
+        <h3>⚠️ API 키 설정이 필요합니다</h3>
+        <p>아래 단계를 따라 네이버 지도 API 키를 발급받아주세요:</p>
+        <ol>
+            <li><a href="https://www.ncloud.com/" target="_blank">네이버 클라우드 플랫폼</a>에 가입</li>
+            <li>Console → Services → Application → Maps에서 애플리케이션 등록</li>
+            <li>발급받은 Client ID를 아래 script 태그의 ncpKeyId 값으로 변경</li>
+        </ol>
     </div>
     
-    <footer>
-        <p>© 2023 네이버 지도 API를 이용한 광화문 교보빌딩 지도</p>
-    </footer>
+    <div id="map"></div>
 
+    <!-- 네이버 지도 API - YOUR_CLIENT_ID_HERE를 발급받은 Client ID로 변경하세요 -->
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=YOUR_CLIENT_ID_HERE"></script>
+    
     <script>
-        // 지도 초기화 함수
         function initMap() {
-            // 광화문 교보빌딩 중심 좌표
+            // 광화문 교보빌딩 좌표
             const kyoboLocation = new naver.maps.LatLng(37.570, 126.978);
             
-            // 지도 옵션 설정
-            const mapOptions = {
+            // 지도 생성
+            const map = new naver.maps.Map('map', {
                 center: kyoboLocation,
                 zoom: 17,
-                zoomControl: true,
-                zoomControlOptions: {
-                    position: naver.maps.Position.TOP_RIGHT
-                },
-                mapTypeControl: true,
-                scaleControl: true,
-                mapDataControl: true,
-                logoControl: false, // 네이버 로고 숨김
-                mapTypeId: naver.maps.MapTypeId.VECTOR // 벡터 지도 사용
-            };
+                mapTypeId: naver.maps.MapTypeId.NORMAL
+            });
             
-            // 지도 생성
-            const map = new naver.maps.Map('map', mapOptions);
-            
-            // 광화문 교보빌딩 마커 추가
-            const marker = new naver.maps.Marker({
+            // 마커 추가
+            new naver.maps.Marker({
                 position: kyoboLocation,
                 map: map,
-                icon: {
-                    content: `
-                        <div style="background-color:#2DB400; color:white; padding:8px 12px; border-radius:20px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">
-                            광화문 교보빌딩
-                        </div>
-                    `,
-                    anchor: new naver.maps.Point(12, 35)
-                }
-            });
-            
-            // 마커 클릭 시 정보창 표시
-            const infoWindow = new naver.maps.InfoWindow({
-                content: `
-                    <div style="padding:10px; max-width:200px;">
-                        <h3 style="margin:0 0 5px; color:#2DB400;">광화문 교보빌딩</h3>
-                        <p style="margin:0;">교보문고 본점이 위치한 대표적인 도서 문화 공간입니다.</p>
-                    </div>
-                `
-            });
-            
-            naver.maps.Event.addListener(marker, 'click', function() {
-                if (infoWindow.getMap()) {
-                    infoWindow.close();
-                } else {
-                    infoWindow.open(map, marker);
-                }
-            });
-            
-            // 지도 클릭 시 정보창 닫기
-            naver.maps.Event.addListener(map, 'click', function() {
-                infoWindow.close();
+                title: '광화문 교보빌딩'
             });
         }
         
