@@ -69,27 +69,6 @@
         #indoorModeBtn:hover {
             background: #7B1FA2;
         }
-        /* 평면도 이미지를 위한 오버레이 스타일 */
-        #floorPlanOverlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 500;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-        #floorPlanImage {
-            max-width: 90%;
-            max-height: 90%;
-            cursor: pointer;
-            border: 3px solid white;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
     </style>
 </head>
 <body>
@@ -98,15 +77,11 @@
     <button id="indoorModeBtn">실내모드 켜기</button>
     <div id="coordDisplay">지도를 클릭하면 좌표가 나와요!</div>
     <div id="map"></div>
-    <!-- 평면도 오버레이 -->
-    <div id="floorPlanOverlay">
-        <img id="floorPlanImage" src="" alt="건물 평면도">
-    </div>
 
     <script>
         const NCP_KEY_ID = 'q1d23mmkof';
         let isIndoorMode = false;
-        let map, polygon;
+        let map, polygon, imageOverlay;
 
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
@@ -189,21 +164,28 @@
 
             // 실내모드 버튼
             const indoorModeBtn = document.getElementById('indoorModeBtn');
-            const floorPlanOverlay = document.getElementById('floorPlanOverlay');
-            const floorPlanImage = document.getElementById('floorPlanImage');
             
-            // 이미지 URL 설정 - GitHub Raw URL로 수정
+            // 이미지 URL
             const imageUrl = 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg';
             
+            // 이미지 좌표 범위 설정 (제공해주신 좌표 사용)
+            const imageBounds = new naver.maps.LatLngBounds(
+                new naver.maps.LatLng(37.570529, 126.977639), // 남서쪽 (하단 왼쪽)
+                new naver.maps.LatLng(37.571365, 126.978095)  // 북동쪽 (상단 오른쪽)
+            );
+
             // 실내모드 활성화 함수
             function activateIndoorMode() {
                 isIndoorMode = true;
                 
-                // 평면도 이미지 설정
-                floorPlanImage.src = imageUrl;
+                // GroundOverlay 생성
+                imageOverlay = new naver.maps.GroundOverlay({
+                    url: imageUrl,
+                    bounds: imageBounds
+                });
                 
-                // 오버레이 표시
-                floorPlanOverlay.style.display = 'flex';
+                // 지도에 오버레이 추가
+                imageOverlay.setMap(map);
                 
                 // UI 업데이트
                 document.getElementById('coordDisplay').textContent = '실내모드: 평면도 표시 중. 평면도를 클릭하면 지도로 돌아갑니다.';
@@ -216,8 +198,11 @@
             function deactivateIndoorMode() {
                 isIndoorMode = false;
                 
-                // 오버레이 숨기기
-                floorPlanOverlay.style.display = 'none';
+                // 오버레이 제거
+                if (imageOverlay) {
+                    imageOverlay.setMap(null);
+                    imageOverlay = null;
+                }
                 
                 // UI 업데이트
                 document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
@@ -235,11 +220,6 @@
                 }
             });
 
-            // 평면도 이미지 클릭 이벤트 - 실내모드 종료
-            floorPlanImage.addEventListener('click', function() {
-                deactivateIndoorMode();
-            });
-
             // 다각형 클릭 이벤트 - 실내모드 전환
             naver.maps.Event.addListener(polygon, 'click', function(e) {
                 // 이벤트 전파 중단
@@ -251,6 +231,16 @@
                     activateIndoorMode();
                 }
             });
+
+            // GroundOverlay 클릭 이벤트 - 실내모드 종료
+            // GroundOverlay는 생성 후에 이벤트 리스너를 추가해야 함
+            function addImageOverlayClickListener() {
+                if (imageOverlay) {
+                    naver.maps.Event.addListener(imageOverlay, 'click', function() {
+                        deactivateIndoorMode();
+                    });
+                }
+            }
 
             // 지도 클릭 이벤트 - 실내모드일 때는 좌표 표시하지 않음
             naver.maps.Event.addListener(map, 'click', function(e) {
