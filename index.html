@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 실내 지도</title>
+    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 실내 지도 (ver.2)</title>
     <style>
         body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
         #map { width: 100%; height: 100%; }
@@ -108,8 +108,16 @@
                 }
             });
 
-            // ⭐ 지도 클릭 시 좌표 표시 기능 (수정 없이 그대로 사용) ⭐
+            // ⭐ 지도 클릭 시 좌표 표시 기능 (폴리곤 내 클릭 방지 로직 추가) ⭐
             naver.maps.Event.addListener(map, 'click', function(e) {
+                // ⭐ 클릭된 지점이 kyoboBuildingPolygon 안에 있는지 확인 ⭐
+                // e.overlay가 kyoboBuildingPolygon이거나, e.point가 kyoboBuildingPolygon 내부에 있으면 무시
+                // GroundOverlay 클릭 시에도 무시
+                if (e.overlay === kyoboBuildingPolygon || e.overlay === floorPlanOverlay || naver.maps.geometry.isPointInPolygon(e.latlng, kyoboBuildingPolygon.getPaths().getAt(0))) {
+                    console.log("교보빌딩 폴리곤 내부 클릭! 좌표 표시 안 함.");
+                    return; // 폴리곤 내부이거나 폴리곤 자체 클릭 시 좌표 표시 안 하고 종료
+                }
+
                 const lat = e.latlng.lat().toFixed(6);
                 const lng = e.latlng.lng().toFixed(6);
                 document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
@@ -117,7 +125,7 @@
             });
 
             // ==============================================================================
-            // ⭐⭐⭐ 광화문 교보빌딩 실내 지도 기능 추가! ⭐⭐⭐
+            // ⭐⭐⭐ 광화문 교보빌딩 실내 지도 기능 최종판! ⭐⭐⭐
             // ==============================================================================
 
             // 1. 광화문 교보빌딩 폴리곤 좌표 (시계 반대 방향)
@@ -135,13 +143,14 @@
                 strokeColor: '#B388FF', // 연보라색 외곽선
                 strokeOpacity: 1,
                 strokeWeight: 3,
-                fillColor: '#FFFFFF', // 처음엔 투명하게 할 건데, 투명도는 fillOpacity로 조절
+                fillColor: '#FFFFFF',
                 fillOpacity: 0 // 초기에는 채우기 투명
             });
 
             // 폴리곤의 LatLngBounds 계산 (GroundOverlay를 위한 범위)
+            // ⭐⭐⭐ minLng, maxLng 초기화 방식 수정! ⭐⭐⭐
             let minLat = kyoboBuildingCoords[0].lat(), maxLat = kyoboBuildingCoords[0].lat();
-            let minLng = kyoboBuildingCoords[0].hasLng() ? kyoboBuildingCoords[0].lng() : 0, maxLng = kyoboBuildingCoords[0].hasLng() ? kyoboBuildingCoords[0].lng() : 0;
+            let minLng = kyoboBuildingCoords[0].lng(), maxLng = kyoboBuildingCoords[0].lng();
             
             kyoboBuildingCoords.forEach(coord => {
                 minLat = Math.min(minLat, coord.lat());
@@ -158,7 +167,7 @@
             const floorPlanImageUrl = 'https://via.placeholder.com/600x400/B388FF/FFFFFF?text=Floor+Plan'; // 임의 이미지
             const floorPlanOverlay = new naver.maps.GroundOverlay(
                 floorPlanImageUrl,
-                kyoboBounds, // 폴리곤 영역에 딱 맞게!
+                kyoboBounds,
                 { map: null } // 처음엔 지도에 보이지 않게 (map: null)
             );
 
@@ -183,7 +192,10 @@
             });
 
             // 3. 클릭 시 평면도 표시 & 4. 평면도 클릭 시 복귀
+            // ⭐ 폴리곤 클릭 이벤트 ⭐
             naver.maps.Event.addListener(kyoboBuildingPolygon, 'click', function(e) {
+                // 일반 지도 클릭 이벤트가 발생하지 않도록 전파 중단 (옵션)
+                e.stop(); 
                 if (isFloorPlanVisible) {
                     // 평면도가 보이는 상태에서 클릭하면 숨기기
                     floorPlanOverlay.setMap(null);
@@ -195,7 +207,6 @@
                 } else {
                     // 평면도가 안 보이는 상태에서 클릭하면 표시하기
                     floorPlanOverlay.setMap(map);
-                    // 폴리곤 채우기는 평면도 위에 가려지므로 의미 없지만 일관성을 위해 설정
                     kyoboBuildingPolygon.setOptions({
                          fillColor: '#B388FF', // 보라색
                          fillOpacity: 0.6 // 평면도 활성화 시 폴리곤 색상 좀 더 진하게
@@ -208,8 +219,9 @@
                 }
             });
 
-            // GroundOverlay 자체를 클릭해도 원복되도록 이벤트 추가 (폴리곤 이벤트와 동일하게 작동)
-            naver.maps.Event.addListener(floorPlanOverlay, 'click', function() {
+            // ⭐ GroundOverlay 자체를 클릭해도 원복되도록 이벤트 추가 ⭐
+            naver.maps.Event.addListener(floorPlanOverlay, 'click', function(e) {
+                e.stop(); // GroundOverlay 클릭 시 map 클릭 이벤트가 발생하지 않도록 전파 중단
                 floorPlanOverlay.setMap(null);
                 kyoboBuildingPolygon.setOptions({
                     fillOpacity: 0
@@ -219,7 +231,7 @@
             });
 
 
-            console.log("광화문 교보빌딩 실내 지도 기능이 추가되었습니다.");
+            console.log("광화문 교보빌딩 실내 지도 기능이 최종 구현되었습니다.");
         };
 
         script.onerror = function() {
