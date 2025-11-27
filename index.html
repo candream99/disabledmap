@@ -113,17 +113,8 @@ z-index: 1000;
                 }
             });
 
-            // ⭐ 기존 지도 클릭 이벤트 (좌표 표시)
-            naver.maps.Event.addListener(map, 'click', function(e) {
-                const lat = e.latlng.lat().toFixed(6); // 위도를 소수점 6째자리까지
-                const lng = e.latlng.lng().toFixed(6); // 경도를 소수점 6째자리까지
-                document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
-                console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
-            });
-
-
             // -------------------------------------------------------------------
-            // ⭐⭐ 요청하신 다각형(Polygon) 기능 구현 ⭐⭐
+            // ⭐⭐ 다각형(Polygon) 기능 최종 수정 ⭐⭐
             // -------------------------------------------------------------------
 
             // 1. 다각형의 꼭짓점 좌표 정의
@@ -134,18 +125,19 @@ z-index: 1000;
                 new naver.maps.LatLng(37.570538, 126.977698)
             ];
 
-            // 2. Polygon 객체 생성 (연한 보라색 외곽선, 초기에는 채우기 없음)
+            // 2. Polygon 객체 생성: clickable: true가 핵심입니다.
             const polygon = new naver.maps.Polygon({
                 map: map,
-                paths: [polygonCoords], // 다각형 경로 설정
+                paths: [polygonCoords],
                 fillColor: 'transparent', // 초기에는 채우기 없음
-                fillOpacity: 0.5, // 채우기 투명도 (마우스 오버 시 사용)
+                fillOpacity: 0.5,
                 strokeColor: '#C490E4', // 연한 보라색 외곽선
                 strokeOpacity: 1,
-                strokeWeight: 3 // 외곽선 두께
+                strokeWeight: 3,
+                clickable: true // 이 객체가 클릭 이벤트를 받을 수 있도록 명시적으로 설정
             });
 
-            // 3. 마우스 오버(Hover) 효과 및 클릭 이벤트 제한 추가
+            // 3. 마우스 오버(Hover) 효과 추가
             
             // 마우스 오버 시: 반투명 보라색으로 채우기
             naver.maps.Event.addListener(polygon, 'mouseover', function() {
@@ -163,16 +155,26 @@ z-index: 1000;
                 document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
             });
 
-            // 클릭 이벤트 시: 지도 클릭 이벤트가 **작동하지 않도록** 전파 중단
-            // 'e.stop()'이 핵심입니다.
+            // 4. 클릭 이벤트 제한 추가 (다각형 내부 클릭 시 지도 이벤트 전파 중단)
             naver.maps.Event.addListener(polygon, 'click', function(e) {
+                // 다각형 내부 클릭 시 지도 클릭 이벤트 전파를 무조건 막습니다.
                 e.stop(); 
                 document.getElementById('coordDisplay').textContent = '🚫 다각형 내부 클릭! 좌표 표시 기능이 제한됩니다.';
                 console.log("다각형 내부 클릭 감지: 지도 좌표 표시 기능 중단됨.");
             });
 
+            // ⭐ 지도 클릭 이벤트 (다각형 밖을 클릭했을 때만 작동)
+            naver.maps.Event.addListener(map, 'click', function(e) {
+                // 다각형 내부 클릭은 위에서 e.stop()으로 막았기 때문에, 
+                // 이 리스너는 다각형 밖 영역을 클릭했을 때만 실행됩니다.
+                const lat = e.latlng.lat().toFixed(6);
+                const lng = e.latlng.lng().toFixed(6);
+                document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
+                console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
+            });
+
             // -------------------------------------------------------------------
-            // ⭐⭐ 다각형(Polygon) 기능 구현 완료 ⭐⭐
+            // ⭐⭐ 다각형(Polygon) 기능 최종 수정 완료 ⭐⭐
             // -------------------------------------------------------------------
 
             console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 및 좌표 표시 기능 추가됨.");
