@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>네이버 벡터 지도 기본 로드 (광화문)</title>
+    <title>네이버 벡터 지도 기본 로드 (광화문) - 라벨 제어</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <meta charset="utf-8">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         /* 지도가 화면 전체를 차지하도록 스타일 설정 */
@@ -17,11 +19,53 @@
             width: 100%;
             height: 100%;
         }
+        
+        /* 맵 컨트롤 버튼 컨테이너 스타일 */
+        #map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            padding: 10px;
+            background-color: transparent;
+        }
+
+        /* 라벨 켜기/끄기 버튼 스타일 */
+        .map-control-button {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #fff;
+            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .map-control-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .map-control-button i {
+            margin-right: 5px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <!-- 지도 컨테이너 -->
     <div id="map"></div>
+
+    <!-- 라벨 제어 컨트롤 -->
+    <div id="map-controls">
+        <button id="toggle-label" class="map-control-button">
+            <i class="fas fa-tags"></i> 라벨 켜기/끄기
+        </button>
+    </div>
 
     <!-- 1. 네이버 지도 API 로드 -->
     <!-- Client ID (q1d23mmkof) 및 벡터 맵 활성화 옵션 '&vsm=1' 적용 -->
@@ -33,28 +77,50 @@
     <script>
         // 광화문 교보빌딩의 중심 좌표
         const KYOBODB_CENTER = new naver.maps.LatLng(37.57094, 126.97788);
+        
+        let map;
+        let labelLayer; // 라벨 레이어 인스턴스를 전역에서 접근 가능하도록 선언
 
         // 지도 초기화 함수
         function initMap() {
             // 지도 인스턴스 생성
-            const map = new naver.maps.Map('map', {
+            map = new naver.maps.Map('map', {
                 center: KYOBODB_CENTER, // 지도 중심 좌표
                 zoom: 19, // 초기 줌 레벨
                 mapTypeId: naver.maps.MapTypeId.NORMAL, // 일반 지도 타입
                 
-                // ⭐ 핵심 수정: vsm=1이 이미 URL에 있으므로 충돌 방지를 위해 renderType 옵션을 제거합니다.
-                // renderType: naver.maps.RenderType.WEBGL, 
-
                 // 지도 컨트롤 표시 설정
                 mapTypeControl: true, 
                 zoomControl: true,
                 scaleControl: true,
             });
 
-            console.log("네이버 벡터 맵이 광화문 교보빌딩을 중심으로 로드되었습니다.");
-            
             // 벡터 맵의 특징인 기울임(Tilt)을 적용하여 입체감을 줍니다.
             map.setTilt(45);
+            
+            // 네이버 지도 API의 LabelLayer 생성
+            // 라벨 레이어는 기본적으로 지도에 표시되지 않은 상태로 생성됩니다.
+            labelLayer = new naver.maps.LabelLayer(); 
+            
+            // 라벨 버튼 이벤트 리스너 등록
+            document.getElementById('toggle-label').addEventListener('click', toggleLabelLayer);
+
+            console.log("네이버 벡터 맵이 광화문 교보빌딩을 중심으로 로드되었습니다. 라벨 제어 버튼이 추가되었습니다.");
+        }
+
+        /**
+         * 라벨 레이어의 표시 상태를 토글하는 함수
+         */
+        function toggleLabelLayer() {
+            if (labelLayer.getMap()) {
+                // 라벨이 켜져 있으면 끄기
+                labelLayer.setMap(null);
+                console.log("라벨 레이어 끄기: 라벨 숨김");
+            } else {
+                // 라벨이 꺼져 있으면 켜기
+                labelLayer.setMap(map);
+                console.log("라벨 레이어 켜기: 라벨 표시");
+            }
         }
 
         // API 로드가 완료되면 initMap 함수 호출
