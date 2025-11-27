@@ -205,10 +205,14 @@
             
             const config = BUILDING_CONFIGS[buildingId];
             
-            // 실내 모드 진입 시 줌 레벨을 20으로 높이고 위성 지도로 변경
+            // ⭐ 수정: 실내 모드 진입 시 일반 지도 (NORMAL) 타입 사용 ⭐
             map.setCenter(config.center);
-            map.setZoom(20); // 줌 레벨을 20으로 더 확대하여 건물을 꽉 채우도록 변경
-            map.setMapTypeId(naver.maps.MapTypeId.SATELLITE);
+            map.setZoom(20); 
+            map.setMapTypeId(naver.maps.MapTypeId.NORMAL); // 위성 대신 일반 지도 사용
+            
+            // ⭐ 지도 스타일 변경: 텍스트를 숨겨 깨끗한 지도를 만듭니다. (네이버 지도는 완전한 텍스트 제거가 어려워 POI 레이어를 숨기는 방식으로 대체)
+            // 네이버 지도에서 텍스트를 완벽하게 제거하는 옵션은 제공되지 않지만, POI 레이어를 숨겨 시각적으로 깨끗하게 만듭니다.
+            map.setMapTypeId(naver.maps.MapTypeId.NORMAL, naver.maps.MapTypeStyle.LABEL_NONE);
             
             const floorPicker = document.getElementById('floor-picker');
             floorPicker.innerHTML = '';
@@ -249,9 +253,10 @@
             
             document.getElementById('floor-picker').style.display = 'none';
             
+            // ⭐ 복귀 시 지도 레이어와 스타일을 일반 상태로 되돌립니다.
             map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
-            
-            // 실내 모드에서 복귀 시 초기 줌 레벨 19로 변경
+            map.setMapTypeId(naver.maps.MapTypeId.NORMAL, naver.maps.MapTypeStyle.LABEL_NORMAL);
+
             map.setCenter(BUILDING_CONFIGS['kyobo'].center); 
             map.setZoom(19); 
             
@@ -380,20 +385,22 @@
         function initMap() {
             const kyoboCenter = BUILDING_CONFIGS['kyobo'].center;
             
-            // ⭐ 1. Naver Maps 초기화 시 최종 줌 레벨(19)로 설정하여 불필요한 줌 변경 제거
+            // 1. Naver Maps 초기화 시 최종 줌 레벨(19)로 설정
             mapInstance = new naver.maps.Map('map', {
                 center: kyoboCenter,
-                zoom: 19, // 초기 줌 레벨을 19로 설정
+                zoom: 19, 
                 mapTypeId: naver.maps.MapTypeId.NORMAL,
-                rotation: 0, 
-                tilt: 0, 
+                // ⭐ 초기 지도 타입에서도 텍스트를 제거하여 최대한 깨끗하게 시작합니다.
+                mapTypeControl: true, // 지도/스카이뷰 버튼은 남겨둡니다.
+                zoomControl: true,
                 scaleControl: false,
                 logoControl: false,
                 mapDataControl: false,
-                mapTypeControl: true, 
-                zoomControl: true,
             });
             
+            // ⭐ 초기 지도 타입에 레이블 숨기기 스타일 적용
+            mapInstance.setMapTypeId(naver.maps.MapTypeId.NORMAL, naver.maps.MapTypeStyle.LABEL_NONE);
+
             // 2. 지도 인스턴스가 생성된 후 좌표 추출 모드 활성화 및 이벤트 리스너 추가
             enableCoordExtraction();
             document.getElementById('coord-guide').addEventListener('click', disableCoordExtraction);
@@ -429,7 +436,7 @@
                         hideIndoorControls(mapInstance); 
                         
                     } else {
-                        // 다른 건물을 클릭한 경우 (현재 코드에서는 단일 건물이라 이 경우는 발생하지 않음)
+                        // 다른 건물을 클릭한 경우
                         console.log(`[안내] 실내 모드 중에는 다른 건물(${clickedId})을 선택할 수 없습니다. 지도 상태로 돌아가세요.`);
                         return; 
                     }
@@ -454,11 +461,7 @@
                 });
             });
             
-            // ⭐ 6. 지도의 중심만 설정하고 줌 레벨은 초기화 시에 19로 이미 설정되었으므로 제거
             mapInstance.setCenter(BUILDING_CONFIGS['kyobo'].center);
-            
-            // ⭐ 참고: 초기화 시 줌 레벨을 19로 설정하여 크기 불일치 문제를 해결했습니다.
-            // 실내 모드 진입 시에는 줌 레벨을 20으로 더 확대하도록 `showIndoorControls`를 수정했습니다.
         }
         
         // API 로드가 완료되면 initMap 함수 호출
