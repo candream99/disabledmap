@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>기본 네이버 지도 로드 테스트</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+        /* 지도가 화면 전체를 차지하도록 설정 */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- 지도를 표시할 영역 -->
+    <div id="map"></div>
+
+    <!-- 1. 네이버 지도 API 로드 -->
+    <!-- 이전에 사용하신 클라이언트 ID(q1d23mmkof)를 적용했습니다. -->
+    <script type="text/javascript" 
+        src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=q1d23mmkof">
+    </script>
+    
+    <!-- 2. 지도 초기화 및 이벤트 리스너 설정 -->
+    <script>
+        function initMap() {
+            // 지도 중심 좌표 설정 (예: 강남역)
+            const mapCenter = new naver.maps.LatLng(37.497942, 127.027621);
+            
+            // 네이버 지도 객체 초기화
+            const mapInstance = new naver.maps.Map('map', {
+                center: mapCenter, // 지도 중심 좌표
+                zoom: 15,          // 초기 줌 레벨
+                mapTypeId: naver.maps.MapTypeId.NORMAL,
+                zoomControl: true, // 줌 컨트롤 표시
+                zoomControlOptions: { // 줌 컨트롤 위치 설정
+                    position: naver.maps.Position.TOP_RIGHT
+                }
+            });
+
+            // 지도가 성공적으로 로드되었는지 확인하는 마커 추가 (선택 사항)
+            new naver.maps.Marker({
+                position: mapCenter,
+                map: mapInstance
+            });
+            
+            console.log("✅ 네이버 지도 로드 및 초기화 성공.");
+        }
+
+        // 네이버 지도 API 스크립트 로딩이 완료되면 initMap 함수를 호출합니다.
+        // 이것이 'naver is not defined' 오류를 방지하는 표준 방법입니다.
+        naver.maps.onJSContentLoaded = initMap;
+    </script>
+</body>
+</html>
