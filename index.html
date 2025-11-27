@@ -63,7 +63,7 @@
     <!-- 라벨 제어 컨트롤 -->
     <div id="map-controls">
         <button id="toggle-label" class="map-control-button">
-            <i class="fas fa-tags"></i> 라벨 켜기
+            <i class="fas fa-tags"></i> 라벨 끄기 <!-- 초기 상태: 라벨이 켜져 있으므로 "끄기" 버튼 표시 -->
         </button>
     </div>
 
@@ -81,7 +81,8 @@
         let map;
         // 2D 평면 모드를 위한 커스텀 맵 ID 정의
         const LABELLESS_MAP_ID = 'LABELLESS_NORMAL_CLEAN'; 
-        let isLabelHidden = false; // 현재 라벨 숨김 상태
+        // ⭐ 수정: 초기 상태는 라벨이 보이는 상태(false)로 시작합니다.
+        let isLabelHidden = false; 
 
         // 지도 초기화 함수
         function initMap() {
@@ -89,13 +90,13 @@
             map = new naver.maps.Map('map', {
                 center: KYOBODB_CENTER, // 지도 중심 좌표
                 zoom: 19, // 초기 줌 레벨
-                mapTypeId: naver.maps.MapTypeId.NORMAL, // 일반 지도 타입
+                mapTypeId: naver.maps.MapTypeId.NORMAL, // 일반 지도 타입 (라벨 보임)
                 
                 // 지도 컨트롤 표시 설정
                 mapTypeControl: true, 
                 zoomControl: true,
                 scaleControl: true,
-                // ⭐ 추가: 회전을 막아 완벽한 2D 모드 유지
+                // 회전을 막아 완벽한 2D 모드 유지
                 rotationControl: false,
             });
             
@@ -105,17 +106,14 @@
             // 지도의 'init' 이벤트가 발생할 때까지 기다렸다가 getMapTypes()를 호출합니다.
             naver.maps.Event.once(map, 'init', function() {
                 
-                // ⭐ 수정: 기울임(Tilt)을 제거하여 완벽한 2D 평면 모드를 유지합니다.
+                // 기울임(Tilt)을 제거하여 완벽한 2D 평면 모드를 유지합니다.
                 map.setTilt(0); 
                 
                 // 2. 벡터 맵에서 라벨과 음영을 제거하기 위해 커스텀 맵 타입을 등록합니다.
                 register2DMapType(map);
                 
-                // 3. 초기 상태: 라벨 숨기기 및 2D 커스텀 맵 타입 적용
-                map.setMapTypeId(LABELLESS_MAP_ID);
-                isLabelHidden = true;
-                document.getElementById('toggle-label').innerHTML = '<i class="fas fa-tags"></i> 라벨 켜기';
-
+                // ⭐ 수정: 초기 상태를 기본 지도 타입(NORMAL)으로 유지합니다. 
+                // 즉, 라벨이 켜진 상태(isLabelHidden = false)로 시작합니다.
 
                 console.log("네이버 벡터 맵이 2D 평면 모드로 로드되었고, 모든 설정이 완료되었습니다.");
             });
@@ -147,7 +145,7 @@
                 maxZoom: normalMapType.maxZoom,
                 projection: normalMapType.projection,
                 layers: cleanLayers, // 필터링된 레이어 적용
-                // ⭐ 추가: 벡터 맵의 색상 보정을 비활성화하여 음영을 제거합니다.
+                // 벡터 맵의 색상 보정을 비활성화하여 음영을 제거합니다.
                 vectorColorMap: false
             });
 
@@ -162,18 +160,18 @@
         function toggleLabelLayer() {
             const button = document.getElementById('toggle-label');
             
-            if (isLabelHidden) {
+            if (!isLabelHidden) {
+                // 현재 라벨이 표시되어 있으면 -> 라벨 없는 2D 평면 커스텀 지도로 변경 (라벨/심볼/음영 숨김)
+                map.setMapTypeId(LABELLESS_MAP_ID);
+                isLabelHidden = true;
+                button.innerHTML = '<i class="fas fa-tags"></i> 라벨 켜기';
+                console.log("라벨 끄기: 2D 평면 지도 타입으로 전환 (라벨/심볼/음영 숨김)");
+            } else {
                 // 현재 라벨이 숨겨져 있으면 -> 일반 라벨 있는 맵으로 변경 (음영 복원)
                 map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
                 isLabelHidden = false;
                 button.innerHTML = '<i class="fas fa-tags"></i> 라벨 끄기';
                 console.log("라벨 켜기: 일반 지도 타입으로 전환 (라벨/심볼 표시, 기본 음영 복원)");
-            } else {
-                // 현재 라벨이 표시되어 있으면 -> 2D 평면 커스텀 지도로 변경 (라벨/심볼/음영 숨김)
-                map.setMapTypeId(LABELLESS_MAP_ID);
-                isLabelHidden = true;
-                button.innerHTML = '<i class="fas fa-tags"></i> 라벨 켜기';
-                console.log("라벨 끄기: 2D 평면 지도 타입으로 전환 (라벨/심볼/음영 숨김)");
             }
         }
 
