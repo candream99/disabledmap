@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>네이버 벡터 지도 기본 로드 (광화문) - 라벨 제어</title>
+    <title>네이버 벡터 지도 기본 로드 (광화문) - 라벨 제어 (수정)</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <meta charset="utf-8">
     
@@ -63,7 +63,7 @@
     <!-- 라벨 제어 컨트롤 -->
     <div id="map-controls">
         <button id="toggle-label" class="map-control-button">
-            <i class="fas fa-tags"></i> 라벨 켜기/끄기
+            <i class="fas fa-tags"></i> 라벨 켜기
         </button>
     </div>
 
@@ -79,7 +79,8 @@
         const KYOBODB_CENTER = new naver.maps.LatLng(37.57094, 126.97788);
         
         let map;
-        let labelLayer; // 라벨 레이어 인스턴스를 전역에서 접근 가능하도록 선언
+        const LABELLESS_MAP_ID = 'LABELLESS_NORMAL_CLEAN'; // 커스텀 맵 ID 정의
+        let isLabelHidden = false; // 현재 라벨 숨김 상태
 
         // 지도 초기화 함수
         function initMap() {
@@ -94,32 +95,80 @@
                 zoomControl: true,
                 scaleControl: true,
             });
-
-            // 벡터 맵의 특징인 기울임(Tilt)을 적용하여 입체감을 줍니다.
-            map.setTilt(45);
-            
-            // 네이버 지도 API의 LabelLayer 생성
-            // 라벨 레이어는 기본적으로 지도에 표시되지 않은 상태로 생성됩니다.
-            labelLayer = new naver.maps.LabelLayer(); 
             
             // 라벨 버튼 이벤트 리스너 등록
             document.getElementById('toggle-label').addEventListener('click', toggleLabelLayer);
 
-            console.log("네이버 벡터 맵이 광화문 교보빌딩을 중심으로 로드되었습니다. 라벨 제어 버튼이 추가되었습니다.");
+            // ⭐ 핵심 수정: 지도의 'init' 이벤트가 발생할 때까지 기다렸다가 getMapTypes()를 호출합니다.
+            naver.maps.Event.once(map, 'init', function() {
+                
+                // 1. 벡터 맵의 특징인 기울임(Tilt)을 적용하여 입체감을 줍니다.
+                map.setTilt(45);
+                
+                // 2. 벡터 맵에서 라벨 제거를 위해 커스텀 맵 타입을 등록합니다. (이제 안전하게 호출 가능)
+                registerLabelLessMapType(map);
+                
+                // 3. 초기 상태: 라벨 숨기기 (요청에 따라 처음부터 라벨이 없도록 설정)
+                map.setMapTypeId(LABELLESS_MAP_ID);
+                isLabelHidden = true;
+                document.getElementById('toggle-label').innerHTML = '<i class="fas fa-tags"></i> 라벨 켜기';
+
+
+                console.log("네이버 벡터 맵이 로드되었고, 모든 설정(틸트, 커스텀 맵 타입)이 완료되었습니다.");
+            });
+        }
+        
+        /**
+         * 벡터 맵에서 라벨과 심볼을 제거한 커스텀 지도 타입을 등록합니다.
+         * @param {naver.maps.Map} mapInstance - 지도 인스턴스
+         */
+        function registerLabelLessMapType(mapInstance) {
+            // 기본 일반 지도 타입을 복사합니다.
+            // ⭐ 이제 mapInstance.getMapTypes()가 'init' 이벤트 내부에서 호출되므로 안전합니다.
+            const normalMapType = mapInstance.getMapTypes().get(naver.maps.MapTypeId.NORMAL);
+            
+            if (!normalMapType) {
+                console.error("일반 지도 타입(NORMAL)을 찾을 수 없습니다.");
+                return;
+            }
+
+            // 지도 타입의 레이어 목록에서 'symbol' (POI 마커) 및 'label'을 제거하여 깨끗한 맵을 만듭니다.
+            const cleanLayers = normalMapType.layers.filter(layer => 
+                layer.name !== 'symbol' && layer.name !== 'label'
+            );
+            
+            // 라벨 없는 새로운 지도 타입 객체를 정의합니다.
+            const labelLessMapType = new naver.maps.MapType({
+                name: '라벨 없는 일반 지도',
+                minZoom: normalMapType.minZoom,
+                maxZoom: normalMapType.maxZoom,
+                projection: normalMapType.projection,
+                layers: cleanLayers // 필터링된 레이어 적용
+            });
+
+            // 지도 타입 레지스트리에 새로운 커스텀 맵 타입을 등록합니다.
+            mapInstance.getMapTypes().set(LABELLESS_MAP_ID, labelLessMapType);
+            console.log("커스텀 지도 타입 (라벨/심볼 제거)이 등록되었습니다:", LABELLESS_MAP_ID);
         }
 
         /**
-         * 라벨 레이어의 표시 상태를 토글하는 함수
+         * 라벨 레이어의 표시 상태를 토글하는 함수 (지도 타입 전환 방식)
          */
         function toggleLabelLayer() {
-            if (labelLayer.getMap()) {
-                // 라벨이 켜져 있으면 끄기
-                labelLayer.setMap(null);
-                console.log("라벨 레이어 끄기: 라벨 숨김");
+            const button = document.getElementById('toggle-label');
+            
+            if (isLabelHidden) {
+                // 현재 라벨이 숨겨져 있으면 -> 일반 라벨 있는 지도로 변경
+                map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
+                isLabelHidden = false;
+                button.innerHTML = '<i class="fas fa-tags"></i> 라벨 끄기';
+                console.log("라벨 켜기: 일반 지도 타입으로 전환 (라벨/심볼 표시)");
             } else {
-                // 라벨이 꺼져 있으면 켜기
-                labelLayer.setMap(map);
-                console.log("라벨 레이어 켜기: 라벨 표시");
+                // 현재 라벨이 표시되어 있으면 -> 라벨 없는 커스텀 지도로 변경
+                map.setMapTypeId(LABELLESS_MAP_ID);
+                isLabelHidden = true;
+                button.innerHTML = '<i class="fas fa-tags"></i> 라벨 켜기';
+                console.log("라벨 끄기: 커스텀 지도 타입으로 전환 (라벨/심볼 숨김)");
             }
         }
 
