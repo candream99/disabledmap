@@ -3,58 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 라벨 온오프 & 좌표 표시</title>
+    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 라벨 온오프 & 좌표 표시 & 실내모드</title>
     <style>
-        body { margin: 0;
-padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
-        #map { width: 100%;
-height: 100%; }
+        body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
+        #map { width: 100%; height: 100%; }
         #status {
             position: absolute;
-top: 10px;
+            top: 10px;
             left: 10px;
-            background: rgba(255, 99, 71, 0.9); /* 시작은 여전히 힙한 토마토 */
+            background: rgba(255, 99, 71, 0.9);
             color: white;
-padding: 10px 15px;
+            padding: 10px 15px;
             border-radius: 5px;
             font-size: 14px;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
+        }
         #labelToggleBtn {
             position: absolute;
-top: 10px;
-            left: 170px; /* status 박스 옆에 놓기 위해 left 값 조절 */
+            top: 10px;
+            left: 170px;
             background: #4A90E2;
-/* 버튼 색상 */
             color: white;
             padding: 10px 15px;
-border: none;
+            border: none;
             border-radius: 5px;
             font-size: 14px;
             cursor: pointer;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             transition: background 0.3s ease;
-}
+        }
         #labelToggleBtn:hover {
             background: #357ABD;
-}
+        }
         #coordDisplay {
             position: absolute;
-top: 50px; /* 라벨 버튼 아래에 표시 */
+            top: 50px;
             left: 10px;
-background: rgba(0, 0, 0, 0.7);
-            color: #FFC107; /* 밝은 노랑색으로 눈에 띄게!
-*/
+            background: rgba(0, 0, 0, 0.7);
+            color: #FFC107;
             padding: 10px 15px;
             border-radius: 5px;
             font-size: 14px;
-z-index: 1000;
+            z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            min-width: 250px; /* 최소 너비로 내용 없어도 형태 유지 */
+            min-width: 250px;
             text-align: center;
-}
+        }
     </style>
 </head>
 <body>
@@ -62,11 +58,14 @@ z-index: 1000;
     <button id="labelToggleBtn">라벨 숨기기</button>
     <div id="coordDisplay">지도를 클릭하면 좌표가 나와요!</div>
     <div id="map"></div>
-    
 
     <script>
         // 호랭이 Key ID 박제!
         const NCP_KEY_ID = 'q1d23mmkof';
+        
+        // 실내모드 상태 변수
+        let isIndoorMode = false;
+        let imageOverlay = null;
 
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
@@ -76,7 +75,7 @@ z-index: 1000;
             
             // 지도 초기 옵션 설정
             const mapOptions = {
-                center: new naver.maps.LatLng(37.570946, 126.97788), // 서울시청 위경도
+                center: new naver.maps.LatLng(37.570946, 126.97788),
                 zoom: 18,
                 zoomControl: true,
                 zoomControlOptions: {
@@ -125,16 +124,16 @@ z-index: 1000;
                 new naver.maps.LatLng(37.570538, 126.977698)
             ];
 
-            // 2. Polygon 객체 생성: clickable: true가 핵심입니다.
+            // 2. Polygon 객체 생성
             const polygon = new naver.maps.Polygon({
                 map: map,
                 paths: [polygonCoords],
-                fillColor: 'transparent', // 초기에는 채우기 없음
+                fillColor: 'transparent',
                 fillOpacity: 0.5,
-                strokeColor: '#C490E4', // 연한 보라색 외곽선
+                strokeColor: '#C490E4',
                 strokeOpacity: 1,
                 strokeWeight: 3,
-                clickable: true // 이 객체가 클릭 이벤트를 받을 수 있도록 명시적으로 설정
+                clickable: true
             });
 
             // 3. 마우스 오버(Hover) 효과 추가
@@ -142,7 +141,7 @@ z-index: 1000;
             // 마우스 오버 시: 반투명 보라색으로 채우기
             naver.maps.Event.addListener(polygon, 'mouseover', function() {
                 polygon.setOptions({
-                    fillColor: '#C490E4' // 반투명의 보라색
+                    fillColor: '#C490E4'
                 });
                 document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다! (마우스 오버)';
             });
@@ -155,29 +154,66 @@ z-index: 1000;
                 document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
             });
 
-            // 4. 클릭 이벤트 제한 추가 (다각형 내부 클릭 시 지도 이벤트 전파 중단)
+            // 4. 다각형 클릭 시 평면도 이미지 표시 (실내모드)
             naver.maps.Event.addListener(polygon, 'click', function(e) {
-                // 다각형 내부 클릭 시 지도 클릭 이벤트 전파를 무조건 막습니다.
-                e.stop(); 
-                document.getElementById('coordDisplay').textContent = '🚫 다각형 내부 클릭! 좌표 표시 기능이 제한됩니다.';
-                console.log("다각형 내부 클릭 감지: 지도 좌표 표시 기능 중단됨.");
+                e.stop();
+                
+                // 실내모드 활성화
+                isIndoorMode = true;
+                
+                // 평면도 이미지 오버레이 생성
+                imageOverlay = new naver.maps.GroundOverlay({
+                    url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
+                    bounds: polygon.getBounds()
+                });
+                
+                // 지도에 이미지 오버레이 추가
+                imageOverlay.setMap(map);
+                
+                // 좌표 표시 메시지 변경
+                document.getElementById('coordDisplay').textContent = '실내모드: 평면도 표시 중. 평면도를 클릭하면 지도로 돌아갑니다.';
+                
+                console.log("실내모드 활성화: 평면도 이미지 표시");
             });
 
-            // ⭐ 지도 클릭 이벤트 (다각형 밖을 클릭했을 때만 작동)
+            // 5. 이미지 오버레이 클릭 이벤트 - 실내모드 종료
+            // 이미지 오버레이가 생성된 후에 이벤트 리스너 추가
+            // 이 부분은 이미지 오버레이가 생성될 때마다 이벤트 리스너를 추가해야 함
+            // 따라서 이미지 오버레이 생성 시점에 이벤트 리스너를 추가하는 방식으로 수정
+            
+            // 6. 지도 클릭 이벤트 - 실내모드일 때는 좌표 표시하지 않음
             naver.maps.Event.addListener(map, 'click', function(e) {
-                // 다각형 내부 클릭은 위에서 e.stop()으로 막았기 때문에, 
-                // 이 리스너는 다각형 밖 영역을 클릭했을 때만 실행됩니다.
+                // 실내모드일 때는 좌표 표시하지 않음
+                if (isIndoorMode) {
+                    return;
+                }
+                
                 const lat = e.latlng.lat().toFixed(6);
                 const lng = e.latlng.lng().toFixed(6);
                 document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
                 console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
             });
 
-            // -------------------------------------------------------------------
-            // ⭐⭐ 다각형(Polygon) 기능 최종 수정 완료 ⭐⭐
-            // -------------------------------------------------------------------
+            // 7. 이미지 오버레이 클릭 이벤트를 위한 전역 이벤트 리스너
+            // 이미지 오버레이가 클릭되면 실내모드 종료
+            naver.maps.Event.addListener(map, 'click', function(e) {
+                // 실내모드이고 이미지 오버레이가 존재할 때
+                if (isIndoorMode && imageOverlay) {
+                    // 이미지 오버레이 제거
+                    imageOverlay.setMap(null);
+                    imageOverlay = null;
+                    
+                    // 실내모드 비활성화
+                    isIndoorMode = false;
+                    
+                    // 좌표 표시 메시지 복원
+                    document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
+                    
+                    console.log("실내모드 비활성화: 평면도 이미지 제거");
+                }
+            });
 
-            console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글 및 좌표 표시 기능 추가됨.");
+            console.log("네이버 벡터맵 로드 및 초기화 성공! 라벨 토글, 좌표 표시, 실내모드 기능 추가됨.");
         };
         script.onerror = function() {
             document.getElementById('status').textContent = 'API 로드 실패! 네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
