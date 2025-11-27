@@ -97,47 +97,61 @@
 
     <!-- 2. 사용자 JavaScript 코드 (API 로드 완료 후 실행) -->
     <script>
+        // 새로운 꼭짓점 좌표 정의
+        const COORDS = {
+            NW: { lat: 37.571346, lng: 126.977674 }, // 북서 (North-West)
+            NE: { lat: 37.571349, lng: 126.978057 }, // 북동 (North-East)
+            SE: { lat: 37.570542, lng: 126.978087 }, // 남동 (South-East)
+            SW: { lat: 37.570541, lng: 126.977699 }  // 남서 (South-West)
+        };
+
+        // 중심 좌표 계산
+        const centerLat = (COORDS.NW.lat + COORDS.SE.lat) / 2;
+        const centerLng = (COORDS.NW.lng + COORDS.SE.lng) / 2;
+
         // 건물별 설정 데이터 (광화문 교보빌딩)
         const BUILDING_CONFIGS = {
             'kyobo': {
-                // 광화문 교보빌딩의 정밀 조정된 중심 좌표
-                center: new naver.maps.LatLng(37.57015, 126.97495), 
+                // 광화문 교보빌딩의 새로운 중심 좌표
+                center: new naver.maps.LatLng(centerLat, centerLng), 
+                // 지도 이미지 오버레이 경계 (NW와 SE로 정의)
                 bounds: new naver.maps.LatLngBounds( 
-                    new naver.maps.LatLng(37.57070, 126.97450), // 북서
-                    new naver.maps.LatLng(37.56960, 126.97540)  // 남동
+                    new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), // 북서
+                    new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng)  // 남동
                 ),
                 polygonPaths: [
-                    // 광화문 교보빌딩의 정밀 조정된 외곽선 Path (빌딩 영역)
+                    // 광화문 교보빌딩의 새로운 외곽선 Path (빌딩 영역)
                     [
-                        new naver.maps.LatLng(37.57070, 126.97450), // 북서
-                        new naver.maps.LatLng(37.57070, 126.97540), // 북동
-                        new naver.maps.LatLng(37.56960, 126.97540), // 남동
-                        new naver.maps.LatLng(37.56960, 126.97450)  // 남서
+                        new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
+                        new naver.maps.LatLng(COORDS.NE.lat, COORDS.NE.lng), 
+                        new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng), 
+                        new naver.maps.LatLng(COORDS.SW.lat, COORDS.SW.lng)
                     ]
                 ],
                 floors: {
                     'B1': {
                         label: '지하 1층',
-                        imageUrl: 'https://placehold.co/1000x800/2962FF/FFFFFF?text=GWANGHWAMUN+B1',
+                        // 이미지도 새로운 경계에 맞게 재정의
+                        imageUrl: 'https://placehold.co/1000x800/2962FF/FFFFFF?text=KYOBODB+B1',
                         imageBounds: new naver.maps.LatLngBounds(
-                            new naver.maps.LatLng(37.57070, 126.97450), 
-                            new naver.maps.LatLng(37.56960, 126.97540)
+                            new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
+                            new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng)
                         ),
                     },
                     '1F': {
                         label: '1층',
-                        imageUrl: 'https://placehold.co/1000x800/1DE9B6/333333?text=GWANGHWAMUN+1F', 
+                        imageUrl: 'https://placehold.co/1000x800/1DE9B6/333333?text=KYOBODB+1F', 
                         imageBounds: new naver.maps.LatLngBounds(
-                            new naver.maps.LatLng(37.57070, 126.97450), 
-                            new naver.maps.LatLng(37.56960, 126.97540)
+                            new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
+                            new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng)
                         ),
                     },
                     '2F': {
                         label: '2층',
-                        imageUrl: 'https://placehold.co/1000x800/FFEA00/333333?text=GWANGHWAMUN+2F',
+                        imageUrl: 'https://placehold.co/1000x800/FFEA00/333333?text=KYOBODB+2F',
                         imageBounds: new naver.maps.LatLngBounds(
-                            new naver.maps.LatLng(37.57070, 126.97450), 
-                            new naver.maps.LatLng(37.56960, 126.97540)
+                            new naver.maps.LatLng(COORDS.NW.lat, COORDS.NW.lng), 
+                            new naver.maps.LatLng(COORDS.SE.lat, COORDS.SE.lng)
                         ),
                     }
                 }
@@ -181,7 +195,7 @@
                  return;
             }
 
-            // ⭐ 좌표 추출 모드 비활성화
+            // 좌표 추출 모드 비활성화
             disableCoordExtraction(); 
 
             isIndoorModeActive = true;
@@ -241,7 +255,7 @@
             
             showAllPolygons(map);
             
-            // ⭐ 지도 클릭 리스너 다시 활성화 (좌표 추출 모드 진입)
+            // 지도 클릭 리스너 다시 활성화 (좌표 추출 모드 진입)
             enableCoordExtraction();
         }
 
@@ -437,6 +451,10 @@
                     overlay.setMap(null); 
                 });
             });
+            
+            // 지도 초기화 후 바로 새로운 좌표로 이동 및 줌 레벨 조정
+            mapInstance.setCenter(BUILDING_CONFIGS['kyobo'].center);
+            mapInstance.setZoom(19); 
         }
         
         // API 로드가 완료되면 initMap 함수 호출
