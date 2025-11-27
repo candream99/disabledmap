@@ -3,64 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>광화문 교보빌딩</title>
-    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof"></script>
+    <title>지도 테스트</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
-            height: 100vh;
-            overflow: hidden;
-        }
-        
-        #map {
-            width: 100%;
-            height: 100%;
+        body { margin: 0; padding: 0; height: 100vh; }
+        #map { width: 100%; height: 100%; }
+        #status { 
+            position: absolute; 
+            top: 10px; 
+            left: 10px; 
+            background: red; 
+            color: white; 
+            padding: 10px; 
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
+    <div id="status">API 키 확인 중...</div>
     <div id="map"></div>
 
     <script>
-        // 지도 초기화 함수
-        function initMap() {
-            // 광화문 교보빌딩 중심 좌표
-            const kyoboLocation = new naver.maps.LatLng(37.570, 126.978);
+        // API 로드 시도
+        const script = document.createElement('script');
+        script.src = 'https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof';
+        script.onload = function() {
+            document.getElementById('status').textContent = 'API 로드 성공! 지도 초기화 중...';
+            document.getElementById('status').style.background = 'green';
             
-            // 지도 옵션 설정
-            const mapOptions = {
-                center: kyoboLocation,
-                zoom: 17,
-                zoomControl: true,
-                zoomControlOptions: {
-                    position: naver.maps.Position.TOP_RIGHT
-                },
-                mapTypeControl: false,
-                scaleControl: false,
-                mapDataControl: false,
-                logoControl: false,
-                mapTypeId: naver.maps.MapTypeId.VECTOR // 벡터 지도 사용
-            };
-            
-            // 지도 생성
-            const map = new naver.maps.Map('map', mapOptions);
-            
-            // 광화문 교보빌딩 마커 추가
-            new naver.maps.Marker({
-                position: kyoboLocation,
-                map: map,
-                title: '광화문 교보빌딩'
+            // 지도 초기화
+            const map = new naver.maps.Map('map', {
+                center: new naver.maps.LatLng(37.570, 126.978),
+                zoom: 15
             });
-        }
-        
-        // API 로드 완료 후 지도 초기화
-        naver.maps.onJSContentLoaded = initMap;
+            
+            document.getElementById('status').style.display = 'none';
+        };
+        script.onerror = function() {
+            document.getElementById('status').textContent = 'API 로드 실패! API 키를 확인해주세요.';
+        };
+        document.head.appendChild(script);
     </script>
 </body>
 </html>
