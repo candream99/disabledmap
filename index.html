@@ -207,6 +207,14 @@ color:#ef4444;">있음</span></div>
                 
                 if (groundOverlay) groundOverlay.setMap(null);
 
+                // --- [MODIFICATION 1: 다른 건물 폴리곤 숨기기] ---
+                for (const id in buildings) {
+                    if (id !== buildingId && buildings[id].polygon) {
+                        buildings[id].polygon.setMap(null); // 다른 건물 폴리곤 숨기기
+                    }
+                }
+                // ----------------------------------------------------
+
                 groundOverlay = new naver.maps.GroundOverlay(
                     config.images[floor],
                     config.imageBounds,
@@ -226,10 +234,20 @@ color:#ef4444;">있음</span></div>
                 naver.maps.Event.addListener(groundOverlay, 'click', function (e) {
                     e.stopOverlays = true;
                     groundOverlay.setMap(null);
+                    
+                    // --- [MODIFICATION 2: 모든 건물 폴리곤 복원] ---
+                    for (const id in buildings) {
+                        if (buildings[id].polygon) {
+                            buildings[id].polygon.setMap(map); // 모든 폴리곤을 맵에 다시 설정
+                            buildings[id].polygon.setOptions({ fillColor: 'transparent' }); // 하이라이트 제거
+                        }
+                    }
+                    // ----------------------------------------------------
+
                     document.getElementById('floorControls').style.display = 'none';
-                    config.polygon.setOptions({ fillColor: 'transparent' }); // 외곽선 색상 복원
+                    config.polygon.setOptions({ fillColor: 'transparent' }); // 현재 건물의 외곽선 색상 복원
                     labelLayer.setMap(map);
-                    currentBuildingId = null; // **건물 상태 초기화**
+                    currentBuildingId = null; // 건물 상태 초기화
                 });
             }
 
@@ -282,37 +300,24 @@ color:#ef4444;">있음</span></div>
 
                 // 마우스 오버 리스너
                 naver.maps.Event.addListener(polygon, 'mouseover', function() {
-                    // **추가된 로직:** 현재 어떤 건물도 활성화되지 않았거나 (currentBuildingId === null) 
-                    // 현재 마우스 오버된 건물이 활성화된 건물인 경우에만 하이라이트 표시
-                    if (currentBuildingId === null || currentBuildingId === buildingId) {
+                    // 실내 모드 중이 아닐 때만 하이라이트 (다른 건물은 숨겨져 있으므로 별도 체크 불필요)
+                    if (!groundOverlay || groundOverlay.getMap() === null) {
                         polygon.setOptions({ fillColor: '#C490E4' });
                         document.getElementById('coordDisplay').textContent = `${buildingId} 건물입니다! (마우스 오버)`;
-                    } else {
-                        // 다른 건물이 활성화된 경우: 클릭 불가 메시지 표시 (선택적으로)
-                         document.getElementById('coordDisplay').textContent = `다른 건물(${currentBuildingId}) 실내 모드 중입니다.`;
                     }
                 });
 
                 // 마우스 아웃 리스너
                 naver.maps.Event.addListener(polygon, 'mouseout', function() {
-                    if (currentBuildingId === null || currentBuildingId === buildingId) {
-                         // 실내 모드가 아닌 경우에만 투명으로 복원
-                        if (!groundOverlay || groundOverlay.getMap() === null) {
-                            polygon.setOptions({ fillColor: 'transparent' });
-                            document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
-                        }
+                    // 실내 모드가 아닌 경우에만 투명으로 복원
+                    if (!groundOverlay || groundOverlay.getMap() === null) {
+                        polygon.setOptions({ fillColor: 'transparent' });
+                        document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
                     }
                 });
 
                 // 클릭 리스너 (실내 모드 진입)
                 naver.maps.Event.addListener(polygon, 'click', function (e) {
-                    // **추가된 핵심 로직:** 이미 다른 건물의 실내 모드인 경우 클릭 무시
-                    if (currentBuildingId !== null && currentBuildingId !== buildingId) {
-                        e.stopOverlays = true; // 이벤트 중지
-                        alert(`현재 ${currentBuildingId} 건물 실내 모드입니다. 다른 건물로 이동하려면 먼저 지도를 클릭하여 모드를 종료해 주세요.`);
-                        return;
-                    }
-                    
                     e.stopOverlays = true;
                     labelLayer.setMap(null);
                     polygon.setOptions({ fillColor: '#C490E4' });
@@ -351,9 +356,6 @@ color:#ef4444;">있음</span></div>
             
             // 무장애시설 버튼 클릭 리스너
             accessBtn.addEventListener('click', function() {
-                // 실내 모드가 아닌 경우에만 작동 (선택적)
-                // if (currentBuildingId === null) {
-                
                 const isOpen = popup.style.display === 'block';
                 
                 // 층 버튼의 active 상태를 모두 해제
@@ -369,7 +371,6 @@ color:#ef4444;">있음</span></div>
                     this.classList.remove('active');
                     updateFloorButtonState(); // 마지막 활성화 층 버튼 복원
                 }
-                // }
             });
 
             // 무장애 시설정보 팝업 닫기 이벤트
