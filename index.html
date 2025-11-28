@@ -58,8 +58,54 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             bottom: 20px; /* 하단 왼쪽 코너 */
             left: 10px;
             z-index: 1500;
-            font-size: 18px; /* 📍 아이콘 크기 */
+            font-size: 0; /* 아이콘이 텍스트가 아니므로 폰트 크기 0 */
         }
+
+        /* ----- Geolocation 아이콘 스타일 ----- */
+        /* Inactive Icon: Target/Bullseye (Grey/Black) */
+        #geolocationBtn .geo-icon {
+            display: block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #333; /* 바깥쪽 원 */
+            border-radius: 50%;
+            position: relative;
+            box-sizing: border-box;
+            background-color: transparent;
+        }
+
+        #geolocationBtn .geo-icon::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background-color: #333; /* 가운데 점 */
+            border-radius: 50%;
+        }
+
+        /* Active State: Arrow/Compass Icon (White) */
+        #geolocationBtn.active .geo-icon {
+            /* 타겟 아이콘 숨기기 */
+            border: none;
+            background-color: transparent;
+            width: 0;
+            height: 0;
+            transform: none; /* 화살표 아이콘을 위한 기본 위치 */
+            
+            /* 화살표 모양 생성 */
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 12px solid #ffffff; /* 흰색 화살표 몸통 */
+            margin-bottom: 6px; /* 중앙 정렬 미세 조정 */
+        }
+
+        #geolocationBtn.active .geo-icon::after {
+            content: none; /* 가운데 점 숨기기 */
+        }
+        /* ------------------------------------- */
         
         /* 층 컨트롤 컨테이너 스타일 */
         #floorControls {
@@ -106,7 +152,7 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     <div id="status">API 키 확인 중...</div>
     <div id="coordDisplay">건물을 클릭하면 실내지도를 볼 수 있어요</div>
     
-    <button id="geolocationBtn" class="map-btn-circle" title="현재 위치 찾기">📍</button>
+    <button id="geolocationBtn" class="map-btn-circle" title="현재 위치 찾기"><span class="geo-icon"></span></button>
     
     <div id="floorControls">
         <button id="accessInfoBtn" class="floor-btn map-btn-circle" data-floor="access">i</button>
@@ -341,7 +387,7 @@ color:#ef4444;">있음</span></div>
                     fillOpacity: 0.5,
                     strokeColor: '#C490E4',
                     strokeOpacity: 1,
-                    strokeWeight: 3,
+                    strokeWeight: 2,
                     clickable: true,
                 });
                 config.polygon = polygon; // Polygon 객체를 config에 저장
@@ -372,6 +418,7 @@ color:#ef4444;">있음</span></div>
                     // 현재 위치 마커가 있다면 제거
                     if (currentPositionMarker) {
                         currentPositionMarker.setMap(null);
+                        geolocationBtn.classList.remove('active'); // 마커 제거 시 내 위치 버튼 비활성화
                     }
 
                     // 해당 건물의 층 버튼 렌더링
@@ -396,8 +443,15 @@ color:#ef4444;">있음</span></div>
                     return;
                 }
                 
-                // 버튼 active 상태 토글
-                geolocationBtn.classList.toggle('active');
+                // 이미 활성화 상태라면 (파란색 버튼) -> 비활성화하고 마커 제거
+                if (geolocationBtn.classList.contains('active')) {
+                    if (currentPositionMarker) {
+                        currentPositionMarker.setMap(null);
+                    }
+                    geolocationBtn.classList.remove('active');
+                    coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
+                    return;
+                }
 
                 if (navigator.geolocation) {
                     coordDisplay.textContent = '현재 위치를 찾는 중입니다...';
@@ -429,7 +483,7 @@ color:#ef4444;">있음</span></div>
                             });
                             
                             coordDisplay.textContent = '현재 위치로 이동했습니다! 건물을 클릭하면 실내지도를 볼 수 있어요';
-                            geolocationBtn.classList.add('active'); // 성공 시 active 유지
+                            geolocationBtn.classList.add('active'); // 성공 시 active 유지 (파란색 화살표)
 
                         },
                         function(error) {
@@ -440,14 +494,13 @@ color:#ef4444;">있음</span></div>
                             if (currentPositionMarker) {
                                 currentPositionMarker.setMap(null);
                             }
-                            geolocationBtn.classList.remove('active'); // 실패 시 active 해제
+                            geolocationBtn.classList.remove('active'); // 실패 시 active 해제 (회색 타겟)
                         },
                         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 } 
                     );
                 } else {
                     alert('이 브라우저에서는 Geolocation이 지원되지 않습니다.');
                     coordDisplay.textContent = 'Geolocation 미지원: 건물을 클릭하면 실내지도를 볼 수 있어요';
-                    geolocationBtn.classList.remove('active'); // 미지원 시 active 해제
                 }
             });
 
