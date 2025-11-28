@@ -114,6 +114,22 @@
                 clickable: true,
             });
 
+            // 마우스 오버 시: 반투명 보라색으로 채움 (실내모드가 아닐 때만 적용)
+            naver.maps.Event.addListener(polygon, 'mouseover', function() {
+                if (!groundOverlay || groundOverlay.getMap() === null) {
+                    polygon.setOptions({ fillColor: '#C490E4' });
+                    document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다! (마우스 오버)';
+                }
+            });
+
+            // 마우스 아웃 시: 실내모드가 아니면 채우기 제거
+            naver.maps.Event.addListener(polygon, 'mouseout', function() {
+                if (!groundOverlay || groundOverlay.getMap() === null) {
+                    polygon.setOptions({ fillColor: 'transparent' });
+                    document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
+                }
+            });
+
             let groundOverlay = null;
             let currentFloor = '1f';
 
