@@ -186,6 +186,26 @@
         };
 
         document.head.appendChild(script);
-    </script>
+        // ⭐ 무장애 시설정보 팝업 토글 이벤트 재설정
+    const accessBtn = document.getElementById('accessInfoBtn');
+    const popup = document.getElementById('accessPopup');
+    const popupClose = document.getElementById('accessPopupClose');
+
+    if (accessBtn) {
+        accessBtn.onclick = () => {
+            if (popup.style.display === 'none' || popup.style.display === '') {
+                popup.style.display = 'block';
+            } else {
+                popup.style.display = 'none';
+            }
+        };
+    }
+
+    if (popupClose) {
+        popupClose.onclick = () => {
+            popup.style.display = 'none';
+        };
+    }
+</script>
 </body>
 </html>
