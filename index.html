@@ -162,7 +162,7 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         /* 무장애 팝업 */
         #accessPopup {
             position: absolute;
-            left: 10px;
+            left: auto;
             width: 208px;
             background: white;
             padding: 10px;
@@ -561,8 +561,10 @@ color:#ef4444;">있음</span></div>
                     // i버튼의 위치 계산
                     const buttonRect = accessBtn.getBoundingClientRect();
                     // 팝업창의 bottom 위치를 i버튼 상단에서 30px 위로 설정
-                    const popupBottom = window.innerHeight - buttonRect.top + 24;
-                    popup.style.bottom = popupBottom + 'px';
+                    const popupTop = buttonRect.top;
+                    const popupLeft = buttonRect.right + 20;
+                    popup.style.top = popupTop + 'px'; 
+                    popup.style.left = popupLeft + 'px';
                     
                     // 팝업 열기
                     popup.style.display = 'block';
@@ -594,5 +596,6 @@ color:#ef4444;">있음</span></div>
     </script>
 </body>
 </html>
+
 
 
