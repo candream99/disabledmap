@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 층별 기능 추가</title>
+    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 층별 기능 추가 (에러 수정)</title>
     <style>
         body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
         #map { width: 100%; height: 100%; }
@@ -35,20 +35,18 @@
             text-align: center;
         }
 
-        /* ⭐ 층별 버튼 컨테이너 스타일 추가 ⭐ */
         #floorControls {
             position: absolute;
             top: 10px;
-            right: 10px; /* 오른쪽 상단에 배치 */
+            right: 10px;
             z-index: 1000;
-            display: none; /* 초기에는 숨김 (실내 모드 진입 시 표시) */
+            display: none; 
             background: white;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             padding: 5px;
         }
 
-        /* ⭐ 층별 버튼 스타일 추가 ⭐ */
         .floor-btn {
             background: #f0f0f0;
             color: #333;
@@ -62,7 +60,7 @@
         }
 
         .floor-btn.active {
-            background: #4A90E2; /* 선택된 버튼 색상 */
+            background: #4A90E2;
             color: white;
             border-color: #4A90E2;
         }
@@ -108,13 +106,13 @@
             document.getElementById('status').textContent = 'API 로드 성공!\n벡터 지도 초기화 중...'; 
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
             
-            // 이미지 경계 정의
+            // 1. 이미지 경계 정의
             const swLatLng = new naver.maps.LatLng(37.570535, 126.977631);
             const neLatLng = new naver.maps.LatLng(37.571365, 126.978099);
             imageBounds = new naver.maps.LatLngBounds(swLatLng, neLatLng);
 
 
-            // 지도 초기 옵션 설정
+            // 2. 지도 초기 옵션 설정 및 생성
             const mapOptions = {
                 center: new naver.maps.LatLng(37.570946, 126.97788),
                 zoom: 18,
@@ -129,11 +127,41 @@
             map = new naver.maps.Map('map', mapOptions);
             map.setMapTypeId('normal');
 
-            // 라벨 레이어 설정 
+            // 3. 라벨 레이어 설정 
             labelLayer = new naver.maps.LabelLayer();
             labelLayer.setMap(map);
 
             document.getElementById('status').style.display = 'none';
+            
+            // -------------------------------------------------------------------
+            // ⭐⭐ GroundOverlay 객체 Eager 생성 및 이벤트 리스너 설정 (에러 수정 핵심) ⭐⭐
+            // -------------------------------------------------------------------
+
+            // GroundOverlay 객체를 초기에 한 번만 생성하여 groundOverlay 변수에 올바른 객체 참조를 보장
+            groundOverlay = new naver.maps.GroundOverlay(
+                floorImageUrls['1F'], // 초기 이미지 URL
+                imageBounds,          // 이미지 경계
+                {
+                    map: null, 
+                    clickable: true, 
+                    opacity: 1
+                }
+            );
+
+            // GroundOverlay 클릭 이벤트: 이미지 클릭 시 제거 (실내 모드 종료)
+            naver.maps.Event.addListener(groundOverlay, 'click', function(e) {
+                e.stopOverlays = true; 
+                
+                // 실내 모드 종료
+                groundOverlay.setMap(null); 
+                labelLayer.setMap(map); // 라벨 다시 보이게 설정
+                floorControls.style.display = 'none'; // 층별 버튼 숨김 
+                polygon.setOptions({
+                    fillColor: 'transparent' 
+                });
+                document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
+                console.log("평면도 클릭: 실내 모드 종료. 지도 라벨 복구.");
+            });
             
             // -------------------------------------------------------------------
             // 다각형(Polygon) 기능
@@ -166,7 +194,7 @@
 
             // 마우스 아웃 시
             naver.maps.Event.addListener(polygon, 'mouseout', function() {
-                if (!groundOverlay || groundOverlay.getMap() === null) { 
+                if (groundOverlay.getMap() === null) { // groundOverlay가 지도에 표시되지 않았을 때
                     polygon.setOptions({
                         fillColor: 'transparent'
                     });
@@ -175,57 +203,22 @@
             });
 
             // -------------------------------------------------------------------
-            // GroundOverlay(평면도) 및 층별 제어 기능
+            // 층별 제어 로직 (showFloor)
             // -------------------------------------------------------------------
-            
-            // GroundOverlay 객체 생성 함수 (이전에 생성되지 않았을 경우에만 생성)
-            function createGroundOverlay() {
-                if (!groundOverlay) {
-                    // ⭐ 수정된 부분: GroundOverlay 생성자에 URL과 Bounds 인자를 명시적으로 전달 ⭐
-                    groundOverlay = new naver.maps.GroundOverlay(
-                        floorImageUrls['1F'], // 초기 이미지 URL
-                        imageBounds,          // 이미지 경계
-                        {
-                            map: null, 
-                            clickable: true, 
-                            opacity: 1
-                        }
-                    );
-                    
-                    // 🌟 GroundOverlay 클릭 이벤트: 이미지 클릭 시 제거 (실내 모드 종료)
-                    naver.maps.Event.addListener(groundOverlay, 'click', function(e) {
-                        e.stopOverlays = true; 
-                        
-                        // 실내 모드 종료
-                        groundOverlay.setMap(null); 
-                        labelLayer.setMap(map); // 라벨 다시 보이게 설정
-                        floorControls.style.display = 'none'; // 층별 버튼 숨김 
-                        polygon.setOptions({
-                            fillColor: 'transparent' 
-                        });
-                        document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
-                        console.log("평면도 클릭: 실내 모드 종료. 지도 라벨 복구.");
-                    });
-                }
-            }
 
             // ⭐ 층별 평면도를 표시하는 핵심 함수 ⭐
             function showFloor(floor) {
-                // GroundOverlay 객체가 아직 생성되지 않았다면 생성합니다.
-                createGroundOverlay();
-
-                // 1. GroundOverlay의 이미지 URL 변경 (에러를 발생시키던 setOptions 호출)
-                // 이제 groundOverlay가 올바른 객체이므로 setOptions가 정상 작동합니다.
+                // groundOverlay는 이미 생성되어 있으므로 바로 setOptions 호출
                 groundOverlay.setOptions({
                     url: floorImageUrls[floor]
                 });
                 
-                // 2. 맵에 표시
+                // 맵에 표시 (이미 표시되어 있어도 문제 없음)
                 if (groundOverlay.getMap() === null) {
                      groundOverlay.setMap(map);
                 }
 
-                // 3. 버튼 활성화 상태 변경
+                // 버튼 활성화 상태 변경
                 floorButtons.forEach(btn => {
                     btn.classList.remove('active');
                 });
@@ -244,7 +237,7 @@
             });
 
 
-            // 다각형(Polygon) 클릭 이벤트 수정: 실내 모드 진입
+            // 다각형(Polygon) 클릭 이벤트: 실내 모드 진입
             naver.maps.Event.addListener(polygon, 'click', function(e) {
                 e.stopOverlays = true; 
 
@@ -255,7 +248,7 @@
                     fillColor: '#C490E4' 
                 });
                 
-                // ⭐⭐ 실내 모드 진입 시 1F를 기본으로 표시 ⭐⭐
+                // 실내 모드 진입 시 1F를 기본으로 표시 
                 showFloor('1F'); 
 
                 console.log("다각형 내부 클릭: 실내 모드 진입. 지도 라벨 숨김.");
@@ -263,7 +256,8 @@
 
             // ⭐ 지도 클릭 이벤트 (다각형 밖을 클릭했을 때만 작동)
             naver.maps.Event.addListener(map, 'click', function(e) {
-                if (!groundOverlay || groundOverlay.getMap() === null) {
+                // groundOverlay가 지도에 표시되지 않았을 때만 좌표 표시 기능 실행
+                if (groundOverlay.getMap() === null) { 
                     const lat = e.latlng.lat().toFixed(6);
                     const lng = e.latlng.lng().toFixed(6);
                     document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
