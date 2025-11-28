@@ -4,65 +4,54 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>네이버 벡터맵 테스트 - 다중 건물 지원</title>
+
     <style>
         body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
         #map { width: 100%; height: 100%; }
 
-        #status {
-            position: absolute;
-            top: 10px; left: 10px;
-            background: rgba(255, 99, 71, 0.9);
-            color: white; padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 14px;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
         #coordDisplay {
             position: absolute;
-            top: 10px; left: 10px;
-            background: rgba(0, 0, 0, 0.75);
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.75);
             color: #FFC107;
             padding: 8px 12px;
             border-radius: 6px;
             font-size: 14px;
             z-index: 1500;
-            min-width: 200px;
         }
 
-        /* -------------------------
-           공통 원형 버튼 스타일
-        ------------------------- */
         .map-btn-circle {
-            width: 45px; height: 45px;
-            padding: 0; cursor: pointer;
-            background: white;
-            border: none; border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: #fff;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            font-size: 14px; display: flex;
-            justify-content: center; align-items: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
         }
 
-        /* -------------------------
-           현재 위치 버튼
-        ------------------------- */
+        /* 현재 위치 버튼 */
         #geolocationBtn {
             position: absolute;
-            bottom: 20px; left: 10px;
+            bottom: 20px;
+            left: 10px;
             z-index: 1500;
             font-size: 0;
         }
 
         #geolocationBtn .geo-icon {
             width: 18px; height: 18px;
-            border: 2px solid #333;
             border-radius: 50%;
+            border: 2px solid #333;
             position: relative;
         }
 
         #geolocationBtn .geo-icon::after {
-            content: '';
+            content: "";
             width: 4px; height: 4px;
             background: #333;
             border-radius: 50%;
@@ -73,32 +62,24 @@
 
         #geolocationBtn.active .geo-icon {
             border: none;
-            background: transparent;
+            background: none;
             width: 0; height: 0;
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-bottom: 12px solid #ffffff;
+            border-bottom: 12px solid #fff;
         }
 
         #geolocationBtn.active .geo-icon::after { content: none; }
 
-        /* -------------------------
-           층 버튼 컨테이너
-        ------------------------- */
+        /* 층 버튼 컨테이너 */
         #floorControls {
             position: absolute;
-            bottom: 95px; left: 10px;
+            bottom: 95px;
+            left: 10px;
             display: none;
             flex-direction: column-reverse;
             gap: 10px;
             z-index: 1500;
-        }
-
-        .floor-btn { font-size: 14px; }
-
-        .map-btn-circle.active {
-            background: #007bff;
-            color: white;
         }
 
         /* i 버튼 */
@@ -106,34 +87,30 @@
 
         #accessInfoBtn .i-icon {
             width: 25px; height: 25px;
-            display: block;
             background-size: contain;
-            background-image: url('https://raw.githubusercontent.com/candream99/disabledmap/main/i_button.png');
+            background-repeat: no-repeat;
+            background-image: url("https://raw.githubusercontent.com/candream99/disabledmap/main/i_button.png");
         }
 
         #accessInfoBtn.active .i-icon {
-            background-image: url('https://raw.githubusercontent.com/candream99/disabledmap/main/i_button2.png');
+            background-image: url("https://raw.githubusercontent.com/candream99/disabledmap/main/i_button2.png");
         }
 
-        /* -------------------------
-           무장애 정보 팝업
-        ------------------------- */
+        /* 무장애 팝업 */
         #accessPopup {
             position: absolute;
             bottom: 180px;
             left: 10px;
             width: 260px;
-            background: white;
-            padding: 12px;
+            background: #fff;
             border-radius: 8px;
-            display: none;
+            padding: 12px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            display: none;
             z-index: 2000;
         }
 
-        /* -------------------------
-           🔥 모바일 버튼 하단 고정
-        ------------------------- */
+        /* 모바일에서 버튼 하단 고정 */
         @media (max-width: 768px) {
             #geolocationBtn {
                 bottom: calc(env(safe-area-inset-bottom, 10px) + 10px);
@@ -144,294 +121,273 @@
                 bottom: calc(env(safe-area-inset-bottom, 10px) + 95px);
                 left: calc(env(safe-area-inset-left, 10px) + 5px);
             }
-
-            #accessInfoBtn { margin-bottom: 20px; }
         }
     </style>
 </head>
+
 <body>
 
-    <div id="status">API 키 확인 중...</div>
     <div id="coordDisplay">건물을 클릭하면 실내지도를 볼 수 있어요</div>
 
-    <button id="geolocationBtn" class="map-btn-circle"><span class="geo-icon"></span></button>
+    <!-- 현재 위치 버튼 -->
+    <button id="geolocationBtn" class="map-btn-circle">
+        <span class="geo-icon"></span>
+    </button>
 
+    <!-- 층 버튼 컨테이너 -->
     <div id="floorControls">
-        <button id="accessInfoBtn" class="floor-btn map-btn-circle" data-floor="access">
+        <button id="accessInfoBtn" class="map-btn-circle floor-btn">
             <span class="i-icon"></span>
         </button>
     </div>
 
+    <!-- 무장애 팝업 -->
     <div id="accessPopup">
-        <span id="accessPopupClose" style="position:absolute; top:8px; right:12px; font-size:22px;cursor:pointer;">×</span>
+        <span id="accessPopupClose" style="position:absolute; top:8px; right:12px; font-size:22px; cursor:pointer;">×</span>
         <div style="font-size:1.2rem; font-weight:700; margin-bottom:15px;">무장애 시설 정보</div>
-        <div style="display:flex; margin-bottom:8px;"><span>• 주출입구 경사로</span><span style="margin-left:auto;color:#10b981;">있음</span></div>
-        <div style="display:flex; margin-bottom:8px;"><span>• 장애인 화장실</span><span style="margin-left:auto;color:#10b981;">있음</span></div>
-        <div style="display:flex; margin-bottom:8px;"><span>• 점자블록</span><span style="margin-left:auto;color:#10b981;">있음</span></div>
-        <div style="display:flex; margin-bottom:8px;"><span>• 엘리베이터</span><span style="margin-left:auto;color:#10b981;">있음</span></div>
-        <div style="display:flex; margin-bottom:8px;"><span>• 주출입구 단차</span><span style="margin-left:auto;color:#ef4444;">있음</span></div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 주출입구 경사로</span><span style="margin-left:auto; color:#10b981;">있음</span></div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 장애인 화장실</span><span style="margin-left:auto; color:#10b981;">있음</span></div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 점자블록</span><span style="margin-left:auto; color:#10b981;">있음</span></div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 엘리베이터</span><span style="margin-left:auto; color:#10b981;">있음</span></div>
+        <div style="display:flex;"><span>• 주출입구 단차</span><span style="margin-left:auto; color:#ef4444;">있음</span></div>
     </div>
 
     <div id="map"></div>
 
-    <script>
-        const script = document.createElement('script');
-        script.src =
-          "https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof&vmode=3";
+<script>
+const script = document.createElement("script");
+script.src = "https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=q1d23mmkof&vmode=3";
 
-        script.onload = function () {
+script.onload = function () {
 
-            const coordDisplay = document.getElementById("coordDisplay");
-            const floorControlsContainer = document.getElementById("floorControls");
-            const popup = document.getElementById("accessPopup");
-            const accessBtn = document.getElementById("accessInfoBtn");
-            const popupClose = document.getElementById("accessPopupClose");
-            const geolocationBtn = document.getElementById("geolocationBtn");
+    const coordDisplay = document.getElementById("coordDisplay");
+    const floorControls = document.getElementById("floorControls");
+    const popup = document.getElementById("accessPopup");
+    const popupClose = document.getElementById("accessPopupClose");
+    const iBtn = document.getElementById("accessInfoBtn");
+    const geoBtn = document.getElementById("geolocationBtn");
 
-            const map = new naver.maps.Map("map", {
-                center: new naver.maps.LatLng(37.5710, 126.9784),
-                zoom: 17,
-                zoomControl: false,
-                mapTypes: new naver.maps.MapTypeRegistry({
-                    normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
-                }),
-            });
+    const map = new naver.maps.Map("map", {
+        center: new naver.maps.LatLng(37.5710, 126.9784),
+        zoom: 17,
+        zoomControl: false,
+        mapTypes: new naver.maps.MapTypeRegistry({
+            normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
+        }),
+    });
 
-            document.getElementById("status").style.display = "none";
+    /* -----------------------------
+       건물 polygon / 이미지 설정
+    ----------------------------- */
+    const buildings = {
+        ky: {
+            polygonCoords: [
+                new naver.maps.LatLng(37.571350, 126.977670),
+                new naver.maps.LatLng(37.571360, 126.978059),
+                new naver.maps.LatLng(37.571275, 126.978063),
+                new naver.maps.LatLng(37.571275, 126.978173),
+                new naver.maps.LatLng(37.570870, 126.978184),
+                new naver.maps.LatLng(37.570872, 126.978082),
+                new naver.maps.LatLng(37.570543, 126.978094),
+                new naver.maps.LatLng(37.570539, 126.977702),
+            ],
+            floors: ["b1", "1f", "2f"],
+            images: {
+                "b1": "https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg",
+                "1f": "https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky1.jpg",
+                "2f": "https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg",
+            },
+            imageBounds: new naver.maps.LatLngBounds(
+                new naver.maps.LatLng(37.570512, 126.977632),
+                new naver.maps.LatLng(37.571415, 126.978244)
+            ),
+        },
 
-            let groundOverlay = null;
-            let currentBuildingId = null;
-            let currentPositionMarker = null;
+        dt: {
+            polygonCoords: [
+                new naver.maps.LatLng(37.571470, 126.978762),
+                new naver.maps.LatLng(37.571476, 126.979161),
+                new naver.maps.LatLng(37.570627, 126.979181),
+                new naver.maps.LatLng(37.570557, 126.979117),
+                new naver.maps.LatLng(37.570553, 126.978777),
+            ],
+            floors: ["b4", "1f"],
+            images: {
+                "b4": "https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt_b4.png",
+                "1f": "https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt1.png",
+            },
+            imageBounds: new naver.maps.LatLngBounds(
+                new naver.maps.LatLng(37.570459, 126.978649),
+                new naver.maps.LatLng(37.571626, 126.979210)
+            ),
+        }
+    };
 
-            const buildings = {
-                ky: {
-                    polygonCoords: [
-                        new naver.maps.LatLng(37.571350, 126.977670),
-                        new naver.maps.LatLng(37.571360, 126.978059),
-                        new naver.maps.LatLng(37.571275, 126.978063),
-                        new naver.maps.LatLng(37.571275, 126.978173),
-                        new naver.maps.LatLng(37.570870, 126.978184),
-                        new naver.maps.LatLng(37.570872, 126.978082),
-                        new naver.maps.LatLng(37.570543, 126.978094),
-                        new naver.maps.LatLng(37.570539, 126.977702),
-                    ],
-                    floors: ["b1", "1f", "2f"],
-                    images: {
-                        b1: "https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg",
-                        1f: "https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky1.jpg",
-                        2f: "https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg",
-                    },
-                    imageBounds: new naver.maps.LatLngBounds(
-                        new naver.maps.LatLng(37.570512, 126.977632),
-                        new naver.maps.LatLng(37.571415, 126.978244)
-                    ),
-                },
+    let currentBuilding = null;
+    let overlay = null;
+    let currentMarker = null;
 
-                dt: {
-                    polygonCoords: [
-                        new naver.maps.LatLng(37.571470, 126.978762),
-                        new naver.maps.LatLng(37.571476, 126.979161),
-                        new naver.maps.LatLng(37.570627, 126.979181),
-                        new naver.maps.LatLng(37.570557, 126.979117),
-                        new naver.maps.LatLng(37.570553, 126.978777),
-                    ],
-                    floors: ["b4", "1f"],
-                    images: {
-                        b4: "https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt_b4.png",
-                        1f: "https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt1.png",
-                    },
-                    imageBounds: new naver.maps.LatLngBounds(
-                        new naver.maps.LatLng(37.570459, 126.978649),
-                        new naver.maps.LatLng(37.571626, 126.979210)
-                    ),
-                },
-            };
+    /* -----------------------------
+       실내모드 종료
+    ----------------------------- */
+    function exitIndoorMode() {
+        if (overlay) overlay.setMap(null);
 
-            function exitIndoorMode() {
-                if (!currentBuildingId) return;
-                if (groundOverlay) groundOverlay.setMap(null);
+        popup.style.display = "none";
+        iBtn.classList.remove("active");
 
-                popup.style.display = "none";
-                accessBtn.classList.remove("active");
+        floorControls.style.display = "none";
 
-                for (const id in buildings) {
-                    const poly = buildings[id].polygon;
-                    if (poly) {
-                        poly.setMap(map);
-                        poly.setOptions({ fillColor: "transparent" });
-                    }
-                }
+        currentBuilding = null;
+        coordDisplay.textContent = "건물을 클릭하면 실내지도를 볼 수 있어요";
+    }
 
-                floorControlsContainer.style.display = "none";
-                currentBuildingId = null;
+    /* -----------------------------
+       층 보여주기
+    ----------------------------- */
+    function showFloor(buildingId, floor) {
+        const config = buildings[buildingId];
+        if (!config) return;
 
-                coordDisplay.textContent = "건물을 클릭하면 실내지도를 볼 수 있어요";
-            }
+        if (overlay) overlay.setMap(null);
 
-            function showFloor(buildingId, floor) {
-                const config = buildings[buildingId];
-                if (!config || !config.images[floor]) return;
+        overlay = new naver.maps.GroundOverlay(
+            config.images[floor],
+            config.imageBounds,
+            { map, opacity: 1, clickable: true }
+        );
 
-                currentBuildingId = buildingId;
+        currentBuilding = buildingId;
 
-                if (groundOverlay) groundOverlay.setMap(null);
+        document.querySelectorAll(
+            "#floorControls .floor-btn:not(#accessInfoBtn)"
+        ).forEach(btn => btn.classList.remove("active"));
 
-                groundOverlay = new naver.maps.GroundOverlay(
-                    config.images[floor],
-                    config.imageBounds,
-                    { map, clickable: true, opacity: 1 }
-                );
+        const activeBtn = document.querySelector(
+            `#floorControls .floor-btn[data-floor="${floor}"]`
+        );
+        if (activeBtn) activeBtn.classList.add("active");
 
-                document
-                    .querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)')
-                    .forEach((b) => b.classList.remove("active"));
+        naver.maps.Event.addListener(overlay, "click", exitIndoorMode);
+    }
 
-                const btn = document.querySelector(
-                    `#floorControls .floor-btn[data-floor="${floor}"]`
-                );
-                if (btn) btn.classList.add("active");
+    /* -----------------------------
+       층 버튼 생성
+    ----------------------------- */
+    function renderFloorButtons(buildingId) {
+        const config = buildings[buildingId];
+        document.querySelectorAll("#floorControls .floor-btn:not(#accessInfoBtn)")
+            .forEach(btn => btn.remove());
 
-                naver.maps.Event.addListener(groundOverlay, "click", function () {
-                    exitIndoorMode();
-                });
-            }
+        config.floors.forEach(f => {
+            const b = document.createElement("button");
+            b.className = "map-btn-circle floor-btn";
+            b.dataset.floor = f;
+            b.textContent = f.toUpperCase();
+            floorControls.prepend(b);
 
-            function renderFloorButtons(buildingId) {
-                const config = buildings[buildingId];
+            b.onclick = () => showFloor(buildingId, f);
+        });
+    }
 
-                document
-                    .querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)')
-                    .forEach((b) => b.remove());
+    /* -----------------------------
+       건물 폴리곤 생성
+    ----------------------------- */
+    for (const id in buildings) {
+        const config = buildings[id];
 
-                const defaultFloor = config.floors.includes("1f")
-                    ? "1f"
-                    : config.floors[0];
+        const poly = new naver.maps.Polygon({
+            map,
+            paths: [config.polygonCoords],
+            fillColor: "transparent",
+            strokeColor: "#C490E4",
+            strokeWeight: 3,
+            clickable: true
+        });
 
-                config.floors.forEach((f) => {
-                    const btn = document.createElement("button");
-                    btn.className = "floor-btn map-btn-circle";
-                    btn.dataset.floor = f;
-                    btn.textContent = f.toUpperCase();
+        config.polygon = poly;
 
-                    floorControlsContainer.prepend(btn);
+        naver.maps.Event.addListener(poly, "mouseover", () => {
+            if (!overlay || !overlay.getMap())
+                poly.setOptions({ fillColor: "#C490E4" });
+        });
 
-                    if (f === defaultFloor) btn.classList.add("active");
+        naver.maps.Event.addListener(poly, "mouseout", () => {
+            if (!overlay || !overlay.getMap())
+                poly.setOptions({ fillColor: "transparent" });
+        });
 
-                    btn.addEventListener("click", () => showFloor(buildingId, f));
-                });
-            }
+        naver.maps.Event.addListener(poly, "click", () => {
+            floorControls.style.display = "flex";
 
-            function setupBuilding(id, cfg) {
-                const poly = new naver.maps.Polygon({
-                    map,
-                    paths: [cfg.polygonCoords],
-                    fillColor: "transparent",
-                    strokeColor: "#C490E4",
-                    strokeWeight: 3,
-                    clickable: true,
-                });
-                cfg.polygon = poly;
+            renderFloorButtons(id);
+            showFloor(id, config.floors.includes("1f") ? "1f" : config.floors[0]);
 
-                naver.maps.Event.addListener(poly, "mouseover", () => {
-                    if (!groundOverlay || !groundOverlay.getMap()) {
-                        poly.setOptions({ fillColor: "#C490E4" });
-                        coordDisplay.textContent = "클릭해서 실내지도를 보세요";
-                    }
-                });
-                naver.maps.Event.addListener(poly, "mouseout", () => {
-                    if (!groundOverlay || !groundOverlay.getMap()) {
-                        poly.setOptions({ fillColor: "transparent" });
-                        coordDisplay.textContent =
-                            "건물을 클릭하면 실내지도를 볼 수 있어요";
-                    }
-                });
+            coordDisplay.textContent = "일반지도로 돌아가려면 실내지도를 클릭하세요";
+        });
+    }
 
-                naver.maps.Event.addListener(poly, "click", () => {
-                    poly.setOptions({ fillColor: "#C490E4" });
-                    floorControlsContainer.style.display = "flex";
 
-                    renderFloorButtons(id);
+    /* -----------------------------
+       위치 찾기 버튼
+    ----------------------------- */
+    geoBtn.onclick = () => {
+        if (geoBtn.classList.contains("active")) {
+            if (currentMarker) currentMarker.setMap(null);
+            geoBtn.classList.remove("active");
+            return;
+        }
 
-                    const df = cfg.floors.includes("1f") ? "1f" : cfg.floors[0];
-                    showFloor(id, df);
+        navigator.geolocation?.getCurrentPosition(pos => {
+            const latlng = new naver.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+            map.setCenter(latlng);
 
-                    coordDisplay.textContent =
-                        "일반지도로 돌아가려면 실내지도를 클릭하세요";
-                });
-            }
+            if (currentMarker) currentMarker.setMap(null);
 
-            for (const id in buildings) setupBuilding(id, buildings[id]);
-
-            /* ---------------------------
-               Geolocation 버튼
-            --------------------------- */
-            geolocationBtn.addEventListener("click", () => {
-                if (geolocationBtn.classList.contains("active")) {
-                    if (currentPositionMarker)
-                        currentPositionMarker.setMap(null);
-
-                    geolocationBtn.classList.remove("active");
-                    return;
-                }
-
-                navigator.geolocation?.getCurrentPosition(
-                    (pos) => {
-                        const latlng = new naver.maps.LatLng(
-                            pos.coords.latitude,
-                            pos.coords.longitude
-                        );
-
-                        map.setCenter(latlng);
-
-                        if (currentPositionMarker)
-                            currentPositionMarker.setMap(null);
-
-                        currentPositionMarker = new naver.maps.Marker({
-                            map,
-                            position: latlng,
-                            icon: {
-                                content:
-                                    '<div style="width:12px;height:12px;background:#007bff;border-radius:50%;border:2px solid white;"></div>',
-                                anchor: new naver.maps.Point(6, 6),
-                            },
-                            zIndex: 9999,
-                        });
-
-                        geolocationBtn.classList.add("active");
-                    },
-                    () => alert("현재 위치를 가져올 수 없음"),
-                    { enableHighAccuracy: true }
-                );
-            });
-
-            /* ---------------------------
-               🔥 i 버튼 → 팝업 위치 조정 (30px 위)
-            --------------------------- */
-            accessBtn.addEventListener("click", () => {
-                const open = popup.style.display === "block";
-
-                if (!open) {
-                    const rect = accessBtn.getBoundingClientRect();
-                    const wh = window.innerHeight;
-
-                    const popupBottom = (wh - rect.top) + 30;
-                    popup.style.bottom = popupBottom + "px";
-
-                    popup.style.display = "block";
-                    accessBtn.classList.add("active");
-                } else {
-                    popup.style.display = "none";
-                    accessBtn.classList.remove("active");
+            currentMarker = new naver.maps.Marker({
+                map,
+                position: latlng,
+                icon: {
+                    content:
+                      '<div style="width:12px;height:12px;background:#007bff;border-radius:50%;border:2px solid white;"></div>',
+                    anchor: new naver.maps.Point(6, 6)
                 }
             });
 
-            popupClose.onclick = () => {
-                popup.style.display = "none";
-                accessBtn.classList.remove("active");
-            };
-        };
+            geoBtn.classList.add("active");
+        });
+    };
 
-        document.head.appendChild(script);
-    </script>
+    /* -----------------------------
+       🔥 i 버튼 팝업 위치 보정
+    ----------------------------- */
+    iBtn.onclick = () => {
+        const isOpen = popup.style.display === "block";
+
+        if (!isOpen) {
+            const rect = iBtn.getBoundingClientRect();
+            const winHeight = window.innerHeight;
+
+            const bottom = (winHeight - rect.top) + 30;
+            popup.style.bottom = bottom + "px";
+
+            popup.style.display = "block";
+            iBtn.classList.add("active");
+        } else {
+            popup.style.display = "none";
+            iBtn.classList.remove("active");
+        }
+    };
+
+    popupClose.onclick = () => {
+        popup.style.display = "none";
+        iBtn.classList.remove("active");
+    };
+
+};
+
+document.head.appendChild(script);
+</script>
+
 </body>
 </html>
