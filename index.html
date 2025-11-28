@@ -1,169 +1,388 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>네이버 벡터맵 테스트 - 층 버튼 추가</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>네이버 벡터맵 - 무장애 시설정보 통합</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
         #map { width: 100%; height: 100%; }
+
+        /* 상태 및 좌표 표시 스타일 (기존 네이버 코드 유지) */
         #status {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(255, 99, 71, 0.9);
-            color: white; padding: 10px 15px;
-            border-radius: 5px; font-size: 14px;
-            z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: absolute; top: 10px; left: 10px; background: rgba(255, 99, 71, 0.9); color: white; padding: 10px 15px; border-radius: 5px; font-size: 14px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         #coordDisplay {
-            position: absolute; top: 50px; left: 10px;
-            background: rgba(0, 0, 0, 0.7); color: #FFC107;
-            padding: 10px 15px; border-radius: 5px;
-            font-size: 14px; z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            min-width: 250px; text-align: center;
+            position: absolute; top: 50px; left: 10px; background: rgba(0, 0, 0, 0.7); color: #FFC107; padding: 10px 15px; border-radius: 5px; font-size: 14px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); min-width: 250px; text-align: center;
         }
-        /* ⭐ 실내 모드 층 버튼 */
-        #floorControls {
+
+        /* ⭐ 무장애 정보 버튼 컨테이너 (왼쪽 상단 - 구글 코드 기반) ⭐ */
+        #accessibility-button-container {
             position: absolute;
-            top: 120px;
-            left: 10px;
-            display: none;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 1500;
+            top: 10px; 
+            left: 10px; /* status와 위치 충돌 피하기 위해 조정 */
+            z-index: 999;
+            display: none; 
         }
-        .floor-btn {
-            padding: 8px 14px;
+        
+        /* 무장애 정보 버튼 스타일 */
+        #accessibility-button {
+            background-color: white;
+            border: 1px solid #ccc; 
+            border-radius: 3px;     
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            padding: 8px 12px;
             font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-            border: none;
-            background: #ccc;
-            color: #000;
-        }
-        .floor-btn.active {
-            background: #007bff;
-            color: #fff;
             font-weight: bold;
+            cursor: pointer;
+            color: #4285F4; 
+            transition: background-color 0.1s, color 0.1s;
+        }
+        #accessibility-button.active {
+            background-color: #4285F4;
+            color: white; 
+            border-color: #4285F4; 
+        }
+
+        /* 무장애 정보 팝업창 */
+        #accessibility-popup {
+            position: absolute;
+            top: 55px; 
+            left: 10px; 
+            z-index: 1000; 
+            width: 300px;
+            max-width: calc(100% - 20px); 
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            display: none; 
+            padding: 15px; 
+            box-sizing: border-box;
+        }
+        
+        #popup-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px; 
+            font-size: 24px;
+            cursor: pointer;
+            color: #777;
+            font-weight: 300;
+            line-height: 1;
+        }
+        
+        /* 무장애 시설 정보 내부 스타일 */
+        .accessibility-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1e3a8a;
+        }
+        .accessibility-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        .accessibility-item i {
+            width: 24px;
+            text-align: center;
+            margin-right: 10px;
+            color: #2563eb;
+        }
+        .accessibility-status {
+            margin-left: auto;
+            font-weight: 600;
+        }
+        .status-yes {
+            color: #10b981;
+        }
+        .status-no {
+            color: #ef4444;
         }
     </style>
 </head>
 <body>
     <div id="status">API 키 확인 중...</div>
     <div id="coordDisplay">지도를 클릭하면 좌표가 나와요!</div>
-    <div id="floorControls">
-        <button class="floor-btn" data-floor="b1">B1</button>
-        <button class="floor-btn active" data-floor="1f">1F</button>
-        <button class="floor-btn" data-floor="2f">2F</button>
-    </div>
     <div id="map"></div>
+    
+    <div id="accessibility-button-container">
+        <button id="accessibility-button">무장애 시설정보</button>
+    </div>
+
+    <div id="accessibility-popup">
+        <span id="popup-close-btn">×</span>
+        <div id="popup-content">
+            </div>
+    </div>
 
     <script>
         const NCP_KEY_ID = 'q1d23mmkof';
+        
+        // ⭐ 건물 데이터 통합 (간소화: 교보빌딩 정보만 사용) ⭐
+        const BUILDING_CONFIGS = {
+            'KYOBOCENTER': {
+                name: '교보빌딩',
+                accessibility: { ramp: true, disabledToilet: true, braille: true, elevator: true, stepFree: false },
+                floorInfo: {
+                    imageUrl: 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
+                    imageBounds: { north: 37.571365, south: 37.570535, west: 126.977631, east: 126.978099 }
+                }
+            }
+        };
+
+        let map;
+        let groundOverlay = null;
+        let labelLayer;
+        let polygon; 
+
+        // ⭐ 무장애 시설 관련 DOM 참조 ⭐
+        let accessButton;
+        let accessPopup;
+        let accessBtnContainer;
+        let popupContent;
+
+        // === 헬퍼 함수 ===
+        
+        // ⭐ 구글 코드에서 가져온 HTML 생성 함수 ⭐
+        function generateAccessibilityHTML(data) {
+            const getStatus = (key) => ({
+                text: data[key] ? '있음' : '없음',
+                class: data[key] ? 'status-yes' : 'status-no'
+            });
+            // 단차는 true(단차 없음)일 때 '없음'으로 표시해야 함.
+            const stepFreeText = data.stepFree ? '없음' : '있음';
+            const stepFreeClass = data.stepFree ? 'status-yes' : 'status-no';
+
+            return `
+                <div class="accessibility-info">
+                    <div class="accessibility-title">무장애 시설 정보</div>
+                    <div class="accessibility-item">
+                        <i class="fas fa-wheelchair"></i>
+                        <span>주출입구 경사로</span>
+                        <span class="accessibility-status ${getStatus('ramp').class}">${getStatus('ramp').text}</span>
+                    </div>
+                    <div class="accessibility-item">
+                        <i class="fas fa-restroom"></i>
+                        <span>장애인 화장실</span>
+                        <span class="accessibility-status ${getStatus('disabledToilet').class}">${getStatus('disabledToilet').text}</span>
+                    </div>
+                    <div class="accessibility-item">
+                        <i class="fas fa-braille"></i>
+                        <span>점자블록</span>
+                        <span class="accessibility-status ${getStatus('braille').class}">${getStatus('braille').text}</span>
+                    </div>
+                    <div class="accessibility-item">
+                        <i class="fas fa-elevator"></i>
+                        <span>엘리베이터</span>
+                        <span class="accessibility-status ${getStatus('elevator').class}">${getStatus('elevator').text}</span>
+                    </div>
+                    <div class="accessibility-item">
+                        <i class="fas fa-accessible-icon"></i>
+                        <span>주출입구 단차</span>
+                        <span class="accessibility-status ${stepFreeClass}">${stepFreeText}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ⭐ 무장애 버튼 활성화 상태 토글 함수 ⭐
+        function toggleAccessibilityButtonState(isActive) {
+            if (accessButton) {
+                if (isActive) {
+                    accessButton.classList.add('active');
+                } else {
+                    accessButton.classList.remove('active');
+                }
+            }
+        }
+
+        // ⭐ GroundOverlay 클릭 이벤트 핸들러 (실내 모드 종료) 함수 정의 ⭐
+        function setupGroundOverlayClickListener(gOverlay) {
+            naver.maps.Event.addListener(gOverlay, 'click', function(e) {
+                e.stopOverlays = true; 
+                
+                // 실내 모드 종료
+                gOverlay.setMap(null); 
+                groundOverlay = null; 
+                labelLayer.setMap(map);
+                
+                // ⭐ 무장애 버튼 및 팝업 숨김 ⭐
+                accessBtnContainer.style.display = 'none';
+                accessPopup.style.display = 'none';
+                toggleAccessibilityButtonState(false);
+
+                polygon.setOptions({
+                    fillColor: 'transparent' 
+                });
+                document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
+                console.log("평면도 클릭: 실내 모드 종료. 지도 라벨 복구.");
+            });
+        }
+
+        // ⭐ 실내 모드 진입/층 변경 함수 (GroundOverlay를 새로 생성) ⭐
+        function showIndoorMode() {
+            const buildingId = 'KYOBOCENTER'; // 현재는 단일 건물
+            const config = BUILDING_CONFIGS[buildingId];
+
+            // 1. 이전 GroundOverlay가 있다면 제거
+            if (groundOverlay) {
+                groundOverlay.setMap(null); 
+                groundOverlay = null;
+            }
+
+            // 2. 이미지 경계 설정 (Naver Maps 형식에 맞게 LatLngBounds 생성)
+            const bounds = config.floorInfo.imageBounds;
+            const swLatLng = new naver.maps.LatLng(bounds.south, bounds.west);
+            const neLatLng = new naver.maps.LatLng(bounds.north, bounds.east);
+            const imageBounds = new naver.maps.LatLngBounds(swLatLng, neLatLng);
+
+            // 3. 새 GroundOverlay 생성 및 지도에 바로 표시
+            groundOverlay = new naver.maps.GroundOverlay(
+                config.floorInfo.imageUrl, 
+                imageBounds,          
+                {
+                    map: map,
+                    clickable: true, 
+                    opacity: 1
+                }
+            );
+            
+            // 4. 새 객체에 클릭 이벤트 리스너 연결
+            setupGroundOverlayClickListener(groundOverlay);
+            
+            // 5. 무장애 정보 업데이트
+            popupContent.innerHTML = generateAccessibilityHTML(config.accessibility);
+
+
+            document.getElementById('coordDisplay').textContent = '🏢 실내 모드 활성화. 이미지를 클릭하면 일반 지도로 돌아갑니다.';
+            console.log("실내 모드 활성화 및 평면도 표시.");
+        }
+
+
+        // === 지도 초기화 메인 함수 ===
+
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
-
-        script.onload = function () {
-            document.getElementById('status').textContent = 'API 로드 성공!';
+        
+        script.onload = function() {
+            document.getElementById('status').textContent = 'API 로드 성공!\n벡터 지도 초기화 중...'; 
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
-
+            
+            // 1. 지도 초기 옵션 설정 및 생성
             const mapOptions = {
                 center: new naver.maps.LatLng(37.570946, 126.97788),
                 zoom: 18,
                 zoomControl: true,
-                zoomControlOptions: { position: naver.maps.Position.TOP_RIGHT },
+                zoomControlOptions: {
+                    position: naver.maps.Position.TOP_RIGHT
+                },
                 mapTypes: new naver.maps.MapTypeRegistry({
-                    normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
-                }),
+                    'normal': naver.maps.NaverStyleMapTypeOptions.getVectorMap()
+                })
             };
-            const map = new naver.maps.Map('map', mapOptions);
+            map = new naver.maps.Map('map', mapOptions);
             map.setMapTypeId('normal');
 
-            const labelLayer = new naver.maps.LabelLayer();
+            // 2. 라벨 레이어 설정 
+            labelLayer = new naver.maps.LabelLayer();
             labelLayer.setMap(map);
+
             document.getElementById('status').style.display = 'none';
 
+            // ⭐ 3. DOM 요소 참조 및 이벤트 연결 (무장애 버튼) ⭐
+            accessButton = document.getElementById('accessibility-button');
+            accessPopup = document.getElementById('accessibility-popup');
+            accessBtnContainer = document.getElementById('accessibility-button-container');
+            popupContent = document.getElementById('popup-content');
+            const closeBtn = document.getElementById('popup-close-btn');
+
+            // 팝업 이벤트 설정
+            accessButton.onclick = () => { 
+                const isPopupVisible = accessPopup.style.display === 'block';
+                if (isPopupVisible) {
+                    accessPopup.style.display = 'none';
+                    toggleAccessibilityButtonState(false);
+                } else {
+                    accessPopup.style.display = 'block';
+                    toggleAccessibilityButtonState(true);
+                }
+            };
+            closeBtn.onclick = () => { 
+                accessPopup.style.display = 'none';
+                toggleAccessibilityButtonState(false); 
+            };
+            
+            // 4. 다각형(Polygon) 기능
             const polygonCoords = [
                 new naver.maps.LatLng(37.571348, 126.977671),
                 new naver.maps.LatLng(37.571354, 126.978059),
                 new naver.maps.LatLng(37.570541, 126.978091),
-                new naver.maps.LatLng(37.570538, 126.977698),
+                new naver.maps.LatLng(37.570538, 126.977698)
             ];
-
-            const polygon = new naver.maps.Polygon({
-                map: map,
-                paths: [polygonCoords],
-                fillColor: 'transparent',
-                fillOpacity: 0.5,
-                strokeColor: '#C490E4',
-                strokeOpacity: 1,
-                strokeWeight: 3,
-                clickable: true,
+            polygon = new naver.maps.Polygon({
+                map: map, paths: [polygonCoords], fillColor: 'transparent', fillOpacity: 0.5,
+                strokeColor: '#C490E4', strokeOpacity: 1, strokeWeight: 3, clickable: true 
             });
-
-            let groundOverlay = null;
-            let currentFloor = '1f';
-
-            const floorImages = {
-                b1: 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
-                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
-                '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
-            };
-
-            const swLatLng = new naver.maps.LatLng(37.570535, 126.977631);
-            const neLatLng = new naver.maps.LatLng(37.571365, 126.978099);
-            const imageBounds = new naver.maps.LatLngBounds(swLatLng, neLatLng);
-
-            function showFloor(floor) {
-                currentFloor = floor;
-                if (groundOverlay) groundOverlay.setMap(null);
-
-                groundOverlay = new naver.maps.GroundOverlay(floorImages[floor], imageBounds, {
-                    map: map,
-                    clickable: true,
-                    opacity: 1,
-                });
-
-                document.querySelectorAll('.floor-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelector(`.floor-btn[data-floor="${floor}"]`).classList.add('active');
-
-                naver.maps.Event.addListener(groundOverlay, 'click', function (e) {
-                    e.stopOverlays = true;
-                    groundOverlay.setMap(null);
-                    document.getElementById('floorControls').style.display = 'none';
-                    polygon.setOptions({ fillColor: 'transparent' });
-                    labelLayer.setMap(map);
-                });
-            }
-
-            naver.maps.Event.addListener(polygon, 'click', function (e) {
-                e.stopOverlays = true;
-                labelLayer.setMap(null);
+            
+            // 마우스 오버(Hover) 효과
+            naver.maps.Event.addListener(polygon, 'mouseover', function() {
                 polygon.setOptions({ fillColor: '#C490E4' });
-                document.getElementById('floorControls').style.display = 'flex';
-                showFloor('1f');
+                document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다! (마우스 오버)';
             });
 
-            naver.maps.Event.addListener(map, 'click', function (e) {
-                if (!groundOverlay || groundOverlay.getMap() === null) {
-                    const lat = e.latlng.lat().toFixed(6);
-                    const lng = e.latlng.lng().toFixed(6);
-                    document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
+            // 마우스 아웃 시
+            naver.maps.Event.addListener(polygon, 'mouseout', function() {
+                if (groundOverlay === null) {
+                    polygon.setOptions({ fillColor: 'transparent' });
+                    document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
                 }
             });
 
-            document.querySelectorAll('.floor-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    showFloor(btn.dataset.floor);
-                });
+
+            // 다각형(Polygon) 클릭 이벤트: 실내 모드 진입
+            naver.maps.Event.addListener(polygon, 'click', function(e) {
+                e.stopOverlays = true; 
+
+                // 실내 모드 시작
+                labelLayer.setMap(null); 
+                
+                // ⭐ 무장애 버튼 표시 ⭐
+                accessBtnContainer.style.display = 'block'; 
+
+                polygon.setOptions({ fillColor: '#C490E4' });
+                
+                // 실내 모드 진입 시 GroundOverlay 표시
+                showIndoorMode(); 
+
+                console.log("다각형 내부 클릭: 실내 모드 진입. 지도 라벨 숨김.");
             });
-        };
 
-        script.onerror = function () {
-            document.getElementById('status').textContent = 'API 로드 실패! URL 또는 Key 확인!';
+            // ⭐ 지도 클릭 이벤트 (다각형 밖을 클릭했을 때만 작동)
+            naver.maps.Event.addListener(map, 'click', function(e) {
+                // groundOverlay가 null일 때 (실내 모드가 아닐 때)만 좌표 표시 기능 실행
+                if (groundOverlay === null) { 
+                    const lat = e.latlng.lat().toFixed(6);
+                    const lng = e.latlng.lng().toFixed(6);
+                    document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
+                    console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
+                } else {
+                    console.log("실내 모드 중: 지도 클릭 무시됨.");
+                }
+            });
+
+            console.log("네이버 벡터맵 로드 및 초기화 성공! 모든 기능 통합 완료.");
+        };
+        
+        script.onerror = function() {
+            document.getElementById('status').textContent = 'API 로드 실패!\n네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
             document.getElementById('status').style.background = 'red';
+            console.error("네이버 지도 API 로드 실패!");
         };
-
         document.head.appendChild(script);
     </script>
 </body>
