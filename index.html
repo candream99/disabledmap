@@ -55,7 +55,7 @@
         <button class="floor-btn" data-floor="b1">B1</button>
         <button class="floor-btn active" data-floor="1f">1F</button>
         <button class="floor-btn" data-floor="2f">2F</button>
-        <button id="accessInfoBtn" class="floor-btn" style="background:#444; color:#fff; margin-top:10px;">무장애 시설정보</button>
+        <button id="accessInfoBtn" class="access-btn" style="background:#444; color:#fff; margin-top:10px;">무장애 시설정보</button>
     </div>
 
     <!-- ⭐ 무장애 시설정보 팝업창 추가 ⭐ -->
@@ -128,6 +128,12 @@
             const imageBounds = new naver.maps.LatLngBounds(swLatLng, neLatLng);
 
             function showFloor(floor) {
+                // 안전장치: 요청된 floor 이미지가 존재하는지 확인
+                if (!floorImages[floor]) {
+                    console.warn(`showFloor: 이미지가 존재하지 않습니다. floor=${floor}`);
+                    return;
+                }
+
                 currentFloor = floor;
                 if (groundOverlay) groundOverlay.setMap(null);
 
@@ -137,19 +143,10 @@
                     opacity: 1,
                 });
 
-                document.getElementById('accessInfoBtn').addEventListener('click', () => {
-                const popup = document.getElementById('accessPopup');
-                popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
-            });
-            document.getElementById('accessPopupClose').addEventListener('click', () => {
-                document.getElementById('accessPopup').style.display = 'none';
-            });
-
-            // ⭐ 무장애 시설정보 버튼은 층 이미지와 완전 독립적으로 동작해야 함
-            // 따라서 showFloor() 호출과 어떠한 연결도 하지 않음
-
-            document.querySelectorAll('.floor-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelector(`.floor-btn[data-floor="${floor}"]`).classList.add('active');
+                // only operate on actual floor buttons
+                document.querySelectorAll('.floor-btn').forEach(btn => btn.classList.remove('active'));
+                const floorBtn = document.querySelector(`.floor-btn[data-floor="${floor}"]`);
+                if (floorBtn) floorBtn.classList.add('active');
 
                 naver.maps.Event.addListener(groundOverlay, 'click', function (e) {
                     e.stopOverlays = true;
