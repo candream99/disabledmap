@@ -39,7 +39,7 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             padding: 0;
             cursor: pointer;
             background: #ffffff;
-            border: none; /* 테두리 제거 */
+            border: none; 
             border-radius: 50%;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             color: #000;
@@ -55,19 +55,18 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         /* 현재 위치 버튼 스타일 */
         #geolocationBtn {
             position: absolute;
-            bottom: 20px; /* 하단 왼쪽 코너 */
+            bottom: 20px; 
             left: 10px;
             z-index: 1500;
             font-size: 0; 
         }
 
         /* ----- Geolocation 아이콘 스타일 ----- */
-        /* Inactive Icon: Target/Bullseye (Grey/Black) */
         #geolocationBtn .geo-icon {
             display: block;
             width: 18px;
             height: 18px;
-            border: 2px solid #333; /* 바깥쪽 원 */
+            border: 2px solid #333; 
             border-radius: 50%;
             position: relative;
             box-sizing: border-box;
@@ -82,28 +81,24 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             transform: translate(-50%, -50%);
             width: 4px;
             height: 4px;
-            background-color: #333; /* 가운데 점 */
+            background-color: #333; 
             border-radius: 50%;
         }
 
-        /* Active State: Arrow/Compass Icon (White) */
         #geolocationBtn.active .geo-icon {
-            /* 타겟 아이콘 숨기기 */
             border: none;
             background-color: transparent;
             width: 0;
             height: 0;
             transform: none; 
-            
-            /* 화살표 모양 생성 */
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-bottom: 12px solid #ffffff; /* 흰색 화살표 몸통 */
-            margin-bottom: 6px; /* 중앙 정렬 미세 조정 */
+            border-bottom: 12px solid #ffffff; 
+            margin-bottom: 6px; 
         }
 
         #geolocationBtn.active .geo-icon::after {
-            content: none; /* 가운데 점 숨기기 */
+            content: none; 
         }
         /* ------------------------------------- */
         
@@ -128,10 +123,37 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 
         /* 클릭된 버튼 활성 스타일 */
         .map-btn-circle.active {
-            background: #007bff;
+            background: #007bff; /* 파란색 배경 유지 */
             color: #fff;
             font-weight: bold;
         }
+
+        /* ------------------------------------- */
+        /* 무장애 시설 버튼 이미지 스타일 (추가/수정된 부분) */
+        /* ------------------------------------- */
+        #accessInfoBtn {
+            font-size: 0;
+            line-height: 0; 
+        }
+        
+        /* Icon (span inside button) */
+        #accessInfoBtn .i-icon {
+            display: block;
+            width: 25px; 
+            height: 25px;
+            background-size: contain; 
+            background-repeat: no-repeat;
+            background-position: center; 
+            
+            /* 기본 이미지 (흰색 배경) */
+            background-image: url('https://raw.githubusercontent.com/candream99/disabledmap/main/i_button.png');
+        }
+
+        /* 활성화 시 이미지 (파란색 배경) */
+        #accessInfoBtn.active .i-icon {
+            background-image: url('https://raw.githubusercontent.com/candream99/disabledmap/main/i_button2.png');
+        }
+        /* ------------------------------------- */
         
         /* 무장애 팝업 */
         #accessPopup {
@@ -155,7 +177,7 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     <button id="geolocationBtn" class="map-btn-circle" title="현재 위치 찾기"><span class="geo-icon"></span></button>
     
     <div id="floorControls">
-        <button id="accessInfoBtn" class="floor-btn map-btn-circle" data-floor="access">i</button>
+        <button id="accessInfoBtn" class="floor-btn map-btn-circle" data-floor="access"><span class="i-icon"></span></button>
         </div>
 
     <div id="accessPopup" style="display:none;">
@@ -329,7 +351,7 @@ color:#ef4444;">있음</span></div>
                 );
 
                 // 버튼 상태 업데이트: 층 버튼만 비활성화 후 선택된 버튼 활성화
-                // 'i' 버튼은 건드리지 않도록 #accessInfoBtn을 제외
+                // 'i' 버튼의 active 상태는 건드리지 않습니다.
                 document.querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)').forEach(btn => btn.classList.remove('active'));
                 
                 const floorBtn = document.querySelector(`#floorControls .floor-btn[data-floor="${floor}"]`);
@@ -367,7 +389,7 @@ color:#ef4444;">있음</span></div>
                     }
 
                     btn.addEventListener('click', () => {
-                        // [수정] 층 버튼 클릭 시 'i' 팝업이나 상태에 전혀 영향을 주지 않음
+                        // 층 버튼 클릭 시 'i' 팝업이나 상태에 전혀 영향을 주지 않습니다. (요청 완료)
                         showFloor(buildingId, floor);
                     });
                 });
@@ -528,11 +550,9 @@ color:#ef4444;">있음</span></div>
                 }
             });
             
-            // 무장애시설 버튼 ('i' 버튼) 클릭 리스너 
+            // 무장애시설 버튼 ('i' 버튼) 클릭 리스너 (팝업/상태 독립적 유지)
             accessBtn.addEventListener('click', function() {
                 const isOpen = popup.style.display === 'block';
-                
-                // 층 버튼의 활성화 상태를 건드리지 않음 (요청 완료)
                 
                 if (!isOpen) {
                     // 팝업 열기
@@ -550,7 +570,6 @@ color:#ef4444;">있음</span></div>
                 popupClose.onclick = () => {
                     popup.style.display = 'none';
                     accessBtn.classList.remove('active');
-                    // 층 버튼의 상태는 그대로 유지
                 };
             }
         };
