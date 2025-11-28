@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>네이버 벡터맵 테스트 - 거리 측정 기능 추가</title>
+    <title>네이버 벡터맵 테스트 - 층 버튼 추가</title>
     <style>
         body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
         #map { width: 100%; height: 100%; }
@@ -57,44 +57,6 @@
             color: #fff;
             font-weight: bold;
         }
-        /* 거리 측정 버튼 */
-        #distanceMeasureBtn {
-            position: absolute;
-            bottom: 20px;
-            right: 10px;
-            padding: 8px 14px;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-            border: none;
-            background: #ccc;
-            color: #000;
-            z-index: 1500;
-        }
-        #distanceMeasureBtn.active {
-            background: #007bff;
-            color: #fff;
-            font-weight: bold;
-        }
-        #distanceMeasureBtn:disabled {
-            background: #eee;
-            color: #aaa;
-            cursor: not-allowed;
-        }
-        /* 거리 측정 결과 표시 */
-        #distanceResult {
-            position: absolute;
-            top: 60px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.75);
-            color: #FFC107;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            z-index: 1500;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            display: none;
-        }
         /* 무장애 팝업 */
         #accessPopup {
             position: absolute;
@@ -113,7 +75,6 @@
 <body>
     <div id="status">API 키 확인 중...</div>
     <div id="coordDisplay">지도를 클릭하면 좌표가 나와요!</div>
-    <div id="distanceResult">거리 측정: 시작점을 클릭하세요</div>
     
     <!-- 수정된 버튼 컨트롤 -->
     <div id="floorControls">
@@ -122,9 +83,6 @@
         <button class="floor-btn active" data-floor="1f">1F</button>
         <button class="floor-btn" data-floor="2f">2F</button>
     </div>
-
-    <!-- 거리 측정 버튼 -->
-    <button id="distanceMeasureBtn">거리측정</button>
 
     <!-- 무장애 시설정보 팝업창 -->
     <div id="accessPopup" style="display:none;">
@@ -143,14 +101,6 @@
         const NCP_KEY_ID = 'q1d23mmkof';
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
-
-        // 거리 측정 관련 변수
-        let isMeasuring = false;
-        let startPoint = null;
-        let endPoint = null;
-        let measureLine = null;
-        let startMarker = null;
-        let endMarker = null;
 
         script.onload = function () {
             document.getElementById('status').textContent = 'API 로드 성공!';
@@ -240,21 +190,12 @@
                 const floorBtn = document.querySelector(`.floor-btn[data-floor="${floor}"]`);
                 if (floorBtn) floorBtn.classList.add('active');
 
-                // 실내 모드일 때 거리 측정 기능 비활성화
-                document.getElementById('distanceMeasureBtn').disabled = true;
-                if (isMeasuring) {
-                    resetDistanceMeasurement();
-                }
-
                 naver.maps.Event.addListener(groundOverlay, 'click', function (e) {
                     e.stopOverlays = true;
                     groundOverlay.setMap(null);
                     document.getElementById('floorControls').style.display = 'none';
                     polygon.setOptions({ fillColor: 'transparent' });
                     labelLayer.setMap(map);
-                    
-                    // 실내 모드 해제 시 거리 측정 기능 활성화
-                    document.getElementById('distanceMeasureBtn').disabled = false;
                 });
             }
 
@@ -271,11 +212,6 @@
                     const lat = e.latlng.lat().toFixed(6);
                     const lng = e.latlng.lng().toFixed(6);
                     document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
-
-                    // 거리 측정 모드일 때의 처리
-                    if (isMeasuring) {
-                        handleDistanceMeasurement(e.latlng, map);
-                    }
                 }
             });
 
@@ -301,112 +237,6 @@
                     }
                 });
             });
-
-            // 거리 측정 기능 구현
-            const distanceMeasureBtn = document.getElementById('distanceMeasureBtn');
-            const distanceResult = document.getElementById('distanceResult');
-
-            distanceMeasureBtn.addEventListener('click', function() {
-                if (groundOverlay && groundOverlay.getMap() !== null) {
-                    alert('실내 모드에서는 거리 측정을 사용할 수 없습니다.');
-                    return;
-                }
-
-                if (!isMeasuring) {
-                    startDistanceMeasurement();
-                } else {
-                    resetDistanceMeasurement();
-                }
-            });
-
-            function startDistanceMeasurement() {
-                isMeasuring = true;
-                distanceMeasureBtn.classList.add('active');
-                distanceResult.style.display = 'block';
-                distanceResult.textContent = '거리 측정: 시작점을 클릭하세요';
-                document.getElementById('coordDisplay').textContent = '거리 측정 모드: 시작점을 클릭하세요';
-            }
-
-            function handleDistanceMeasurement(latlng, map) {
-                if (!startPoint) {
-                    // 첫 번째 클릭 - 시작점 설정
-                    startPoint = latlng;
-                    
-                    // 시작점 마커 생성
-                    startMarker = new naver.maps.Marker({
-                        position: startPoint,
-                        map: map,
-                        icon: {
-                            content: '<div style="background:red;width:12px;height:12px;border-radius:50%;border:2px solid white;"></div>',
-                            size: new naver.maps.Size(16, 16),
-                            anchor: new naver.maps.Point(8, 8)
-                        }
-                    });
-                    
-                    distanceResult.textContent = '거리 측정: 끝점을 클릭하세요';
-                    document.getElementById('coordDisplay').textContent = '거리 측정 모드: 끝점을 클릭하세요';
-                } else {
-                    // 두 번째 클릭 - 끝점 설정 및 거리 계산
-                    endPoint = latlng;
-                    
-                    // 끝점 마커 생성
-                    endMarker = new naver.maps.Marker({
-                        position: endPoint,
-                        map: map,
-                        icon: {
-                            content: '<div style="background:blue;width:12px;height:12px;border-radius:50%;border:2px solid white;"></div>',
-                            size: new naver.maps.Size(16, 16),
-                            anchor: new naver.maps.Point(8, 8)
-                        }
-                    });
-                    
-                    // 선 그리기
-                    measureLine = new naver.maps.Polyline({
-                        map: map,
-                        path: [startPoint, endPoint],
-                        strokeColor: '#FF0000',
-                        strokeOpacity: 0.8,
-                        strokeWeight: 3
-                    });
-                    
-                    // 거리 계산 (미터 단위)
-                    const distance = naver.maps.geometry.spherical.computeDistanceBetween(startPoint, endPoint);
-                    
-                    // 결과 표시
-                    distanceResult.textContent = `측정 거리: ${distance.toFixed(2)}m`;
-                    document.getElementById('coordDisplay').textContent = `거리 측정 완료: ${distance.toFixed(2)}m`;
-                    
-                    // 측정 완료 후 상태 초기화 (다시 측정하려면 버튼 클릭)
-                    isMeasuring = false;
-                    startPoint = null;
-                    endPoint = null;
-                    distanceMeasureBtn.classList.remove('active');
-                }
-            }
-
-            function resetDistanceMeasurement() {
-                isMeasuring = false;
-                startPoint = null;
-                endPoint = null;
-                
-                // 마커와 선 제거
-                if (startMarker) {
-                    startMarker.setMap(null);
-                    startMarker = null;
-                }
-                if (endMarker) {
-                    endMarker.setMap(null);
-                    endMarker = null;
-                }
-                if (measureLine) {
-                    measureLine.setMap(null);
-                    measureLine = null;
-                }
-                
-                distanceMeasureBtn.classList.remove('active');
-                distanceResult.style.display = 'none';
-                document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
-            }
         };
 
         script.onerror = function () {
