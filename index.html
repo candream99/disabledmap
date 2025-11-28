@@ -5,18 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>네이버 벡터맵 테스트 - 층 버튼 추가</title>
     <style>
-        body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
-        #map { width: 100%; height: 100%; }
+        body { margin: 0;
+padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
+        #map { width: 100%;
+height: 100%; }
         #status {
-            position: absolute; top: 10px; left: 10px;
+            position: absolute;
+top: 10px; left: 10px;
             background: rgba(255, 99, 71, 0.9);
             color: white; padding: 10px 15px;
             border-radius: 5px; font-size: 14px;
-            z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         #coordDisplay {
             position: absolute;
-            top: 10px;
+top: 10px;
             left: 10px;
             background: rgba(0, 0, 0, 0.75);
             color: #FFC107;
@@ -24,13 +28,13 @@
             border-radius: 6px;
             font-size: 14px;
             z-index: 1500;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             min-width: 200px;
         }
         /* 수정된 버튼 컨트롤 */
         #floorControls {
             position: absolute;
-            bottom: 20px;
+bottom: 20px;
             left: 10px;
             display: none;
             flex-direction: row;
@@ -38,29 +42,30 @@
             z-index: 1500;
             background: rgba(255, 255, 255, 0.9);
             padding: 10px;
-            border-radius: 8px;
+border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         .floor-btn {
             padding: 8px 14px;
-            font-size: 14px;
+font-size: 14px;
             border-radius: 5px;
             cursor: pointer;
             border: none;
             background: #ccc;
             color: #000;
-            width: 100px; /* 동일한 너비 설정 */
+            width: 100px;
+/* 동일한 너비 설정 */
             white-space: nowrap;
-        }
+}
         .floor-btn.active {
             background: #007bff;
-            color: #fff;
+color: #fff;
             font-weight: bold;
         }
         /* 무장애 팝업 */
         #accessPopup {
             position: absolute;
-            bottom: 80px;
+bottom: 80px;
             left: 10px;
             width: 260px;
             background: white;
@@ -68,7 +73,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
             display: none;
-            z-index: 2000;
+z-index: 2000;
         }
     </style>
 </head>
@@ -76,7 +81,6 @@
     <div id="status">API 키 확인 중...</div>
     <div id="coordDisplay">지도를 클릭하면 좌표가 나와요!</div>
     
-    <!-- 수정된 버튼 컨트롤 -->
     <div id="floorControls">
         <button id="accessInfoBtn" class="floor-btn" data-floor="access">무장애시설</button>
         <button class="floor-btn" data-floor="b1">B1</button>
@@ -84,15 +88,19 @@
         <button class="floor-btn" data-floor="2f">2F</button>
     </div>
 
-    <!-- 무장애 시설정보 팝업창 -->
     <div id="accessPopup" style="display:none;">
-        <span id="accessPopupClose" style="position:absolute; top:8px; right:12px; font-size:22px; cursor:pointer; color:#777;">×</span>
+ 
+       <span id="accessPopupClose" style="position:absolute; top:8px; right:12px; font-size:22px; cursor:pointer; color:#777;">×</span>
         <div style="font-size:1.2rem; font-weight:700; margin-bottom:15px; color:#1e3a8a;">무장애 시설 정보</div>
         <div style="display:flex; margin-bottom:8px;"><span>• 주출입구 경사로</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
-        <div style="display:flex; margin-bottom:8px;"><span>• 장애인 화장실</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
-        <div style="display:flex; margin-bottom:8px;"><span>• 점자블록</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
-        <div style="display:flex; margin-bottom:8px;"><span>• 엘리베이터</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
-        <div style="display:flex; margin-bottom:8px;"><span>• 주출입구 단차</span><span style="margin-left:auto; font-weight:600; color:#ef4444;">있음</span></div>
+        <div style="display:flex;
+margin-bottom:8px;"><span>• 장애인 화장실</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 점자블록</span><span style="margin-left:auto; font-weight:600;
+color:#10b981;">있음</span></div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 엘리베이터</span><span style="margin-left:auto; font-weight:600;
+color:#10b981;">있음</span></div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 주출입구 단차</span><span style="margin-left:auto; font-weight:600;
+color:#ef4444;">있음</span></div>
     </div>
 
     <div id="map"></div>
@@ -106,19 +114,20 @@
             document.getElementById('status').textContent = 'API 로드 성공!';
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
 
-            const mapOptions = {
+          
+  const mapOptions = {
                 center: new naver.maps.LatLng(37.570946, 126.97788),
                 zoom: 18,
                 zoomControl: true,
                 zoomControlOptions: { position: naver.maps.Position.TOP_RIGHT },
                 mapTypes: new naver.maps.MapTypeRegistry({
-                    normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
+    
+                normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
                 }),
             };
             const map = new naver.maps.Map('map', mapOptions);
             map.setMapTypeId('normal');
-
-            const labelLayer = new naver.maps.LabelLayer();
+const labelLayer = new naver.maps.LabelLayer();
             labelLayer.setMap(map);
             document.getElementById('status').style.display = 'none';
 
@@ -128,66 +137,66 @@
                 new naver.maps.LatLng(37.570541, 126.978091),
                 new naver.maps.LatLng(37.570538, 126.977698),
             ];
-
-            const polygon = new naver.maps.Polygon({
+const polygon = new naver.maps.Polygon({
                 map: map,
                 paths: [polygonCoords],
                 fillColor: 'transparent',
                 fillOpacity: 0.5,
                 strokeColor: '#C490E4',
-                strokeOpacity: 1,
+           
+     strokeOpacity: 1,
                 strokeWeight: 3,
                 clickable: true,
             });
-
-            // 마우스 오버 시: 반투명 보라색으로 채움 (실내모드가 아닐 때만 적용)
+// 마우스 오버 시: 반투명 보라색으로 채움 (실내모드가 아닐 때만 적용)
             naver.maps.Event.addListener(polygon, 'mouseover', function() {
                 if (!groundOverlay || groundOverlay.getMap() === null) {
                     polygon.setOptions({ fillColor: '#C490E4' });
                     document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다! (마우스 오버)';
-                }
+    
+            }
             });
-
-            // 마우스 아웃 시: 실내모드가 아니면 채우기 제거
+// 마우스 아웃 시: 실내모드가 아니면 채우기 제거
             naver.maps.Event.addListener(polygon, 'mouseout', function() {
                 if (!groundOverlay || groundOverlay.getMap() === null) {
                     polygon.setOptions({ fillColor: 'transparent' });
                     document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
-                }
+        
+        }
             });
-
-            let groundOverlay = null;
+let groundOverlay = null;
             let currentFloor = '1f';
 
             const floorImages = {
                 b1: 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
-                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
+                // 변경된 1F 이미지 파일명
+                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky1.jpg',
                 '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
             };
-
-            const swLatLng = new naver.maps.LatLng(37.570535, 126.977631);
-            const neLatLng = new naver.maps.LatLng(37.571365, 126.978099);
+            
+            // 변경된 이미지 바운드 (상단 왼쪽: 37.571389, 126.977578 / 하단 오른쪽: 37.570478, 126.978224)
+            const swLatLng = new naver.maps.LatLng(37.570478, 126.977578);
+            const neLatLng = new naver.maps.LatLng(37.571389, 126.978224);
             const imageBounds = new naver.maps.LatLngBounds(swLatLng, neLatLng);
-
-            function showFloor(floor) {
+            
+function showFloor(floor) {
                 // 안전장치: 요청된 floor 이미지가 존재하는지 확인
                 if (!floorImages[floor]) {
                     console.warn(`showFloor: 이미지가 존재하지 않습니다. floor=${floor}`);
-                    return;
+return;
                 }
 
                 currentFloor = floor;
-                if (groundOverlay) groundOverlay.setMap(null);
+if (groundOverlay) groundOverlay.setMap(null);
 
                 groundOverlay = new naver.maps.GroundOverlay(floorImages[floor], imageBounds, {
                     map: map,
                     clickable: true,
                     opacity: 1,
                 });
-
-                // only operate on actual floor buttons
+// only operate on actual floor buttons
                 document.querySelectorAll('.floor-btn').forEach(btn => btn.classList.remove('active'));
-                const floorBtn = document.querySelector(`.floor-btn[data-floor="${floor}"]`);
+const floorBtn = document.querySelector(`.floor-btn[data-floor="${floor}"]`);
                 if (floorBtn) floorBtn.classList.add('active');
 
                 naver.maps.Event.addListener(groundOverlay, 'click', function (e) {
@@ -195,52 +204,58 @@
                     groundOverlay.setMap(null);
                     document.getElementById('floorControls').style.display = 'none';
                     polygon.setOptions({ fillColor: 'transparent' });
-                    labelLayer.setMap(map);
+  
+                  labelLayer.setMap(map);
                 });
-            }
+}
 
             naver.maps.Event.addListener(polygon, 'click', function (e) {
                 e.stopOverlays = true;
                 labelLayer.setMap(null);
                 polygon.setOptions({ fillColor: '#C490E4' });
                 document.getElementById('floorControls').style.display = 'flex';
-                showFloor('1f');
+             
+   showFloor('1f');
             });
-
-            naver.maps.Event.addListener(map, 'click', function (e) {
+naver.maps.Event.addListener(map, 'click', function (e) {
                 if (!groundOverlay || groundOverlay.getMap() === null) {
                     const lat = e.latlng.lat().toFixed(6);
                     const lng = e.latlng.lng().toFixed(6);
                     document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
-                }
+   
+             }
             });
-
-            document.querySelectorAll('.floor-btn').forEach(btn => {
+document.querySelectorAll('.floor-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     if (btn.dataset.floor === 'access') {
                         // 무장애시설 버튼 클릭 시 팝업 토글
-                        const popup = document.getElementById('accessPopup');
+                        const 
+popup = document.getElementById('accessPopup');
                         const isOpen = popup.style.display === 'block';
                         
                         // 모든 버튼에서 active 클래스 제거
-                        document.querySelectorAll('.floor-btn').forEach(b => b.classList.remove('active'));
+                
+        document.querySelectorAll('.floor-btn').forEach(b => b.classList.remove('active'));
                         
                         if (!isOpen) {
                             popup.style.display = 'block';
-                            btn.classList.add('active');
+          
+                  btn.classList.add('active');
                         } else {
                             popup.style.display = 'none';
                         }
-                    } else {
+  
+                  } else {
                         // 층별 버튼 클릭 시
                         showFloor(btn.dataset.floor);
                     }
-                });
+        
+        });
             });
         };
-
-        script.onerror = function () {
-            document.getElementById('status').textContent = 'API 로드 실패! URL 또는 Key 확인!';
+script.onerror = function () {
+            document.getElementById('status').textContent = 'API 로드 실패!
+URL 또는 Key 확인!';
             document.getElementById('status').style.background = 'red';
         };
 
@@ -248,13 +263,13 @@
         
         // 무장애 시설정보 팝업 닫기 이벤트
         const popupClose = document.getElementById('accessPopupClose');
-        const popup = document.getElementById('accessPopup');
+const popup = document.getElementById('accessPopup');
         const accessBtn = document.getElementById('accessInfoBtn');
 
         if (popupClose) {
             popupClose.onclick = () => {
                 popup.style.display = 'none';
-                accessBtn.classList.remove('active');
+accessBtn.classList.remove('active');
             };
         }
     </script>
