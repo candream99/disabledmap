@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 좌표 표시 & 이미지 표시</title>
+    <title>네이버 벡터맵 테스트 (feat. 호랭이) - 층별 기능 추가</title>
     <style>
         body { margin: 0; padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
         #map { width: 100%; height: 100%; }
@@ -11,7 +11,7 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background: rgba(255, 99, 71, 0.9); /* 시작은 여전히 힙한 토마토 */
+            background: rgba(255, 99, 71, 0.9);
             color: white;
             padding: 10px 15px;
             border-radius: 5px;
@@ -22,17 +22,53 @@
         
         #coordDisplay {
             position: absolute;
-            top: 50px; /* status 박스 아래에 표시 */
+            top: 50px;
             left: 10px;
             background: rgba(0, 0, 0, 0.7);
-            color: #FFC107; /* 밝은 노랑색으로 눈에 띄게! */
+            color: #FFC107;
             padding: 10px 15px;
             border-radius: 5px;
             font-size: 14px;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            min-width: 250px; /* 최소 너비로 내용 없어도 형태 유지 */
+            min-width: 250px;
             text-align: center;
+        }
+
+        /* ⭐ 층별 버튼 컨테이너 스타일 추가 ⭐ */
+        #floorControls {
+            position: absolute;
+            top: 10px;
+            right: 10px; /* 오른쪽 상단에 배치 */
+            z-index: 1000;
+            display: none; /* 초기에는 숨김 (실내 모드 진입 시 표시) */
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 5px;
+        }
+
+        /* ⭐ 층별 버튼 스타일 추가 ⭐ */
+        .floor-btn {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            margin: 0 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            font-weight: bold;
+        }
+
+        .floor-btn.active {
+            background: #4A90E2; /* 선택된 버튼 색상 */
+            color: white;
+            border-color: #4A90E2;
+        }
+
+        .floor-btn:not(.active):hover {
+            background: #e0e0e0;
         }
     </style>
 </head>
@@ -41,21 +77,46 @@
     <div id="coordDisplay">지도를 클릭하면 좌표가 나와요!</div>
     <div id="map"></div>
     
-
+    <div id="floorControls">
+        <button class="floor-btn" id="btnB1" data-floor="B1">B1</button>
+        <button class="floor-btn" id="btn1F" data-floor="1F">1F</button>
+        <button class="floor-btn" id="btn2F" data-floor="2F">2F</button>
+    </div>
+    
     <script>
-        // 호랭이 Key ID 박제!
         const NCP_KEY_ID = 'q1d23mmkof';
+        
+        // ⭐ 층별 이미지 URL 정의 (현재는 모두 ky_1.jpg 사용) ⭐
+        const floorImageUrls = {
+            'B1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
+            '1F': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
+            '2F': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg'
+        };
+        
+        const floorControls = document.getElementById('floorControls');
+        const floorButtons = document.querySelectorAll('.floor-btn');
+
+        let map;
+        let groundOverlay = null;
+        let labelLayer;
+        let imageBounds; // 이미지 경계를 전역 변수로 선언
+        let polygon; // 다각형 객체를 전역 변수로 선언
 
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
         script.onload = function() {
-            // ⭐ 줄바꿈 오류 수정
             document.getElementById('status').textContent = 'API 로드 성공!\n벡터 지도 초기화 중...'; 
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
             
+            // 이미지 경계 정의 (기존 코드에서 GroundOverlay 생성 전에 필요하므로 앞으로 뺌)
+            const swLatLng = new naver.maps.LatLng(37.570535, 126.977631); // 남서쪽 (좌측 하단)
+            const neLatLng = new naver.maps.LatLng(37.571365, 126.978099); // 북동쪽 (우측 상단)
+            imageBounds = new naver.maps.LatLngBounds(swLatLng, neLatLng);
+
+
             // 지도 초기 옵션 설정
             const mapOptions = {
-                center: new naver.maps.LatLng(37.570946, 126.97788), // 서울시청 위경도
+                center: new naver.maps.LatLng(37.570946, 126.97788),
                 zoom: 18,
                 zoomControl: true,
                 zoomControlOptions: {
@@ -65,12 +126,12 @@
                     'normal': naver.maps.NaverStyleMapTypeOptions.getVectorMap()
                 })
             };
-            const map = new naver.maps.Map('map', mapOptions);
+            map = new naver.maps.Map('map', mapOptions);
             map.setMapTypeId('normal');
 
-            // 라벨 레이어 설정 (초기값: 지도에 표시 - 보이기)
-            const labelLayer = new naver.maps.LabelLayer();
-            labelLayer.setMap(map); // 라벨을 초기부터 보이게 설정
+            // 라벨 레이어 설정 
+            labelLayer = new naver.maps.LabelLayer();
+            labelLayer.setMap(map);
 
             document.getElementById('status').style.display = 'none';
             
@@ -78,41 +139,33 @@
             // ⭐⭐ 다각형(Polygon) 기능 ⭐⭐
             // -------------------------------------------------------------------
 
-            // 1. 다각형의 꼭짓점 좌표 정의
             const polygonCoords = [
                 new naver.maps.LatLng(37.571348, 126.977671),
                 new naver.maps.LatLng(37.571354, 126.978059),
                 new naver.maps.LatLng(37.570541, 126.978091),
                 new naver.maps.LatLng(37.570538, 126.977698)
             ];
-            // 2. Polygon 객체 생성
-            const polygon = new naver.maps.Polygon({
+            polygon = new naver.maps.Polygon({
                 map: map,
                 paths: [polygonCoords],
-                fillColor: 'transparent', // 초기에는 채우기 없음
+                fillColor: 'transparent',
                 fillOpacity: 0.5,
-                strokeColor: '#C490E4', // 연한 보라색 외곽선
+                strokeColor: '#C490E4',
                 strokeOpacity: 1,
                 strokeWeight: 3,
                 clickable: true 
             });
             
-            // GroundOverlay 객체를 함수 밖에서 선언하여 전역적으로 사용 가능하게 함
-            let groundOverlay = null; 
-
-            // 3. 마우스 오버(Hover) 효과 추가
-            
-            // 마우스 오버 시: 반투명 보라색으로 채우기
+            // 마우스 오버(Hover) 효과
             naver.maps.Event.addListener(polygon, 'mouseover', function() {
                 polygon.setOptions({
-                    fillColor: '#C490E4' // 반투명의 보라색
+                    fillColor: '#C490E4'
                 });
                 document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다! (마우스 오버)';
             });
 
-            // 마우스 아웃 시: 채우기 색상 제거 (transparent)
+            // 마우스 아웃 시
             naver.maps.Event.addListener(polygon, 'mouseout', function() {
-                // GroundOverlay가 활성화 상태가 아니라면 원래 메시지로 복귀
                 if (!groundOverlay || groundOverlay.getMap() === null) { 
                     polygon.setOptions({
                         fillColor: 'transparent'
@@ -122,77 +175,102 @@
             });
 
             // -------------------------------------------------------------------
-            // ⭐⭐ GroundOverlay(평면도) 및 실내 모드 추가 기능 ⭐⭐
+            // ⭐⭐ GroundOverlay(평면도) 및 층별 제어 기능 ⭐⭐
             // -------------------------------------------------------------------
             
-            // 이미지 정보
-            const imageUrl = 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg';
-            const swLatLng = new naver.maps.LatLng(37.570535, 126.977631); // 남서쪽 (좌측 하단)
-            const neLatLng = new naver.maps.LatLng(37.571365, 126.978099); // 북동쪽 (우측 상단)
-            const imageBounds = new naver.maps.LatLngBounds(swLatLng, neLatLng);
-
-            // GroundOverlay 객체 생성 함수
+            // GroundOverlay 객체 생성 함수 (이전에 생성되지 않았을 경우에만 생성)
             function createGroundOverlay() {
-                groundOverlay = new naver.maps.GroundOverlay(imageUrl, imageBounds, {
-                    map: null, // 초기에는 지도에 표시하지 않음
-                    clickable: true, 
-                    opacity: 1
-                });
-                // 🌟 GroundOverlay 클릭 이벤트: 이미지 클릭 시 제거 (실내 모드 종료)
-                naver.maps.Event.addListener(groundOverlay, 'click', function(e) {
-                    e.stopOverlays = true; 
-                    
-                    // 이미지 제거 (실내 모드 종료)
-                    groundOverlay.setMap(null); 
-                    labelLayer.setMap(map); // ⭐ 라벨 다시 보이게 설정 ⭐
-                    polygon.setOptions({ // 다각형 색상 투명하게 복구
-                        fillColor: 'transparent' 
+                if (!groundOverlay) {
+                    // GroundOverlay는 최초 1회만 생성하고 URL과 맵만 변경합니다.
+                    groundOverlay = new naver.maps.GroundOverlay(floorImageUrls['1F'], imageBounds, {
+                        map: null, 
+                        clickable: true, 
+                        opacity: 1
                     });
-                    document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
-                    console.log("평면도 클릭: 실내 모드 종료. 지도 라벨 복구.");
-                });
+                    
+                    // 🌟 GroundOverlay 클릭 이벤트: 이미지 클릭 시 제거 (실내 모드 종료)
+                    naver.maps.Event.addListener(groundOverlay, 'click', function(e) {
+                        e.stopOverlays = true; 
+                        
+                        // 실내 모드 종료
+                        groundOverlay.setMap(null); 
+                        labelLayer.setMap(map); // 라벨 다시 보이게 설정
+                        floorControls.style.display = 'none'; // ⭐ 층별 버튼 숨김 ⭐
+                        polygon.setOptions({
+                            fillColor: 'transparent' 
+                        });
+                        document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
+                        console.log("평면도 클릭: 실내 모드 종료. 지도 라벨 복구.");
+                    });
+                }
             }
+
+            // ⭐ 층별 평면도를 표시하는 핵심 함수 ⭐
+            function showFloor(floor) {
+                // GroundOverlay 객체가 아직 생성되지 않았다면 생성합니다.
+                createGroundOverlay();
+
+                // 1. GroundOverlay의 이미지 URL 변경
+                groundOverlay.setOptions({
+                    url: floorImageUrls[floor]
+                });
+                
+                // 2. 맵에 표시
+                if (groundOverlay.getMap() === null) {
+                     groundOverlay.setMap(map);
+                }
+
+                // 3. 버튼 활성화 상태 변경
+                floorButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`#btn${floor}`).classList.add('active');
+
+                document.getElementById('coordDisplay').textContent = `🏢 실내 모드 활성화: ${floor}층. 이미지를 클릭하면 일반 지도로 돌아갑니다.`;
+                console.log(`층 변경: ${floor}`);
+            }
+
+            // ⭐ 층별 버튼 클릭 이벤트 리스너 등록 ⭐
+            floorButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const floor = this.getAttribute('data-floor');
+                    showFloor(floor);
+                });
+            });
+
 
             // 다각형(Polygon) 클릭 이벤트 수정: 실내 모드 진입
             naver.maps.Event.addListener(polygon, 'click', function(e) {
                 e.stopOverlays = true; // 다각형 내부 클릭 시 지도 클릭 이벤트 전파 중단
 
-                if (!groundOverlay) {
-                    createGroundOverlay();
-                }
-
-                // GroundOverlay 표시 (실내 모드 시작)
-                groundOverlay.setMap(map);
-                labelLayer.setMap(null); // ⭐ 라벨 숨김 설정 ⭐
-                polygon.setOptions({ // 다각형을 채워진 상태로 유지
+                // 실내 모드 시작
+                labelLayer.setMap(null); // 라벨 숨김 설정
+                floorControls.style.display = 'flex'; // ⭐ 층별 버튼 표시 ⭐
+                polygon.setOptions({
                     fillColor: '#C490E4' 
                 });
-                document.getElementById('coordDisplay').textContent = '🏢 실내 모드 활성화. 이미지를 클릭하면 일반 지도로 돌아갑니다.';
+                
+                // ⭐⭐ 실내 모드 진입 시 1F를 기본으로 표시 ⭐⭐
+                showFloor('1F'); 
+
                 console.log("다각형 내부 클릭: 실내 모드 진입. 지도 라벨 숨김.");
             });
 
             // ⭐ 지도 클릭 이벤트 (다각형 밖을 클릭했을 때만 작동)
             naver.maps.Event.addListener(map, 'click', function(e) {
-                // GroundOverlay가 표시되지 않았을 때만 좌표 표시 기능 실행
                 if (!groundOverlay || groundOverlay.getMap() === null) {
                     const lat = e.latlng.lat().toFixed(6);
                     const lng = e.latlng.lng().toFixed(6);
                     document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
                     console.log(`클릭된 좌표: 위도 ${lat}, 경도 ${lng}`);
                 } else {
-                    // 실내 모드 중: 지도 클릭 무시됨.
                     console.log("실내 모드 중: 지도 클릭 무시됨.");
                 }
             });
 
-            // -------------------------------------------------------------------
-            // ⭐⭐ GroundOverlay(평면도) 및 실내 모드 추가 기능 완료 ⭐⭐
-            // -------------------------------------------------------------------
-
-            console.log("네이버 벡터맵 로드 및 초기화 성공! 좌표 표시 기능, 실내 모드 라벨 제어 기능 추가됨.");
+            console.log("네이버 벡터맵 로드 및 초기화 성공! 층별 제어 기능 추가됨.");
         };
         script.onerror = function() {
-            // ⭐ 줄바꿈 오류 수정
             document.getElementById('status').textContent = 'API 로드 실패!\n네이버 Key ID 또는 웹 서비스 URL을 확인해주세요. ㅠㅠ';
             document.getElementById('status').style.background = 'red';
             console.error("네이버 지도 API 로드 실패!");
