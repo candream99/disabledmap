@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>네이버 벡터맵 테스트 - 층 버튼 추가</title>
+    <title>네이버 벡터맵 테스트 - 다중 건물 지원</title>
     <style>
         body { margin: 0;
 padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
@@ -31,7 +31,7 @@ top: 10px;
 box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             min-width: 200px;
         }
-        /* 수정된 버튼 컨트롤 */
+        /* 버튼 컨트롤 스타일 */
         #floorControls {
             position: absolute;
 bottom: 20px;
@@ -53,8 +53,8 @@ font-size: 14px;
             border: none;
             background: #ccc;
             color: #000;
-            width: 100px;
- /* 동일한 너비 설정 */
+            min-width: 50px;
+            text-align: center;
             white-space: nowrap;
  }
         .floor-btn.active {
@@ -83,10 +83,7 @@ z-index: 2000;
     
     <div id="floorControls">
         <button id="accessInfoBtn" class="floor-btn" data-floor="access">무장애시설</button>
-        <button class="floor-btn" data-floor="b1">B1</button>
-        <button class="floor-btn active" data-floor="1f">1F</button>
-        <button class="floor-btn" data-floor="2f">2F</button>
-    </div>
+        </div>
 
     <div id="accessPopup" style="display:none;">
  
@@ -114,172 +111,265 @@ color:#ef4444;">있음</span></div>
             document.getElementById('status').textContent = 'API 로드 성공!';
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
 
-          
-    const mapOptions = {
-                center: new naver.maps.LatLng(37.570946, 126.97788),
-                zoom: 18,
+            // 지도의 중심 좌표를 두 건물을 모두 볼 수 있도록 조정
+            const mapOptions = {
+                center: new naver.maps.LatLng(37.5710, 126.9784),
+                zoom: 17, // 줌 레벨 조정
                 zoomControl: true,
                 zoomControlOptions: { position: naver.maps.Position.TOP_RIGHT },
                 mapTypes: new naver.maps.MapTypeRegistry({
-    
-                 normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
+                    normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
                 }),
             };
             const map = new naver.maps.Map('map', mapOptions);
             map.setMapTypeId('normal');
-    const labelLayer = new naver.maps.LabelLayer();
+            const labelLayer = new naver.maps.LabelLayer();
             labelLayer.setMap(map);
             document.getElementById('status').style.display = 'none';
 
-            // 외곽선 좌표 (이전 요청에 따라 8개 지점으로 설정됨)
-            const polygonCoords = [
-                new naver.maps.LatLng(37.571350, 126.977670),
-                new naver.maps.LatLng(37.571360, 126.978059),
-                new naver.maps.LatLng(37.571275, 126.978063),
-                new naver.maps.LatLng(37.571275, 126.978173),
-                new naver.maps.LatLng(37.570870, 126.978184),
-                new naver.maps.LatLng(37.570872, 126.978082),
-                new naver.maps.LatLng(37.570543, 126.978094),
-                new naver.maps.LatLng(37.570539, 126.977702),
-            ];
+            let groundOverlay = null; // 현재 활성화된 GroundOverlay
+            let currentBuildingId = null; // 현재 활성화된 건물 ID
 
-    const polygon = new naver.maps.Polygon({
-                map: map,
-                paths: [polygonCoords],
-                fillColor: 'transparent',
-                fillOpacity: 0.5,
-                strokeColor: '#C490E4',
-           
-         strokeOpacity: 1,
-                strokeWeight: 2,
-                clickable: true,
-            });
-    // 마우스 오버 시: 반투명 보라색으로 채움 (실내모드가 아닐 때만 적용)
-            naver.maps.Event.addListener(polygon, 'mouseover', function() {
-                if (!groundOverlay || groundOverlay.getMap() === null) {
-                    polygon.setOptions({ fillColor: '#C490E4' });
-                    document.getElementById('coordDisplay').textContent = '여기는 다각형 내부입니다! (마우스 오버)';
-    
-             }
-            });
-    // 마우스 아웃 시: 실내모드가 아니면 채우기 제거
-            naver.maps.Event.addListener(polygon, 'mouseout', function() {
-                if (!groundOverlay || groundOverlay.getMap() === null) {
-                    polygon.setOptions({ fillColor: 'transparent' });
-                    document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
-        
-         }
-            });
-    let groundOverlay = null;
-            let currentFloor = '1f';
-
-            const floorImages = {
-                b1: 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_b1.png',
-                // 1F 이미지 파일명 수정
-                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky11.png',
-                '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_b1.png',
-            };
-            
-            // 1F 이미지 바운드 좌표 수정 (새로운 SW/NE 좌표 반영)
-            const swLatLng = new naver.maps.LatLng(37.570512, 126.977632); // 남서쪽(SW)
-            const neLatLng = new naver.maps.LatLng(37.571415, 126.978244); // 북동쪽(NE)
-            const imageBounds = new naver.maps.LatLngBounds(swLatLng, neLatLng);
-
-    function showFloor(floor) {
-                // 안전장치: 요청된 floor 이미지가 존재하는지 확인
-                if (!floorImages[floor]) {
-                    console.warn(`showFloor: 이미지가 존재하지 않습니다. floor=${floor}`);
-    return;
+            // =========================================================
+            // 빌딩별 데이터 정의
+            // =========================================================
+            const buildings = {
+                'ky': { // 건물 1: 기존 건물 (ky1.jpg, 8각형 외곽선)
+                    polygonCoords: [
+                        new naver.maps.LatLng(37.571350, 126.977670),
+                        new naver.maps.LatLng(37.571360, 126.978059),
+                        new naver.maps.LatLng(37.571275, 126.978063),
+                        new naver.maps.LatLng(37.571275, 126.978173),
+                        new naver.maps.LatLng(37.570870, 126.978184),
+                        new naver.maps.LatLng(37.570872, 126.978082),
+                        new naver.maps.LatLng(37.570543, 126.978094),
+                        new naver.maps.LatLng(37.570539, 126.977702),
+                    ],
+                    floors: ['b1', '1f', '2f'],
+                    images: {
+                        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky1.jpg', // 변경된 파일명
+                        '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
+                    },
+                    imageBounds: new naver.maps.LatLngBounds(
+                        new naver.maps.LatLng(37.570512, 126.977632), // SW (변경됨)
+                        new naver.maps.LatLng(37.571415, 126.978244)  // NE (변경됨)
+                    ),
+                    currentFloor: '1f', // 현재 활성화된 층
+                    polygon: null,
+                },
+                'dt': { // 건물 2: 새로 추가된 건물
+                    polygonCoords: [
+                        new naver.maps.LatLng(37.571470, 126.978762),
+                        new naver.maps.LatLng(37.571476, 126.979161),
+                        new naver.maps.LatLng(37.570627, 126.979181),
+                        new naver.maps.LatLng(37.570557, 126.979117),
+                        new naver.maps.LatLng(37.570553, 126.978777),
+                    ],
+                    floors: ['b4', '1f'], // B4, 1F 층 버튼
+                    images: {
+                        'b4': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt_b4.png',
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt1.png',
+                    },
+                    imageBounds: new naver.maps.LatLngBounds(
+                        new naver.maps.LatLng(37.570459, 126.978649), // SW (새 좌표)
+                        new naver.maps.LatLng(37.571626, 126.979210)  // NE (새 좌표)
+                    ),
+                    currentFloor: '1f',
+                    polygon: null,
                 }
+            };
 
-                currentFloor = floor;
-    if (groundOverlay) groundOverlay.setMap(null);
+            // =========================================================
+            // 핵심 로직 함수
+            // =========================================================
 
-                groundOverlay = new naver.maps.GroundOverlay(floorImages[floor], imageBounds, {
-                    map: map,
-                    clickable: true,
-                    opacity: 1,
-                });
-    // only operate on actual floor buttons
-                document.querySelectorAll('.floor-btn').forEach(btn => btn.classList.remove('active'));
-    const floorBtn = document.querySelector(`.floor-btn[data-floor="${floor}"]`);
+            // Access 팝업이 닫힐 때 마지막 활성화된 층 버튼을 다시 활성화
+            function updateFloorButtonState() {
+                document.querySelectorAll('#floorControls .floor-btn').forEach(b => b.classList.remove('active'));
+
+                if (currentBuildingId) {
+                    const config = buildings[currentBuildingId];
+                    const floorBtn = document.querySelector(`#floorControls .floor-btn[data-floor="${config.currentFloor}"]`);
+                    if (floorBtn) {
+                        floorBtn.classList.add('active');
+                    }
+                }
+            }
+
+            // 층 지도(GroundOverlay) 표시
+            function showFloor(buildingId, floor) {
+                const config = buildings[buildingId];
+                if (!config || !config.images[floor]) return;
+
+                currentBuildingId = buildingId;
+                config.currentFloor = floor; // 현재 층 상태 업데이트
+                
+                if (groundOverlay) groundOverlay.setMap(null);
+
+                groundOverlay = new naver.maps.GroundOverlay(
+                    config.images[floor],
+                    config.imageBounds,
+                    {
+                        map: map,
+                        clickable: true,
+                        opacity: 1,
+                    }
+                );
+
+                // 버튼 상태 업데이트: 모든 층 버튼 비활성화 후 선택된 버튼 활성화
+                document.querySelectorAll('#floorControls .floor-btn').forEach(btn => btn.classList.remove('active'));
+                const floorBtn = document.querySelector(`#floorControls .floor-btn[data-floor="${floor}"]`);
                 if (floorBtn) floorBtn.classList.add('active');
 
+                // 실내 모드 종료 리스너
                 naver.maps.Event.addListener(groundOverlay, 'click', function (e) {
                     e.stopOverlays = true;
                     groundOverlay.setMap(null);
                     document.getElementById('floorControls').style.display = 'none';
-                    polygon.setOptions({ fillColor: 'transparent' });
-  
+                    config.polygon.setOptions({ fillColor: 'transparent' }); // 외곽선 색상 복원
                     labelLayer.setMap(map);
+                    currentBuildingId = null;
                 });
-    }
+            }
 
-            naver.maps.Event.addListener(polygon, 'click', function (e) {
-                e.stopOverlays = true;
-                labelLayer.setMap(null);
-                polygon.setOptions({ fillColor: '#C490E4' });
-                document.getElementById('floorControls').style.display = 'flex';
-             
-       showFloor('1f');
-            });
-    naver.maps.Event.addListener(map, 'click', function (e) {
+            // 층 버튼 동적 생성 및 렌더링
+            function renderFloorButtons(buildingId) {
+                const config = buildings[buildingId];
+                const container = document.getElementById('floorControls');
+                
+                // 기존 층 버튼 제거 (무장애시설 버튼 제외)
+                document.querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)').forEach(btn => btn.remove());
+                
+                const defaultFloor = config.floors.includes('1f') ? '1f' : config.floors[0];
+                config.currentFloor = defaultFloor;
+
+                // 새로운 층 버튼 생성 및 추가
+                config.floors.forEach(floor => {
+                    const btn = document.createElement('button');
+                    btn.className = 'floor-btn';
+                    btn.dataset.floor = floor;
+                    btn.textContent = floor.toUpperCase();
+                    
+                    if (floor === defaultFloor) {
+                        // 기본 층으로 설정
+                        btn.classList.add('active');
+                    }
+
+                    btn.addEventListener('click', () => {
+                        // Access 팝업 닫기 (층 버튼 클릭 시)
+                        document.getElementById('accessPopup').style.display = 'none';
+                        document.getElementById('accessInfoBtn').classList.remove('active');
+                        showFloor(buildingId, floor);
+                    });
+                    container.appendChild(btn);
+                });
+            }
+
+            // 건물별 Polygon 생성 및 리스너 설정
+            function setupBuilding(buildingId, config) {
+                const polygon = new naver.maps.Polygon({
+                    map: map,
+                    paths: [config.polygonCoords],
+                    fillColor: 'transparent',
+                    fillOpacity: 0.5,
+                    strokeColor: '#C490E4',
+                    strokeOpacity: 1,
+                    strokeWeight: 3,
+                    clickable: true,
+                });
+                config.polygon = polygon; // Polygon 객체를 config에 저장
+
+                // 마우스 오버/아웃 리스너
+                naver.maps.Event.addListener(polygon, 'mouseover', function() {
+                    if (!groundOverlay || groundOverlay.getMap() === null) {
+                        polygon.setOptions({ fillColor: '#C490E4' });
+                        document.getElementById('coordDisplay').textContent = `${buildingId} 건물입니다! (마우스 오버)`;
+                    }
+                });
+
+                naver.maps.Event.addListener(polygon, 'mouseout', function() {
+                    if (!groundOverlay || groundOverlay.getMap() === null) {
+                        polygon.setOptions({ fillColor: 'transparent' });
+                        document.getElementById('coordDisplay').textContent = '지도를 클릭하면 좌표가 나와요!';
+                    }
+                });
+
+                // 클릭 리스너 (실내 모드 진입)
+                naver.maps.Event.addListener(polygon, 'click', function (e) {
+                    e.stopOverlays = true;
+                    labelLayer.setMap(null);
+                    polygon.setOptions({ fillColor: '#C490E4' });
+                    document.getElementById('floorControls').style.display = 'flex';
+                    
+                    // 해당 건물의 층 버튼 렌더링
+                    renderFloorButtons(buildingId);
+                    
+                    // 기본 층(1F 또는 첫 층) 표시
+                    const defaultFloor = config.floors.includes('1f') ? '1f' : config.floors[0];
+                    showFloor(buildingId, defaultFloor);
+                });
+            }
+
+            // =========================================================
+            // 초기화 및 이벤트 리스너 설정
+            // =========================================================
+
+            // 모든 건물 설정
+            for (const id in buildings) {
+                setupBuilding(id, buildings[id]);
+            }
+
+            // 지도 클릭 시 좌표 표시
+            naver.maps.Event.addListener(map, 'click', function (e) {
                 if (!groundOverlay || groundOverlay.getMap() === null) {
                     const lat = e.latlng.lat().toFixed(6);
                     const lng = e.latlng.lng().toFixed(6);
                     document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
-   
-               }
+                }
             });
-    document.querySelectorAll('.floor-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (btn.dataset.floor === 'access') {
-                        // 무장애시설 버튼 클릭 시 팝업 토글
-                        const 
-    popup = document.getElementById('accessPopup');
-                        const isOpen = popup.style.display === 'block';
-                        
-                        // 모든 버튼에서 active 클래스 제거
+
+            const accessBtn = document.getElementById('accessInfoBtn');
+            const popup = document.getElementById('accessPopup');
+            const popupClose = document.getElementById('accessPopupClose');
+            
+            // 무장애시설 버튼 클릭 리스너
+            accessBtn.addEventListener('click', function() {
+                const isOpen = popup.style.display === 'block';
                 
-             document.querySelectorAll('.floor-btn').forEach(b => b.classList.remove('active'));
-                        
-                        if (!isOpen) {
-                            popup.style.display = 'block';
-          
-                        btn.classList.add('active');
-                        } else {
-                            popup.style.display = 'none';
-                        }
-  
-                    } else {
-                        // 층별 버튼 클릭 시
-                        showFloor(btn.dataset.floor);
-                    }
-        
-         });
+                // 층 버튼의 active 상태를 모두 해제
+                document.querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)').forEach(b => b.classList.remove('active'));
+
+                if (!isOpen) {
+                    // 팝업 열기
+                    popup.style.display = 'block';
+                    this.classList.add('active');
+                } else {
+                    // 팝업 닫기
+                    popup.style.display = 'none';
+                    this.classList.remove('active');
+                    updateFloorButtonState(); // 마지막 활성화 층 버튼 복원
+                }
             });
-        };
-    // SyntaxError 해결: 문자열을 한 줄로 연결
-    script.onerror = function () {
-        document.getElementById('status').textContent = 'API 로드 실패! URL 또는 Key 확인!';
-        document.getElementById('status').style.background = 'red';
-    };
 
-    document.head.appendChild(script);
+            // 무장애 시설정보 팝업 닫기 이벤트
+            if (popupClose) {
+                popupClose.onclick = () => {
+                    popup.style.display = 'none';
+                    accessBtn.classList.remove('active');
+                    updateFloorButtonState(); // 마지막 활성화 층 버튼 복원
+                };
+            }
+        };
+
+        // API 로드 실패 시 에러 메시지
+        script.onerror = function () {
+            document.getElementById('status').textContent = 'API 로드 실패! URL 또는 Key 확인!';
+            document.getElementById('status').style.background = 'red';
+        };
+
+        document.head.appendChild(script);
         
-    // 무장애 시설정보 팝업 닫기 이벤트
-    const popupClose = document.getElementById('accessPopupClose');
-    const popup = document.getElementById('accessPopup');
-    const accessBtn = document.getElementById('accessInfoBtn');
-
-    if (popupClose) {
-        popupClose.onclick = () => {
-        popup.style.display = 'none';
-        accessBtn.classList.remove('active');
-        };
-    }
     </script>
 </body>
 </html>
-
-
