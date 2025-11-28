@@ -131,16 +131,16 @@ color:#ef4444;">있음</span></div>
             labelLayer.setMap(map);
             document.getElementById('status').style.display = 'none';
 
-            // 새롭게 수정된 외곽선 좌표 (8개 지점, 시계 방향)
+            // 외곽선 좌표 (이전 요청에 따라 8개 지점으로 설정됨)
             const polygonCoords = [
-                new naver.maps.LatLng(37.571350, 126.977670), // 1
-                new naver.maps.LatLng(37.571360, 126.978059), // 2
-                new naver.maps.LatLng(37.571275, 126.978063), // 3
-                new naver.maps.LatLng(37.571275, 126.978173), // 4
-                new naver.maps.LatLng(37.570870, 126.978184), // 5
-                new naver.maps.LatLng(37.570872, 126.978082), // 6
-                new naver.maps.LatLng(37.570543, 126.978094), // 7
-                new naver.maps.LatLng(37.570539, 126.977702), // 8
+                new naver.maps.LatLng(37.571350, 126.977670),
+                new naver.maps.LatLng(37.571360, 126.978059),
+                new naver.maps.LatLng(37.571275, 126.978063),
+                new naver.maps.LatLng(37.571275, 126.978173),
+                new naver.maps.LatLng(37.570870, 126.978184),
+                new naver.maps.LatLng(37.570872, 126.978082),
+                new naver.maps.LatLng(37.570543, 126.978094),
+                new naver.maps.LatLng(37.570539, 126.977702),
             ];
 
     const polygon = new naver.maps.Polygon({
@@ -176,13 +176,13 @@ color:#ef4444;">있음</span></div>
             const floorImages = {
                 b1: 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
                 // 1F 이미지 파일명 수정
-                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky1.jpg',
+                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky11.jpg',
                 '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
             };
             
-            // 이미지 바운드 좌표
-            const swLatLng = new naver.maps.LatLng(37.570478, 126.977578);
-            const neLatLng = new naver.maps.LatLng(37.571389, 126.978224);
+            // 1F 이미지 바운드 좌표 수정 (새로운 SW/NE 좌표 반영)
+            const swLatLng = new naver.maps.LatLng(37.570512, 126.977632); // 남서쪽(SW)
+            const neLatLng = new naver.maps.LatLng(37.571415, 126.978244); // 북동쪽(NE)
             const imageBounds = new naver.maps.LatLngBounds(swLatLng, neLatLng);
 
     function showFloor(floor) {
@@ -274,11 +274,10 @@ color:#ef4444;">있음</span></div>
 
     if (popupClose) {
         popupClose.onclick = () => {
-            popup.style.display = 'none';
-            accessBtn.classList.remove('active');
+        popup.style.display = 'none';
+        accessBtn.classList.remove('active');
         };
     }
     </script>
 </body>
 </html>
-
