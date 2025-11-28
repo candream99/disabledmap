@@ -338,15 +338,13 @@ let currentBuildingId = null;
                 const config = buildings[buildingId];
                 if (!config || !config.images[floor]) return;
                 
-                // 🌟🌟🌟 [수정된 로직] 층 변경 시 'i' 버튼 및 팝업 상태 초기화 🌟🌟🌟
-                // 층이 바뀌면 무장애 시설 정보도 새로 봐야 하므로 상태를 리셋합니다.
+                // 층 변경 시 'i' 버튼 및 팝업 상태 초기화
                 if (accessBtn.classList.contains('active')) {
                     accessBtn.classList.remove('active');
                 }
                 if (popup.style.display === 'block') {
                     popup.style.display = 'none';
                 }
-                // -------------------------------------------------------------------
 
                 currentBuildingId = buildingId;
                 config.currentFloor = floor;
@@ -416,7 +414,6 @@ let currentBuildingId = null;
 
                     btn.addEventListener('click', () => {
                         // 층 버튼 클릭 
-                        // 이제 showFloor 함수 내에서 'i' 버튼 상태를 초기화합니다.
                         showFloor(buildingId, floor);
                     });
                 });
@@ -626,10 +623,11 @@ let currentBuildingId = null;
                 };
             }
         };
- // API 로드 실패 시 에러 메시지
+
+        // API 로드 실패 시 에러 메시지
         script.onerror = function () {
-            document.getElementById('status').textContent = 'API 로드 실패!
- URL 또는 Key 확인!';
+            // 🌟🌟🌟 [수정된 부분] 줄 바꿈 제거 🌟🌟🌟
+            document.getElementById('status').textContent = 'API 로드 실패! URL 또는 Key 확인!';
             document.getElementById('status').background = 'red';
         };
 
