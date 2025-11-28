@@ -57,7 +57,19 @@
         <button class="floor-btn" data-floor="2f">2F</button>
         <button id="accessInfoBtn" class="floor-btn" style="background:#444; color:#fff; margin-top:10px;">무장애 시설정보</button>
     </div>
-    <div id="map"></div>
+
+    <!-- ⭐ 무장애 시설정보 팝업창 추가 ⭐ -->
+    <div id="accessPopup" style="display:none; position:absolute; top:170px; left:10px; width:300px; padding:15px; background:white; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.3); z-index:2000;">
+        <span id="accessPopupClose" style="position:absolute; top:8px; right:12px; font-size:22px; cursor:pointer; color:#777;">×</span>
+        <div style="font-size:1.2rem; font-weight:700; margin-bottom:15px; color:#1e3a8a;">무장애 시설 정보</div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 주출입구 경사로</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 장애인 화장실</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 점자블록</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 엘리베이터</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
+        <div style="display:flex; margin-bottom:8px;"><span>• 주출입구 단차</span><span style="margin-left:auto; font-weight:600; color:#ef4444;">있음</span></div>
+    </div>
+
+    <div id="map""></div>
 
     <script>
         const NCP_KEY_ID = 'q1d23mmkof';
@@ -125,7 +137,15 @@
                     opacity: 1,
                 });
 
-                document.querySelectorAll('.floor-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById('accessInfoBtn').addEventListener('click', () => {
+                const popup = document.getElementById('accessPopup');
+                popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+            });
+            document.getElementById('accessPopupClose').addEventListener('click', () => {
+                document.getElementById('accessPopup').style.display = 'none';
+            });
+
+            document.querySelectorAll('.floor-btn').forEach(btn => btn.classList.remove('active'));
                 document.querySelector(`.floor-btn[data-floor="${floor}"]`).classList.add('active');
 
                 naver.maps.Event.addListener(groundOverlay, 'click', function (e) {
