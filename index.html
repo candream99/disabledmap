@@ -34,8 +34,8 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 
         /* 공통 원형 버튼 스타일 */
         .map-btn-circle {
-            width: 36px; /* 45px에서 36px로 수정 (약 80%) */
-            height: 36px; /* 45px에서 36px로 수정 (약 80%) */
+            width: 36px; /* 45px -> 36px (80% 축소) */
+            height: 36px; /* 45px -> 36px (80% 축소) */
             padding: 0;
             cursor: pointer;
             background: #ffffff;
@@ -50,7 +50,7 @@ font-weight: normal;
             align-items: center;
             text-align: center;
             line-height: 1;
-        }
+}
 
         /* 현재 위치 버튼 스타일 */
         #geolocationBtn {
@@ -552,8 +552,8 @@ let currentBuildingId = null;
                             
                
               if (isIndoorMode) {
-                                coordDisplay.textContent = '위치 찾기 실패.
- 실내지도로 돌아가려면 클릭하세요';
+                                // 구문 에러 해결: 줄 바꿈 제거
+                                coordDisplay.textContent = '위치 찾기 실패. 실내지도로 돌아가려면 클릭하세요';
                             } else {
                                 coordDisplay.textContent = '위치 찾기 실패: 건물을 클릭하면 실내지도를 볼 수 있어요';
  }
