@@ -145,6 +145,9 @@
                 document.getElementById('accessPopup').style.display = 'none';
             });
 
+            // ⭐ 무장애 시설정보 버튼은 층 이미지와 완전 독립적으로 동작해야 함
+            // 따라서 showFloor() 호출과 어떠한 연결도 하지 않음
+
             document.querySelectorAll('.floor-btn').forEach(btn => btn.classList.remove('active'));
                 document.querySelector(`.floor-btn[data-floor="${floor}"]`).classList.add('active');
 
