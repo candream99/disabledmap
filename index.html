@@ -75,11 +75,31 @@ bottom: 80px;
             display: none;
 z-index: 2000;
         }
+        /* 현재 위치 버튼 스타일 */
+        #geolocationBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px; /* 우측 상단에 배치 */
+            z-index: 1500;
+            padding: 10px 12px;
+            font-size: 18px;
+            cursor: pointer;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            line-height: 1; /* 아이콘 중앙 정렬 */
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div id="status">API 키 확인 중...</div>
     <div id="coordDisplay">건물을 클릭하면 실내지도를 볼 수 있어요</div>
+    
+    <button id="geolocationBtn" title="현재 위치 찾기">📍</button>
     
     <div id="floorControls">
         <button id="accessInfoBtn" class="floor-btn" data-floor="access">무장애시설</button>
@@ -116,13 +136,13 @@ color:#ef4444;">있음</span></div>
             const popup = document.getElementById('accessPopup');
             const accessBtn = document.getElementById('accessInfoBtn');
             const popupClose = document.getElementById('accessPopupClose');
+            const geolocationBtn = document.getElementById('geolocationBtn');
 
             // 지도의 중심 좌표를 두 건물을 모두 볼 수 있도록 조정
             const mapOptions = {
                 center: new naver.maps.LatLng(37.5710, 126.9784),
                 zoom: 17, // 줌 레벨 조정
-                zoomControl: true,
-                zoomControlOptions: { position: naver.maps.Position.TOP_RIGHT },
+                zoomControl: false, // 확대/축소 컨트롤 제거
                 mapTypes: new naver.maps.MapTypeRegistry({
                     normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
                 }),
@@ -135,6 +155,7 @@ color:#ef4444;">있음</span></div>
 
             let groundOverlay = null; // 현재 활성화된 GroundOverlay
             let currentBuildingId = null; // 현재 활성화된 건물 ID
+            let currentPositionMarker = null; // 현재 위치 마커 저장 변수
 
             // =========================================================
             // 빌딩별 데이터 정의
@@ -220,6 +241,11 @@ color:#ef4444;">있음</span></div>
                     }
                 }
 
+                // 현재 위치 마커가 있다면 제거
+                if (currentPositionMarker) {
+                    currentPositionMarker.setMap(null);
+                }
+
                 groundOverlay = new naver.maps.GroundOverlay(
                     config.images[floor],
                     config.imageBounds,
@@ -257,7 +283,7 @@ color:#ef4444;">있음</span></div>
                     labelLayer.setMap(map);
                     currentBuildingId = null; // 건물 상태 초기화
 
-                    // **실내 모드 종료 문구**
+                    // 실내 모드 종료 문구
                     coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요'; 
                 });
             }
@@ -309,22 +335,22 @@ color:#ef4444;">있음</span></div>
                 });
                 config.polygon = polygon; // Polygon 객체를 config에 저장
 
-                // 마우스 오버 리스너 (문구 수정)
+                // 마우스 오버 리스너 
                 naver.maps.Event.addListener(polygon, 'mouseover', function() {
                     // 실내 모드 중이 아닐 때만 하이라이트
                     if (!groundOverlay || groundOverlay.getMap() === null) {
                         polygon.setOptions({ fillColor: '#C490E4' });
-                        // **마우스 오버 문구**
+                        // 마우스 오버 문구
                         coordDisplay.textContent = '클릭해서 실내지도를 보세요';
                     }
                 });
 
-                // 마우스 아웃 리스너 (문구 수정)
+                // 마우스 아웃 리스너 
                 naver.maps.Event.addListener(polygon, 'mouseout', function() {
                     // 실내 모드가 아닌 경우에만 투명으로 복원
                     if (!groundOverlay || groundOverlay.getMap() === null) {
                         polygon.setOptions({ fillColor: 'transparent' });
-                        // **기본 문구**
+                        // 기본 문구
                         coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
                     }
                 });
@@ -336,6 +362,11 @@ color:#ef4444;">있음</span></div>
                     polygon.setOptions({ fillColor: '#C490E4' });
                     document.getElementById('floorControls').style.display = 'flex';
                     
+                    // 현재 위치 마커가 있다면 제거
+                    if (currentPositionMarker) {
+                        currentPositionMarker.setMap(null);
+                    }
+
                     // 해당 건물의 층 버튼 렌더링
                     renderFloorButtons(buildingId);
                     
@@ -343,10 +374,78 @@ color:#ef4444;">있음</span></div>
                     const defaultFloor = config.floors.includes('1f') ? '1f' : config.floors[0];
                     showFloor(buildingId, defaultFloor);
 
-                    // **실내 모드 진입 문구**
+                    // 실내 모드 진입 문구
                     coordDisplay.textContent = '일반지도로 돌아가려면 실내지도를 클릭하세요'; 
                 });
             }
+
+            // =========================================================
+            // 현재 위치 (Geolocation) 기능
+            // =========================================================
+            geolocationBtn.addEventListener('click', function() {
+                // 실내 모드일 경우 경고
+                if (currentBuildingId !== null) {
+                    alert('실내 모드를 먼저 종료하고 현재 위치를 찾아주세요.');
+                    return;
+                }
+
+                if (navigator.geolocation) {
+                    coordDisplay.textContent = '현재 위치를 찾는 중입니다...';
+                    
+                    // 위치 정보 요청
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            const currentLatLng = new naver.maps.LatLng(lat, lng);
+
+                            // 지도 중심 이동
+                            map.setCenter(currentLatLng);
+                            map.setZoom(17); // 현재 위치를 잘 보여주는 줌 레벨
+
+                            // 기존 마커 제거
+                            if (currentPositionMarker) {
+                                currentPositionMarker.setMap(null);
+                            }
+
+                            // 새로운 현재 위치 마커 생성 (파란색 도트)
+                            currentPositionMarker = new naver.maps.Marker({
+                                map: map,
+                                position: currentLatLng,
+                                icon: {
+                                    content: '<div style="width:12px; height:12px; background-color:#007bff; border-radius:50%; border:2px solid #ffffff; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>',
+                                    size: new naver.maps.Size(12, 12),
+                                    anchor: new naver.maps.Point(6, 6)
+                                },
+                                zIndex: 9999
+                            });
+                            
+                            coordDisplay.textContent = '현재 위치로 이동했습니다! 건물을 클릭하면 실내지도를 볼 수 있어요';
+
+                        },
+                        function(error) {
+                            console.error("Geolocation Error:", error);
+                            // 에러 처리: 사용자에게 권한 요청 거부나 위치를 찾을 수 없음을 알림
+                            if (error.code === 1) {
+                                alert('위치 정보 접근이 거부되었습니다. 브라우저 설정을 확인해주세요.');
+                            } else {
+                                alert('현재 위치를 찾을 수 없습니다.');
+                            }
+                            coordDisplay.textContent = '위치 찾기 실패: 건물을 클릭하면 실내지도를 볼 수 있어요';
+                            
+                            // 실패 시 마커 제거
+                            if (currentPositionMarker) {
+                                currentPositionMarker.setMap(null);
+                            }
+                        },
+                        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 } // 옵션 추가
+                    );
+                } else {
+                    alert('이 브라우저에서는 Geolocation이 지원되지 않습니다.');
+                    coordDisplay.textContent = 'Geolocation 미지원: 건물을 클릭하면 실내지도를 볼 수 있어요';
+                }
+            });
+
 
             // =========================================================
             // 초기화 및 이벤트 리스너 설정
@@ -357,10 +456,10 @@ color:#ef4444;">있음</span></div>
                 setupBuilding(id, buildings[id]);
             }
 
-            // 지도 클릭 리스너 (위도/경도 표시 기능 제거)
+            // 지도 클릭 리스너 (기능 제거 후 기본 문구 유지)
             naver.maps.Event.addListener(map, 'click', function (e) {
                 if (!groundOverlay || groundOverlay.getMap() === null) {
-                    // **지도 클릭 시 문구 (기본 문구 유지)**
+                    // 지도 클릭 시 문구 (기본 문구 유지)
                     coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
                 }
             });
