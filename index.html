@@ -58,7 +58,7 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             bottom: 20px; /* 하단 왼쪽 코너 */
             left: 10px;
             z-index: 1500;
-            font-size: 0; /* 아이콘이 텍스트가 아니므로 폰트 크기 0 */
+            font-size: 0; 
         }
 
         /* ----- Geolocation 아이콘 스타일 ----- */
@@ -93,7 +93,7 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             background-color: transparent;
             width: 0;
             height: 0;
-            transform: none; /* 화살표 아이콘을 위한 기본 위치 */
+            transform: none; 
             
             /* 화살표 모양 생성 */
             border-left: 6px solid transparent;
@@ -110,11 +110,11 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         /* 층 컨트롤 컨테이너 스타일 */
         #floorControls {
             position: absolute;
-            bottom: 75px; /* GeolocationBtn (45px) + gap (10px) + bottom (20px) = 75px */
+            bottom: 75px; 
             left: 10px;
             display: none;
-            flex-direction: column-reverse; /* 버튼을 아래에서 위로 쌓기 위해 */
-            gap: 10px; /* 버튼 사이 간격 */
+            flex-direction: column-reverse; 
+            gap: 10px; 
             z-index: 1500;
             background: transparent;
             padding: 0;
@@ -136,7 +136,7 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         /* 무장애 팝업 */
         #accessPopup {
             position: absolute;
-            bottom: 300px; /* 버튼 스택 위에 안전하게 배치 */
+            bottom: 300px; 
             left: 10px;
             width: 260px;
             background: white;
@@ -195,8 +195,8 @@ color:#ef4444;">있음</span></div>
             // 지도의 중심 좌표를 두 건물을 모두 볼 수 있도록 조정
             const mapOptions = {
                 center: new naver.maps.LatLng(37.5710, 126.9784),
-                zoom: 17, // 줌 레벨 조정
-                zoomControl: false, // 확대/축소 컨트롤 제거
+                zoom: 17, 
+                zoomControl: false, 
                 mapTypes: new naver.maps.MapTypeRegistry({
                     normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
                 }),
@@ -207,15 +207,15 @@ color:#ef4444;">있음</span></div>
             labelLayer.setMap(map);
             document.getElementById('status').style.display = 'none';
 
-            let groundOverlay = null; // 현재 활성화된 GroundOverlay
-            let currentBuildingId = null; // 현재 활성화된 건물 ID
-            let currentPositionMarker = null; // 현재 위치 마커 저장 변수
+            let groundOverlay = null; 
+            let currentBuildingId = null; 
+            let currentPositionMarker = null; 
 
             // =========================================================
             // 빌딩별 데이터 정의
             // =========================================================
             const buildings = {
-                'ky': { // 건물 1: 기존 건물 (ky1.jpg, 8각형 외곽선)
+                'ky': { 
                     polygonCoords: [
                         new naver.maps.LatLng(37.571350, 126.977670),
                         new naver.maps.LatLng(37.571360, 126.978059),
@@ -229,17 +229,17 @@ color:#ef4444;">있음</span></div>
                     floors: ['b1', '1f', '2f'],
                     images: {
                         'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
-                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky1.jpg', // 변경된 파일명
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky1.jpg', 
                         '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
                     },
                     imageBounds: new naver.maps.LatLngBounds(
-                        new naver.maps.LatLng(37.570512, 126.977632), // SW (변경됨)
-                        new naver.maps.LatLng(37.571415, 126.978244)  // NE (변경됨)
+                        new naver.maps.LatLng(37.570512, 126.977632), 
+                        new naver.maps.LatLng(37.571415, 126.978244)  
                     ),
-                    currentFloor: '1f', // 현재 활성화된 층
+                    currentFloor: '1f', 
                     polygon: null,
                 },
-                'dt': { // 건물 2: 새로 추가된 건물
+                'dt': { 
                     polygonCoords: [
                         new naver.maps.LatLng(37.571470, 126.978762),
                         new naver.maps.LatLng(37.571476, 126.979161),
@@ -247,14 +247,14 @@ color:#ef4444;">있음</span></div>
                         new naver.maps.LatLng(37.570557, 126.979117),
                         new naver.maps.LatLng(37.570553, 126.978777),
                     ],
-                    floors: ['b4', '1f'], // B4, 1F 층 버튼
+                    floors: ['b4', '1f'], 
                     images: {
                         'b4': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt_b4.png',
                         '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt1.png',
                     },
                     imageBounds: new naver.maps.LatLngBounds(
-                        new naver.maps.LatLng(37.570459, 126.978649), // SW (새 좌표)
-                        new naver.maps.LatLng(37.571626, 126.979210)  // NE (새 좌표)
+                        new naver.maps.LatLng(37.570459, 126.978649), 
+                        new naver.maps.LatLng(37.571626, 126.979210)  
                     ),
                     currentFloor: '1f',
                     polygon: null,
@@ -269,13 +269,13 @@ color:#ef4444;">있음</span></div>
              * 실내 모드를 종료하고 일반 지도로 돌아갑니다.
              */
             function exitIndoorMode() {
-                if (!currentBuildingId) return; // 이미 일반 모드인 경우
+                if (!currentBuildingId) return; 
             
                 if (groundOverlay) {
                     groundOverlay.setMap(null);
                 }
                 
-                // 팝업창 닫기 및 'i' 버튼 active 해제
+                // 팝업창 닫기 및 'i' 버튼 active 해제 (실내모드 종료 시 모든 UI 요소 초기화)
                 popup.style.display = 'none';
                 accessBtn.classList.remove('active');
                 
@@ -293,20 +293,6 @@ color:#ef4444;">있음</span></div>
             
                 // 문구 변경
                 coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요'; 
-            }
-
-            // Access 팝업이 닫힐 때 마지막 활성화된 층 버튼을 다시 활성화
-            function updateFloorButtonState() {
-                // 모든 층 버튼의 active 상태 제거
-                document.querySelectorAll('#floorControls .floor-btn').forEach(b => b.classList.remove('active'));
-
-                if (currentBuildingId) {
-                    const config = buildings[currentBuildingId];
-                    const floorBtn = document.querySelector(`#floorControls .floor-btn[data-floor="${config.currentFloor}"]`);
-                    if (floorBtn) {
-                        floorBtn.classList.add('active');
-                    }
-                }
             }
 
             // 층 지도(GroundOverlay) 표시
@@ -329,7 +315,7 @@ color:#ef4444;">있음</span></div>
                 // 현재 위치 마커가 있다면 제거 (실내 모드 진입 시)
                 if (currentPositionMarker) {
                     currentPositionMarker.setMap(null);
-                    geolocationBtn.classList.remove('active'); // 마커 제거 시 내 위치 버튼 비활성화
+                    geolocationBtn.classList.remove('active'); 
                 }
 
                 groundOverlay = new naver.maps.GroundOverlay(
@@ -342,9 +328,9 @@ color:#ef4444;">있음</span></div>
                     }
                 );
 
-                // 버튼 상태 업데이트: 모든 버튼 비활성화 후 선택된 버튼 활성화
-                document.querySelectorAll('#floorControls .floor-btn').forEach(btn => btn.classList.remove('active'));
-                accessBtn.classList.remove('active'); // i 버튼도 초기화
+                // 버튼 상태 업데이트: 층 버튼만 비활성화 후 선택된 버튼 활성화
+                // 'i' 버튼은 건드리지 않도록 #accessInfoBtn을 제외
+                document.querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)').forEach(btn => btn.classList.remove('active'));
                 
                 const floorBtn = document.querySelector(`#floorControls .floor-btn[data-floor="${floor}"]`);
                 if (floorBtn) floorBtn.classList.add('active');
@@ -352,7 +338,7 @@ color:#ef4444;">있음</span></div>
                 // 실내 모드 종료 리스너 (GroundOverlay 클릭 시)
                 naver.maps.Event.addListener(groundOverlay, 'click', function (e) {
                     e.stopOverlays = true;
-                    exitIndoorMode(); // 추출된 함수 사용
+                    exitIndoorMode(); 
                 });
             }
 
@@ -369,7 +355,7 @@ color:#ef4444;">있음</span></div>
                 // 새로운 층 버튼 생성 및 추가
                 config.floors.forEach(floor => {
                     const btn = document.createElement('button');
-                    btn.className = 'floor-btn map-btn-circle'; // 새 스타일 적용
+                    btn.className = 'floor-btn map-btn-circle'; 
                     btn.dataset.floor = floor;
                     btn.textContent = floor.toUpperCase();
                     
@@ -381,9 +367,7 @@ color:#ef4444;">있음</span></div>
                     }
 
                     btn.addEventListener('click', () => {
-                        // Access 팝업 닫기 및 버튼 active 해제
-                        popup.style.display = 'none';
-                        accessBtn.classList.remove('active');
+                        // [수정] 층 버튼 클릭 시 'i' 팝업이나 상태에 전혀 영향을 주지 않음
                         showFloor(buildingId, floor);
                     });
                 });
@@ -401,7 +385,7 @@ color:#ef4444;">있음</span></div>
                     strokeWeight: 3,
                     clickable: true,
                 });
-                config.polygon = polygon; // Polygon 객체를 config에 저장
+                config.polygon = polygon; 
 
                 // 마우스 오버 리스너 
                 naver.maps.Event.addListener(polygon, 'mouseover', function() {
@@ -424,12 +408,12 @@ color:#ef4444;">있음</span></div>
                     e.stopOverlays = true;
                     labelLayer.setMap(null);
                     polygon.setOptions({ fillColor: '#C490E4' });
-                    floorControlsContainer.style.display = 'flex'; // 컨트롤 보이기
+                    floorControlsContainer.style.display = 'flex'; 
                     
                     // 현재 위치 마커가 있다면 제거
                     if (currentPositionMarker) {
                         currentPositionMarker.setMap(null);
-                        geolocationBtn.classList.remove('active'); // 마커 제거 시 내 위치 버튼 비활성화
+                        geolocationBtn.classList.remove('active'); 
                     }
 
                     // 해당 건물의 층 버튼 렌더링
@@ -445,10 +429,9 @@ color:#ef4444;">있음</span></div>
             }
 
             // =========================================================
-            // 현재 위치 (Geolocation) 기능 (실내 모드에서 작동하도록 수정됨)
+            // 현재 위치 (Geolocation) 기능
             // =========================================================
             geolocationBtn.addEventListener('click', function() {
-                // 실내 모드 여부에 관계없이 Geolocation 시도. exitIndoorMode() 호출 제거.
                 const isIndoorMode = currentBuildingId !== null;
 
                 // 1. 이미 활성화 상태라면 (파란색 버튼) -> 비활성화하고 마커 제거
@@ -458,7 +441,6 @@ color:#ef4444;">있음</span></div>
                     }
                     geolocationBtn.classList.remove('active');
                     
-                    // 문구 업데이트: 모드에 따라 다름
                     if (isIndoorMode) {
                         coordDisplay.textContent = '일반지도로 돌아가려면 실내지도를 클릭하세요';
                     } else {
@@ -477,7 +459,6 @@ color:#ef4444;">있음</span></div>
                             const lng = position.coords.longitude;
                             const currentLatLng = new naver.maps.LatLng(lat, lng);
 
-                            // 지도 중심 이동 및 줌 레벨 설정 (실내 모드 중이라도 실행)
                             map.setCenter(currentLatLng);
                             map.setZoom(17); 
 
@@ -498,20 +479,19 @@ color:#ef4444;">있음</span></div>
                                 zIndex: 9999
                             });
                             
-                            // 문구 업데이트: 모드에 따라 다름
+                            // 문구 업데이트
                             if (isIndoorMode) {
                                 coordDisplay.textContent = '현재 위치로 이동했습니다. 실내지도는 그대로 표시됩니다.';
                             } else {
                                 coordDisplay.textContent = '현재 위치로 이동했습니다! 건물을 클릭하면 실내지도를 볼 수 있어요';
                             }
-                            geolocationBtn.classList.add('active'); // 성공 시 active 유지 (파란색 화살표)
+                            geolocationBtn.classList.add('active'); 
 
                         },
                         function(error) {
                             console.error("Geolocation Error:", error);
                             alert('위치 정보를 찾을 수 없거나 접근이 거부되었습니다. (권한 거부 또는 위치 찾기 실패)');
                             
-                            // 문구 업데이트: 모드에 따라 다름
                             if (isIndoorMode) {
                                 coordDisplay.textContent = '위치 찾기 실패. 실내지도로 돌아가려면 클릭하세요';
                             } else {
@@ -521,7 +501,7 @@ color:#ef4444;">있음</span></div>
                             if (currentPositionMarker) {
                                 currentPositionMarker.setMap(null);
                             }
-                            geolocationBtn.classList.remove('active'); // 실패 시 active 해제 (회색 타겟)
+                            geolocationBtn.classList.remove('active'); 
                         },
                         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 } 
                     );
@@ -548,13 +528,12 @@ color:#ef4444;">있음</span></div>
                 }
             });
             
-            // 무장애시설 버튼 ('i' 버튼) 클릭 리스너
+            // 무장애시설 버튼 ('i' 버튼) 클릭 리스너 
             accessBtn.addEventListener('click', function() {
                 const isOpen = popup.style.display === 'block';
                 
-                // 층 버튼의 active 상태를 모두 해제 (i 버튼 클릭 시)
-                document.querySelectorAll('#floorControls .floor-btn').forEach(b => b.classList.remove('active'));
-
+                // 층 버튼의 활성화 상태를 건드리지 않음 (요청 완료)
+                
                 if (!isOpen) {
                     // 팝업 열기
                     popup.style.display = 'block';
@@ -563,7 +542,6 @@ color:#ef4444;">있음</span></div>
                     // 팝업 닫기
                     popup.style.display = 'none';
                     this.classList.remove('active');
-                    updateFloorButtonState(); // 팝업 닫고 원래 층 버튼 active 복원
                 }
             });
 
@@ -572,7 +550,7 @@ color:#ef4444;">있음</span></div>
                 popupClose.onclick = () => {
                     popup.style.display = 'none';
                     accessBtn.classList.remove('active');
-                    updateFloorButtonState(); // 마지막 활성화 층 버튼 복원
+                    // 층 버튼의 상태는 그대로 유지
                 };
             }
         };
