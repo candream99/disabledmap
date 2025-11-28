@@ -131,12 +131,18 @@ color:#ef4444;">있음</span></div>
             labelLayer.setMap(map);
             document.getElementById('status').style.display = 'none';
 
+            // 새롭게 수정된 외곽선 좌표 (8개 지점, 시계 방향)
             const polygonCoords = [
-                new naver.maps.LatLng(37.571348, 126.977671),
-                new naver.maps.LatLng(37.571354, 126.978059),
-                new naver.maps.LatLng(37.570541, 126.978091),
-                new naver.maps.LatLng(37.570538, 126.977698),
+                new naver.maps.LatLng(37.571350, 126.977670), // 1
+                new naver.maps.LatLng(37.571360, 126.978059), // 2
+                new naver.maps.LatLng(37.571275, 126.978063), // 3
+                new naver.maps.LatLng(37.571275, 126.978173), // 4
+                new naver.maps.LatLng(37.570870, 126.978184), // 5
+                new naver.maps.LatLng(37.570872, 126.978082), // 6
+                new naver.maps.LatLng(37.570543, 126.978094), // 7
+                new naver.maps.LatLng(37.570539, 126.977702), // 8
             ];
+
     const polygon = new naver.maps.Polygon({
                 map: map,
                 paths: [polygonCoords],
@@ -174,7 +180,7 @@ color:#ef4444;">있음</span></div>
                 '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
             };
             
-            // 이미지 바운드 좌표 수정: SW(37.570478, 126.977578), NE(37.571389, 126.978224)
+            // 이미지 바운드 좌표
             const swLatLng = new naver.maps.LatLng(37.570478, 126.977578);
             const neLatLng = new naver.maps.LatLng(37.571389, 126.978224);
             const imageBounds = new naver.maps.LatLngBounds(swLatLng, neLatLng);
