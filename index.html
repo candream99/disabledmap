@@ -336,7 +336,17 @@ let currentBuildingId = null;
             // 층 지도(GroundOverlay) 표시
             function showFloor(buildingId, floor) {
                 const config = buildings[buildingId];
- if (!config || !config.images[floor]) return;
+                if (!config || !config.images[floor]) return;
+                
+                // 🌟🌟🌟 [수정된 로직] 층 변경 시 'i' 버튼 및 팝업 상태 초기화 🌟🌟🌟
+                // 층이 바뀌면 무장애 시설 정보도 새로 봐야 하므로 상태를 리셋합니다.
+                if (accessBtn.classList.contains('active')) {
+                    accessBtn.classList.remove('active');
+                }
+                if (popup.style.display === 'block') {
+                    popup.style.display = 'none';
+                }
+                // -------------------------------------------------------------------
 
                 currentBuildingId = buildingId;
                 config.currentFloor = floor;
@@ -406,7 +416,7 @@ let currentBuildingId = null;
 
                     btn.addEventListener('click', () => {
                         // 층 버튼 클릭 
- 시 'i' 팝업이나 상태에 전혀 영향을 주지 않습니다.
+                        // 이제 showFloor 함수 내에서 'i' 버튼 상태를 초기화합니다.
                         showFloor(buildingId, floor);
                     });
                 });
@@ -552,7 +562,6 @@ let currentBuildingId = null;
                             
                
               if (isIndoorMode) {
-                                // 구문 에러 해결: 줄 바꿈 제거
                                 coordDisplay.textContent = '위치 찾기 실패. 실내지도로 돌아가려면 클릭하세요';
                             } else {
                                 coordDisplay.textContent = '위치 찾기 실패: 건물을 클릭하면 실내지도를 볼 수 있어요';
