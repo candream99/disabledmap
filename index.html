@@ -27,61 +27,19 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             min-width: 200px;
         }
-        /* 무장애 버튼 */
-        #accessInfoBtn {
-            position: absolute;
-            top: 55px;
-            left: 10px;
-            background: #444;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            z-index: 1500;
-        }
-        #accessPopup {
-            position: absolute;
-            top: 95px;
-            left: 10px;
-            width: 260px;
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-            display: none;
-            z-index: 2000;
-        }
-        /* 층 버튼 */
+        /* 수정된 버튼 컨트롤 */
         #floorControls {
             position: absolute;
             bottom: 20px;
             left: 10px;
-            display: flex;
-            flex-direction: row;
-            gap: 6px;
-            z-index: 1500;
-        }
-        .floor-btn {
-            padding: 6px 10px;
-            font-size: 13px;
-            border-radius: 5px;
-            background: #ccc;
-            border: none;
-            width: auto;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-        .floor-btn.active { background:#007bff; color:#fff; }/* ⭐ 실내 모드 층 버튼 */
-        #floorControls {
-            position: absolute;
-            top: 120px;
-            left: 10px;
             display: none;
-            flex-direction: column;
+            flex-direction: row;
             gap: 8px;
             z-index: 1500;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         .floor-btn {
             padding: 8px 14px;
@@ -91,26 +49,43 @@
             border: none;
             background: #ccc;
             color: #000;
+            width: 100px; /* 동일한 너비 설정 */
+            white-space: nowrap;
         }
         .floor-btn.active {
             background: #007bff;
             color: #fff;
             font-weight: bold;
         }
+        /* 무장애 팝업 */
+        #accessPopup {
+            position: absolute;
+            bottom: 80px;
+            left: 10px;
+            width: 260px;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 2000;
+        }
     </style>
 </head>
 <body>
     <div id="status">API 키 확인 중...</div>
     <div id="coordDisplay">지도를 클릭하면 좌표가 나와요!</div>
+    
+    <!-- 수정된 버튼 컨트롤 -->
     <div id="floorControls">
+        <button id="accessInfoBtn" class="floor-btn" data-floor="access">무장애시설</button>
         <button class="floor-btn" data-floor="b1">B1</button>
         <button class="floor-btn active" data-floor="1f">1F</button>
         <button class="floor-btn" data-floor="2f">2F</button>
-        <button id="accessInfoBtn" class="access-btn" style="background:#444; color:#fff; margin-top:10px;">무장애 시설정보</button>
     </div>
 
-    <!-- ⭐ 무장애 시설정보 팝업창 추가 ⭐ -->
-    <div id="accessPopup" style="display:none; position:absolute; top:170px; left:10px; width:300px; padding:15px; background:white; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.3); z-index:2000;">
+    <!-- 무장애 시설정보 팝업창 -->
+    <div id="accessPopup" style="display:none;">
         <span id="accessPopupClose" style="position:absolute; top:8px; right:12px; font-size:22px; cursor:pointer; color:#777;">×</span>
         <div style="font-size:1.2rem; font-weight:700; margin-bottom:15px; color:#1e3a8a;">무장애 시설 정보</div>
         <div style="display:flex; margin-bottom:8px;"><span>• 주출입구 경사로</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
@@ -120,7 +95,7 @@
         <div style="display:flex; margin-bottom:8px;"><span>• 주출입구 단차</span><span style="margin-left:auto; font-weight:600; color:#ef4444;">있음</span></div>
     </div>
 
-    <div id="map""></div>
+    <div id="map"></div>
 
     <script>
         const NCP_KEY_ID = 'q1d23mmkof';
@@ -242,7 +217,24 @@
 
             document.querySelectorAll('.floor-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    showFloor(btn.dataset.floor);
+                    if (btn.dataset.floor === 'access') {
+                        // 무장애시설 버튼 클릭 시 팝업 토글
+                        const popup = document.getElementById('accessPopup');
+                        const isOpen = popup.style.display === 'block';
+                        
+                        // 모든 버튼에서 active 클래스 제거
+                        document.querySelectorAll('.floor-btn').forEach(b => b.classList.remove('active'));
+                        
+                        if (!isOpen) {
+                            popup.style.display = 'block';
+                            btn.classList.add('active');
+                        } else {
+                            popup.style.display = 'none';
+                        }
+                    } else {
+                        // 층별 버튼 클릭 시
+                        showFloor(btn.dataset.floor);
+                    }
                 });
             });
         };
@@ -253,26 +245,18 @@
         };
 
         document.head.appendChild(script);
-        // ⭐ 무장애 시설정보 팝업 토글 이벤트 재설정
-    const accessBtn = document.getElementById('accessInfoBtn');
-    const popup = document.getElementById('accessPopup');
-    const popupClose = document.getElementById('accessPopupClose');
+        
+        // 무장애 시설정보 팝업 닫기 이벤트
+        const popupClose = document.getElementById('accessPopupClose');
+        const popup = document.getElementById('accessPopup');
+        const accessBtn = document.getElementById('accessInfoBtn');
 
-    if (accessBtn) {
-        accessBtn.onclick = () => {
-            if (popup.style.display === 'none' || popup.style.display === '') {
-                popup.style.display = 'block';
-            } else {
+        if (popupClose) {
+            popupClose.onclick = () => {
                 popup.style.display = 'none';
-            }
-        };
-    }
-
-    if (popupClose) {
-        popupClose.onclick = () => {
-            popup.style.display = 'none';
-        };
-    }
-</script>
+                accessBtn.classList.remove('active');
+            };
+        }
+    </script>
 </body>
 </html>
