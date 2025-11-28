@@ -110,6 +110,11 @@ color:#ef4444;">있음</span></div>
         script.onload = function () {
             document.getElementById('status').textContent = 'API 로드 성공!';
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
+            
+            // 전역 DOM 요소 변수
+            const popup = document.getElementById('accessPopup');
+            const accessBtn = document.getElementById('accessInfoBtn');
+            const popupClose = document.getElementById('accessPopupClose');
 
             // 지도의 중심 좌표를 두 건물을 모두 볼 수 있도록 조정
             const mapOptions = {
@@ -207,13 +212,12 @@ color:#ef4444;">있음</span></div>
                 
                 if (groundOverlay) groundOverlay.setMap(null);
 
-                // --- [MODIFICATION 1: 다른 건물 폴리곤 숨기기] ---
+                // 다른 건물 폴리곤 숨기기
                 for (const id in buildings) {
                     if (id !== buildingId && buildings[id].polygon) {
                         buildings[id].polygon.setMap(null); // 다른 건물 폴리곤 숨기기
                     }
                 }
-                // ----------------------------------------------------
 
                 groundOverlay = new naver.maps.GroundOverlay(
                     config.images[floor],
@@ -230,19 +234,23 @@ color:#ef4444;">있음</span></div>
                 const floorBtn = document.querySelector(`#floorControls .floor-btn[data-floor="${floor}"]`);
                 if (floorBtn) floorBtn.classList.add('active');
 
-                // 실내 모드 종료 리스너
+                // 실내 모드 종료 리스너 (GroundOverlay 클릭 시)
                 naver.maps.Event.addListener(groundOverlay, 'click', function (e) {
                     e.stopOverlays = true;
                     groundOverlay.setMap(null);
                     
-                    // --- [MODIFICATION 2: 모든 건물 폴리곤 복원] ---
+                    // --- [MODIFICATION: 팝업창 닫기 로직 추가] ---
+                    popup.style.display = 'none'; // 팝업창 숨기기
+                    accessBtn.classList.remove('active'); // 무장애시설 버튼 active 해제
+                    // ---------------------------------------------
+                    
+                    // 모든 건물 폴리곤 복원
                     for (const id in buildings) {
                         if (buildings[id].polygon) {
                             buildings[id].polygon.setMap(map); // 모든 폴리곤을 맵에 다시 설정
                             buildings[id].polygon.setOptions({ fillColor: 'transparent' }); // 하이라이트 제거
                         }
                     }
-                    // ----------------------------------------------------
 
                     document.getElementById('floorControls').style.display = 'none';
                     config.polygon.setOptions({ fillColor: 'transparent' }); // 현재 건물의 외곽선 색상 복원
@@ -276,8 +284,8 @@ color:#ef4444;">있음</span></div>
 
                     btn.addEventListener('click', () => {
                         // Access 팝업 닫기 (층 버튼 클릭 시)
-                        document.getElementById('accessPopup').style.display = 'none';
-                        document.getElementById('accessInfoBtn').classList.remove('active');
+                        popup.style.display = 'none';
+                        accessBtn.classList.remove('active');
                         showFloor(buildingId, floor);
                     });
                     container.appendChild(btn);
@@ -300,7 +308,7 @@ color:#ef4444;">있음</span></div>
 
                 // 마우스 오버 리스너
                 naver.maps.Event.addListener(polygon, 'mouseover', function() {
-                    // 실내 모드 중이 아닐 때만 하이라이트 (다른 건물은 숨겨져 있으므로 별도 체크 불필요)
+                    // 실내 모드 중이 아닐 때만 하이라이트
                     if (!groundOverlay || groundOverlay.getMap() === null) {
                         polygon.setOptions({ fillColor: '#C490E4' });
                         document.getElementById('coordDisplay').textContent = `${buildingId} 건물입니다! (마우스 오버)`;
@@ -349,10 +357,6 @@ color:#ef4444;">있음</span></div>
                     document.getElementById('coordDisplay').textContent = `위도: ${lat}, 경도: ${lng}`;
                 }
             });
-
-            const accessBtn = document.getElementById('accessInfoBtn');
-            const popup = document.getElementById('accessPopup');
-            const popupClose = document.getElementById('accessPopupClose');
             
             // 무장애시설 버튼 클릭 리스너
             accessBtn.addEventListener('click', function() {
@@ -373,7 +377,7 @@ color:#ef4444;">있음</span></div>
                 }
             });
 
-            // 무장애 시설정보 팝업 닫기 이벤트
+            // 무장애 시설정보 팝업 닫기 이벤트 (X 버튼 클릭)
             if (popupClose) {
                 popupClose.onclick = () => {
                     popup.style.display = 'none';
