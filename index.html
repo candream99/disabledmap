@@ -265,6 +265,36 @@ color:#ef4444;">있음</span></div>
             // 핵심 로직 함수
             // =========================================================
 
+            /**
+             * 실내 모드를 종료하고 일반 지도로 돌아갑니다.
+             */
+            function exitIndoorMode() {
+                if (!currentBuildingId) return; // 이미 일반 모드인 경우
+            
+                if (groundOverlay) {
+                    groundOverlay.setMap(null);
+                }
+                
+                // 팝업창 닫기 및 'i' 버튼 active 해제
+                popup.style.display = 'none';
+                accessBtn.classList.remove('active');
+                
+                // 모든 건물 폴리곤 복원
+                for (const id in buildings) {
+                    if (buildings[id].polygon) {
+                        buildings[id].polygon.setMap(map); 
+                        buildings[id].polygon.setOptions({ fillColor: 'transparent' }); 
+                    }
+                }
+            
+                floorControlsContainer.style.display = 'none'; // 컨트롤 숨기기
+                labelLayer.setMap(map);
+                currentBuildingId = null; // 건물 상태 초기화
+            
+                // 문구 변경
+                coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요'; 
+            }
+
             // Access 팝업이 닫힐 때 마지막 활성화된 층 버튼을 다시 활성화
             function updateFloorButtonState() {
                 // 모든 층 버튼의 active 상태 제거
@@ -299,6 +329,7 @@ color:#ef4444;">있음</span></div>
                 // 현재 위치 마커가 있다면 제거 (실내 모드 진입 시)
                 if (currentPositionMarker) {
                     currentPositionMarker.setMap(null);
+                    geolocationBtn.classList.remove('active'); // 마커 제거 시 내 위치 버튼 비활성화
                 }
 
                 groundOverlay = new naver.maps.GroundOverlay(
@@ -321,27 +352,7 @@ color:#ef4444;">있음</span></div>
                 // 실내 모드 종료 리스너 (GroundOverlay 클릭 시)
                 naver.maps.Event.addListener(groundOverlay, 'click', function (e) {
                     e.stopOverlays = true;
-                    groundOverlay.setMap(null);
-                    
-                    // 팝업창 닫기 및 버튼 active 해제
-                    popup.style.display = 'none';
-                    accessBtn.classList.remove('active');
-                    
-                    // 모든 건물 폴리곤 복원
-                    for (const id in buildings) {
-                        if (buildings[id].polygon) {
-                            buildings[id].polygon.setMap(map); 
-                            buildings[id].polygon.setOptions({ fillColor: 'transparent' }); 
-                        }
-                    }
-
-                    floorControlsContainer.style.display = 'none'; // 컨트롤 숨기기
-                    config.polygon.setOptions({ fillColor: 'transparent' }); // 현재 건물의 외곽선 색상 복원
-                    labelLayer.setMap(map);
-                    currentBuildingId = null; // 건물 상태 초기화
-
-                    // 실내 모드 종료 문구
-                    coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요'; 
+                    exitIndoorMode(); // 추출된 함수 사용
                 });
             }
 
@@ -387,7 +398,7 @@ color:#ef4444;">있음</span></div>
                     fillOpacity: 0.5,
                     strokeColor: '#C490E4',
                     strokeOpacity: 1,
-                    strokeWeight: 2,
+                    strokeWeight: 3,
                     clickable: true,
                 });
                 config.polygon = polygon; // Polygon 객체를 config에 저장
@@ -434,25 +445,29 @@ color:#ef4444;">있음</span></div>
             }
 
             // =========================================================
-            // 현재 위치 (Geolocation) 기능
+            // 현재 위치 (Geolocation) 기능 (실내 모드에서 작동하도록 수정됨)
             // =========================================================
             geolocationBtn.addEventListener('click', function() {
-                // 실내 모드일 경우 경고
-                if (currentBuildingId !== null) {
-                    alert('실내 모드를 먼저 종료하고 현재 위치를 찾아주세요.');
-                    return;
-                }
-                
-                // 이미 활성화 상태라면 (파란색 버튼) -> 비활성화하고 마커 제거
+                // 실내 모드 여부에 관계없이 Geolocation 시도. exitIndoorMode() 호출 제거.
+                const isIndoorMode = currentBuildingId !== null;
+
+                // 1. 이미 활성화 상태라면 (파란색 버튼) -> 비활성화하고 마커 제거
                 if (geolocationBtn.classList.contains('active')) {
                     if (currentPositionMarker) {
                         currentPositionMarker.setMap(null);
                     }
                     geolocationBtn.classList.remove('active');
-                    coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
+                    
+                    // 문구 업데이트: 모드에 따라 다름
+                    if (isIndoorMode) {
+                        coordDisplay.textContent = '일반지도로 돌아가려면 실내지도를 클릭하세요';
+                    } else {
+                        coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
+                    }
                     return;
                 }
 
+                // 2. Geolocation 시작
                 if (navigator.geolocation) {
                     coordDisplay.textContent = '현재 위치를 찾는 중입니다...';
                     
@@ -462,6 +477,7 @@ color:#ef4444;">있음</span></div>
                             const lng = position.coords.longitude;
                             const currentLatLng = new naver.maps.LatLng(lat, lng);
 
+                            // 지도 중심 이동 및 줌 레벨 설정 (실내 모드 중이라도 실행)
                             map.setCenter(currentLatLng);
                             map.setZoom(17); 
 
@@ -482,14 +498,25 @@ color:#ef4444;">있음</span></div>
                                 zIndex: 9999
                             });
                             
-                            coordDisplay.textContent = '현재 위치로 이동했습니다! 건물을 클릭하면 실내지도를 볼 수 있어요';
+                            // 문구 업데이트: 모드에 따라 다름
+                            if (isIndoorMode) {
+                                coordDisplay.textContent = '현재 위치로 이동했습니다. 실내지도는 그대로 표시됩니다.';
+                            } else {
+                                coordDisplay.textContent = '현재 위치로 이동했습니다! 건물을 클릭하면 실내지도를 볼 수 있어요';
+                            }
                             geolocationBtn.classList.add('active'); // 성공 시 active 유지 (파란색 화살표)
 
                         },
                         function(error) {
                             console.error("Geolocation Error:", error);
-                            alert('위치 정보를 찾을 수 없거나 접근이 거부되었습니다.');
-                            coordDisplay.textContent = '위치 찾기 실패: 건물을 클릭하면 실내지도를 볼 수 있어요';
+                            alert('위치 정보를 찾을 수 없거나 접근이 거부되었습니다. (권한 거부 또는 위치 찾기 실패)');
+                            
+                            // 문구 업데이트: 모드에 따라 다름
+                            if (isIndoorMode) {
+                                coordDisplay.textContent = '위치 찾기 실패. 실내지도로 돌아가려면 클릭하세요';
+                            } else {
+                                coordDisplay.textContent = '위치 찾기 실패: 건물을 클릭하면 실내지도를 볼 수 있어요';
+                            }
                             
                             if (currentPositionMarker) {
                                 currentPositionMarker.setMap(null);
@@ -553,7 +580,7 @@ color:#ef4444;">있음</span></div>
         // API 로드 실패 시 에러 메시지
         script.onerror = function () {
             document.getElementById('status').textContent = 'API 로드 실패! URL 또는 Key 확인!';
-            document.getElementById('status').style.background = 'red';
+            document.getElementById('status').background = 'red';
         };
 
         document.head.appendChild(script);
