@@ -68,11 +68,11 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
         /* ------------------------------------------------ */
-        /* ★★★ coordDisplay 스타일 수정 (둥글게, 투명한 흰색, 검색창과 너비 일치) ★★★ */
+        /* ★★★ coordDisplay 스타일 (모든 모드에 동일하게 적용됨) ★★★ */
         /* ------------------------------------------------ */
         #coordDisplay {
             position: absolute;
-            /* 일반 모드: searchBox 아래 (48px height + 20px top + 10px gap) = 78px */
+            /* 일반 모드 위치 (searchBox 아래) */
             top: 78px; 
             left: 50%;
             transform: translateX(-50%);
@@ -84,14 +84,12 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             /* 높이: 검색창(48px)의 절반 */
             height: 24px;
             
-            /* 배경색: 약간 투명한 흰색, 글씨색: 검정색 */
+            /* 디자인: 약간 투명한 흰색, 둥근 모양 */
             background: rgba(255, 255, 255, 0.9);
             color: #000000;
-            
-            /* 양옆 완전히 둥글게 */
             border-radius: 24px;
             
-            /* 항상 한 줄 표시 및 수직 중앙 정렬 */
+            /* 항상 한 줄 표시 및 중앙 정렬 */
             display: flex;
             justify-content: center; /* 텍스트 중앙 정렬 */
             align-items: center; /* 수직 중앙 정렬 */
@@ -110,29 +108,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             min-width: unset; 
         }
         
-        /* 실내 모드 스타일 (JS에서 동적으로 적용할 스타일) - 원래 디자인으로 복구 */
-        .indoor-mode-coord {
-            top: 10px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            
-            /* 실내 모드에서는 너비, 높이, 패딩, 색상을 원래대로 (내용 기반) */
-            width: auto !important; 
-            height: auto !important;
-            padding: 8px 12px !important; 
-            border-radius: 6px !important; 
-            background: rgba(0, 0, 0, 0.75) !important;
-            color: #FFC107 !important;
-            
-            /* 텍스트 처리 초기화 */
-            white-space: normal !important;
-            overflow: visible !important;
-            text-overflow: clip !important;
-            
-            /* 중앙 정렬은 유지 */
-            justify-content: center;
-            align-items: center;
-        }
+        /* [수정] .indoor-mode-coord 클래스는 삭제되었습니다. 위치 변경은 JS에서 처리합니다. */
 
         /* 공통 원형 버튼 스타일 */
         .map-btn-circle {
@@ -448,8 +424,8 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                 // 검색창 숨기기
                 searchBox.style.display = 'none';
 
-                // coordDisplay를 실내 모드 위치로 변경 (상단 중앙)
-                coordDisplay.classList.add('indoor-mode-coord');
+                // [수정] coordDisplay의 디자인은 유지하고 위치만 상단(top: 10px)으로 올림 (검색창이 사라지므로)
+                coordDisplay.style.top = '10px'; 
                 
                 // 기타 실내 모드 진입 로직 실행
                 currentBuildingId = buildingId;
@@ -486,7 +462,8 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             
                 // ★★★ 일반 모드로 복귀 시 UI 변경 ★★★
                 searchBox.style.display = 'flex'; // 검색창 표시
-                coordDisplay.classList.remove('indoor-mode-coord'); // 실내 모드 스타일 제거
+                // [수정] coordDisplay 위치를 검색창 아래(top: 78px)로 복원
+                coordDisplay.style.top = '78px'; 
             
                 // 문구 변경
                 coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요'; 
