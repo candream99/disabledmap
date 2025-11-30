@@ -20,14 +20,14 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         /* ------------------------------------------------ */
-        /* ★★★ 검색창 관련 스타일 수정 (둥글게, 위치 조정) ★★★ */
+        /* ★★★ 검색창 스타일 (48px height) ★★★ */
         /* ------------------------------------------------ */
         #searchBox {
             position: absolute;
             top: 20px; /* 위치를 약간 아래로 내림 */
             left: 50%;
             transform: translateX(-50%);
-            /* [수정] 너비를 화면 너비의 80%로 설정하여 모바일에서 여백 증가 */
+            /* 너비: 화면 너비의 80% */
             width: 80vw; 
             max-width: 500px; /* 데스크톱에서는 500px을 넘지 않도록 유지 */
             height: 48px;
@@ -66,36 +66,72 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             pointer-events: none;
             user-select: none;
         }
+        
         /* ------------------------------------------------ */
-
+        /* ★★★ coordDisplay 스타일 수정 (둥글게, 투명한 흰색, 검색창과 너비 일치) ★★★ */
+        /* ------------------------------------------------ */
         #coordDisplay {
             position: absolute;
-            /* 일반 모드: searchBox 아래 (48px height + 20px top + 10px gap) = 78px로 수정 */
+            /* 일반 모드: searchBox 아래 (48px height + 20px top + 10px gap) = 78px */
             top: 78px; 
             left: 50%;
             transform: translateX(-50%);
-            /* 일반 모드에서는 너비를 작게 설정 */
-            width: auto; 
-            max-width: none; 
-            background: rgba(0, 0, 0, 0.75);
-            color: #FFC107;
-            padding: 8px 12px;
-            border-radius: 6px;
+            
+            /* 너비: 검색창과 동일 */
+            width: 80vw; 
+            max-width: 500px;
+            
+            /* 높이: 검색창(48px)의 절반 */
+            height: 24px;
+            
+            /* 배경색: 약간 투명한 흰색, 글씨색: 검정색 */
+            background: rgba(255, 255, 255, 0.9);
+            color: #000000;
+            
+            /* 양옆 완전히 둥글게 */
+            border-radius: 24px;
+            
+            /* 항상 한 줄 표시 및 수직 중앙 정렬 */
+            display: flex;
+            justify-content: center; /* 텍스트 중앙 정렬 */
+            align-items: center; /* 수직 중앙 정렬 */
+            padding: 0 15px; /* 내부 여백 */
             font-size: 14px;
             z-index: 1500;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            min-width: 200px;
-            text-align: center;
-            transition: all 0.3s ease; /* 전환 효과 추가 */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2); 
+            transition: all 0.3s ease; 
+            
+            /* 텍스트가 넘칠 경우 처리 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            
+            /* 기존 스타일 초기화 */
+            min-width: unset; 
         }
         
-        /* 실내 모드 스타일 (JS에서 동적으로 적용할 스타일) */
+        /* 실내 모드 스타일 (JS에서 동적으로 적용할 스타일) - 원래 디자인으로 복구 */
         .indoor-mode-coord {
             top: 10px !important;
             left: 50% !important;
             transform: translateX(-50%) !important;
-            width: auto !important;
-            text-align: center;
+            
+            /* 실내 모드에서는 너비, 높이, 패딩, 색상을 원래대로 (내용 기반) */
+            width: auto !important; 
+            height: auto !important;
+            padding: 8px 12px !important; 
+            border-radius: 6px !important; 
+            background: rgba(0, 0, 0, 0.75) !important;
+            color: #FFC107 !important;
+            
+            /* 텍스트 처리 초기화 */
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+            
+            /* 중앙 정렬은 유지 */
+            justify-content: center;
+            align-items: center;
         }
 
         /* 공통 원형 버튼 스타일 */
