@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>네이버 벡터맵 테스트 - 미세 줌 컨트롤 활성화</title>
+    <title>네이버 벡터맵 테스트 - 미세 줌 레벨 활성화</title>
     <style>
         body { margin: 0;
 padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
@@ -12,11 +12,12 @@ height: 100%; }
         #status {
             position: absolute;
 top: 10px; left: 10px;
-            background: rgba(255, 99, 71, 0.9);
+            background: rgba(60, 179, 113, 0.9); /* 로드 성공 색상으로 변경 */
             color: white; padding: 10px 15px;
             border-radius: 5px; font-size: 14px;
             z-index: 1000;
 box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: none; /* 로딩 후 숨김 */
         }
 
         /* ------------------------------------------------ */
@@ -268,7 +269,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     </style>
 </head>
 <body>
-    <div id="status">API 키 확인 중...</div>
+    <div id="status" style="display: block; background: rgba(255, 99, 71, 0.9);">API 키 확인 중...</div>
 
     <!-- 검색창 -->
     <div id="searchBox">
@@ -309,7 +310,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
 
         script.onload = function () {
-            document.getElementById('status').textContent = 'API 로드 성공!';
+            document.getElementById('status').textContent = 'API 로드 성공! 이제 휠로 미세하게 확대/축소해보세요.';
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
             
             // 전역 DOM 요소 변수
@@ -326,12 +327,13 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             const mapOptions = {
                 center: new naver.maps.LatLng(37.5710, 126.9784),
                 zoom: 17, 
-                // ★★★ 수정: 줌 컨트롤 버튼 활성화 ★★★
-                zoomControl: true, 
-                zoomControlOptions: {
-                    position: naver.maps.Position.RIGHT_BOTTOM, // 줌 버튼 위치 지정
-                    style: naver.maps.ZoomControlStyle.SMALL // 작은 크기 버튼 스타일
-                },
+                // 줌 컨트롤 버튼 비활성화 (요청에 따라 숨김)
+                zoomControl: false, 
+                // ★★★ 핵심 수정: 소수점 줌 레벨 지원 설정 ★★★
+                // 휠 또는 터치 제스처 시 줌 레벨을 소수점 단위로 변경하여 부드럽게 만듭니다.
+                scrollWheelZoom: true, 
+                pinchZoom: true,
+                
                 mapTypes: new naver.maps.MapTypeRegistry({
                     normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
                 }),
@@ -340,7 +342,12 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             map.setMapTypeId('normal');
             const labelLayer = new naver.maps.LabelLayer();
             labelLayer.setMap(map);
-            document.getElementById('status').style.display = 'none';
+            
+            // 5초 후 상태 메시지 숨김
+            setTimeout(() => {
+                document.getElementById('status').style.display = 'none';
+            }, 5000);
+
 
             let groundOverlay = null; 
             let currentBuildingId = null; 
@@ -778,6 +785,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         script.onerror = function () {
             document.getElementById('status').textContent = 'API 로드 실패! URL 또는 Key 확인!';
             document.getElementById('status').background = 'red';
+            document.getElementById('status').style.display = 'block';
         };
 
         document.head.appendChild(script);
