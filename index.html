@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>네이버 벡터맵 테스트 - 다중 건물 지원</title>
+    <title>네이버 벡터맵 테스트 - 미세 줌 컨트롤 활성화</title>
     <style>
         body { margin: 0;
 padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
@@ -20,23 +20,22 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         /* ------------------------------------------------ */
-        /* ★★★ 검색창 스타일 (48px height) ★★★ */
+        /* 검색창 스타일 */
         /* ------------------------------------------------ */
         #searchBox {
             position: absolute;
-            top: 20px; /* 위치를 약간 아래로 내림 */
+            top: 20px; 
             left: 50%;
             transform: translateX(-50%);
-            /* 너비: 화면 너비의 80% */
             width: 80vw; 
-            max-width: 500px; /* 데스크톱에서는 500px을 넘지 않도록 유지 */
+            max-width: 500px; 
             height: 48px;
             background: #ffffff;
-            border-radius: 24px; /* 양옆을 완전히 둥글게 (pill shape) */
-            box-shadow: 0 6px 16px rgba(0,0,0,0.2); /* 그림자를 더 강조하여 떠있는 느낌 */
+            border-radius: 24px; 
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2); 
             display: flex;
             align-items: center;
-            padding: 0 15px; /* 내부 패딩 조정 */
+            padding: 0 15px; 
             z-index: 2000;
         }
         #hamburgerBtn {
@@ -62,13 +61,13 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         #searchPlaceholder {
             flex-grow: 1;
             font-size: 16px;
-            color: #a0a0a0; /* 회색 텍스트 */
+            color: #a0a0a0; 
             pointer-events: none;
             user-select: none;
         }
         
         /* ------------------------------------------------ */
-        /* ★★★ coordDisplay 스타일 (모든 모드에 동일하게 적용됨) ★★★ */
+        /* coordDisplay 스타일 (모든 모드에 동일하게 적용됨) */
         /* ------------------------------------------------ */
         #coordDisplay {
             position: absolute;
@@ -91,9 +90,9 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             
             /* 항상 한 줄 표시 및 중앙 정렬 */
             display: flex;
-            justify-content: center; /* 텍스트 중앙 정렬 */
-            align-items: center; /* 수직 중앙 정렬 */
-            padding: 0 15px; /* 내부 여백 */
+            justify-content: center; 
+            align-items: center; 
+            padding: 0 15px; 
             font-size: 14px;
             z-index: 1500;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2); 
@@ -104,12 +103,9 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             overflow: hidden;
             text-overflow: ellipsis;
             
-            /* 기존 스타일 초기화 */
             min-width: unset; 
         }
         
-        /* [수정] .indoor-mode-coord 클래스는 삭제되었습니다. 위치 변경은 JS에서 처리합니다. */
-
         /* 공통 원형 버튼 스타일 */
         .map-btn-circle {
             width: 40px;
@@ -171,7 +167,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             transform: none; 
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-bottom: 12px solid #007bff; /* 활성화 시 파란색으로 변경 */
+            border-bottom: 12px solid #007bff; 
             margin-bottom: 6px; 
         }
 
@@ -183,12 +179,10 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         /* 층 컨트롤 컨테이너 스타일 */
         #floorControls {
             position: absolute;
-            /* Geo 버튼과의 간격 30px 확보 */
             bottom: 88px; 
             left: 10px;
             display: none;
             flex-direction: column-reverse; 
-            /* 층 버튼 사이의 간격은 10px로 유지 */
             gap: 8px; 
             z-index: 1500;
             background: transparent;
@@ -212,7 +206,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         /* 무장애 시설 버튼 이미지 스타일 */
         /* ------------------------------------- */
         #accessInfoBtn {
-            /* 층 버튼과의 간격을 30px (10px gap + 20px margin) 확보 */
             margin-bottom: 18px; 
             font-size: 0;
             line-height: 0; 
@@ -241,7 +234,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         #accessPopup {
             position: absolute;
             left: auto;
-            width: 240px; /* 너비 확장 */
+            width: 240px; 
             background: white;
             padding: 10px;
             border-radius: 6px;
@@ -265,11 +258,11 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .status-positive {
-            color: #10b981; /* 초록색 */
+            color: #10b981; 
         }
 
         .status-negative {
-            color: #ef4444; /* 빨간색 */
+            color: #ef4444; 
         }
 
     </style>
@@ -277,7 +270,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 <body>
     <div id="status">API 키 확인 중...</div>
 
-    <!-- ★★★ 검색창 추가 ★★★ -->
+    <!-- 검색창 -->
     <div id="searchBox">
         <button id="hamburgerBtn" title="메뉴">
             <span class="burger-line"></span>
@@ -287,15 +280,18 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         <div id="searchPlaceholder">건물이름을 검색하세요</div>
     </div>
     
+    <!-- 좌표/상태 표시 -->
     <div id="coordDisplay" class="outdoor-mode-coord">건물을 클릭하면 실내지도를 볼 수 있어요</div>
     
+    <!-- 현재 위치 버튼 -->
     <button id="geolocationBtn" class="map-btn-circle" title="현재 위치 찾기"><span class="geo-icon"></span></button>
     
+    <!-- 층 컨트롤 및 무장애 시설 버튼 -->
     <div id="floorControls">
         <button id="accessInfoBtn" class="floor-btn map-btn-circle" data-floor="access" title="무장애 시설 정보"><span class="i-icon"></span></button>
         </div>
 
-    <!-- 팝업 내용을 동적으로 채우기 위해 기본 마크업을 단순화 -->
+    <!-- 무장애 시설 팝업 -->
     <div id="accessPopup" style="display:none;">
         <span id="accessPopupClose" style="position:absolute; top:6px; right:10px; font-size:22px; cursor:pointer; color:#777;">×</span>
         <div style="font-size:1.0rem; font-weight:700; margin-bottom:12px; color:#1e3a8a;">무장애 시설 정보</div>
@@ -307,8 +303,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     <div id="map"></div>
 
     <script>
-        // 현재 코드에서는 alert() 사용을 피하고, 사용자에게 정보를 전달할 때는 UI 요소 (coordDisplay)를 활용하는 것이 좋습니다.
-        // 하지만 기존 코드에 alert()이 포함되어 있으므로, Geolocation 오류 메시지만 UI에 맞게 수정했습니다.
         
         const NCP_KEY_ID = 'q1d23mmkof';
         const script = document.createElement('script');
@@ -319,20 +313,25 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             document.getElementById('status').style.background = 'rgba(60, 179, 113, 0.9)';
             
             // 전역 DOM 요소 변수
-            const searchBox = document.getElementById('searchBox'); // ★★★ searchBox DOM 추가 ★★★
+            const searchBox = document.getElementById('searchBox'); 
             const coordDisplay = document.getElementById('coordDisplay');
             const floorControlsContainer = document.getElementById('floorControls');
             const popup = document.getElementById('accessPopup');
-            const popupContent = document.getElementById('accessPopupContent'); // 팝업 내용 컨테이너 추가
+            const popupContent = document.getElementById('accessPopupContent'); 
             const accessBtn = document.getElementById('accessInfoBtn');
             const popupClose = document.getElementById('accessPopupClose');
             const geolocationBtn = document.getElementById('geolocationBtn');
 
-            // 지도의 중심 좌표를 두 건물을 모두 볼 수 있도록 조정
+            // 지도 옵션
             const mapOptions = {
                 center: new naver.maps.LatLng(37.5710, 126.9784),
                 zoom: 17, 
-                zoomControl: false, 
+                // ★★★ 수정: 줌 컨트롤 버튼 활성화 ★★★
+                zoomControl: true, 
+                zoomControlOptions: {
+                    position: naver.maps.Position.RIGHT_BOTTOM, // 줌 버튼 위치 지정
+                    style: naver.maps.ZoomControlStyle.SMALL // 작은 크기 버튼 스타일
+                },
                 mapTypes: new naver.maps.MapTypeRegistry({
                     normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
                 }),
@@ -348,7 +347,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             let currentPositionMarker = null; 
 
             // =========================================================
-            // 빌딩별 데이터 정의 (무장애 시설 정보 추가)
+            // 빌딩별 데이터 정의 
             // =========================================================
             const buildings = {
                 'ky': { // 건물 1 (예시: 경희궁)
@@ -374,7 +373,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                     ),
                     currentFloor: '1f', 
                     polygon: null,
-                    // 무장애 시설 정보 추가 (true: 있음, false: 없음)
                     accessInfo: {
                         '주출입구 경사로': true,
                         '장애인 화장실': true,
@@ -402,7 +400,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                     ),
                     currentFloor: '1f',
                     polygon: null,
-                    // 무장애 시설 정보 추가
                     accessInfo: {
                         '주출입구 경사로': false,
                         '장애인 화장실': true,
@@ -424,7 +421,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                 // 검색창 숨기기
                 searchBox.style.display = 'none';
 
-                // [수정] coordDisplay의 디자인은 유지하고 위치만 상단(top: 10px)으로 올림 (검색창이 사라지므로)
+                // coordDisplay의 위치를 상단(top: 10px)으로 올림 (검색창이 사라지므로)
                 coordDisplay.style.top = '10px'; 
                 
                 // 기타 실내 모드 진입 로직 실행
@@ -444,7 +441,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                     groundOverlay.setMap(null);
                 }
                 
-                // 팝업창 닫기 및 'i' 버튼 active 해제 (실내모드 종료 시 모든 UI 요소 초기화)
+                // 팝업창 닫기 및 'i' 버튼 active 해제
                 popup.style.display = 'none';
                 accessBtn.classList.remove('active');
                 
@@ -456,13 +453,13 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                     }
                 }
             
-                floorControlsContainer.style.display = 'none'; // 컨트롤 숨기기
+                floorControlsContainer.style.display = 'none'; 
                 labelLayer.setMap(map);
-                currentBuildingId = null; // 건물 상태 초기화
+                currentBuildingId = null; 
             
-                // ★★★ 일반 모드로 복귀 시 UI 변경 ★★★
-                searchBox.style.display = 'flex'; // 검색창 표시
-                // [수정] coordDisplay 위치를 검색창 아래(top: 78px)로 복원
+                // 일반 모드로 복귀 시 UI 변경
+                searchBox.style.display = 'flex'; 
+                // coordDisplay 위치를 검색창 아래(top: 78px)로 복원
                 coordDisplay.style.top = '78px'; 
             
                 // 문구 변경
@@ -475,18 +472,18 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                 if (!config || !config.images[floor]) return;
 
                 currentBuildingId = buildingId;
-                config.currentFloor = floor; // 현재 층 상태 업데이트
+                config.currentFloor = floor; 
                 
                 if (groundOverlay) groundOverlay.setMap(null);
 
                 // 다른 건물 폴리곤 숨기기
                 for (const id in buildings) {
                     if (id !== buildingId && buildings[id].polygon) {
-                        buildings[id].polygon.setMap(null); // 다른 건물 폴리곤 숨기기
+                        buildings[id].polygon.setMap(null); 
                     }
                 }
 
-                // 현재 위치 마커가 있다면 제거 (실내 모드 진입 시)
+                // 현재 위치 마커가 있다면 제거
                 if (currentPositionMarker) {
                     currentPositionMarker.setMap(null);
                     geolocationBtn.classList.remove('active'); 
@@ -503,7 +500,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                 );
 
                 // 버튼 상태 업데이트: 층 버튼만 비활성화 후 선택된 버튼 활성화
-                // 'i' 버튼의 active 상태는 건드리지 않습니다.
                 document.querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)').forEach(btn => btn.classList.remove('active'));
                 
                 const floorBtn = document.querySelector(`#floorControls .floor-btn[data-floor="${floor}"]`);
@@ -541,7 +537,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                     }
 
                     btn.addEventListener('click', () => {
-                        // 층 버튼 클릭 시 'i' 팝업이나 상태에 전혀 영향을 주지 않습니다.
                         showFloor(buildingId, floor);
                     });
                 });
@@ -549,7 +544,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 
             /**
              * 무장애 시설 정보 팝업 내용을 동적으로 업데이트합니다.
-             * @param {string} buildingId 현재 건물의 ID
              */
             function updateAccessPopup(buildingId) {
                 const accessInfo = buildings[buildingId]?.accessInfo;
@@ -563,14 +557,14 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                     const isAvailable = accessInfo[facility];
                     let statusText, statusClass;
 
-                    // '단차'는 '없음'을 긍정적인 상황(장애물 없음)으로 간주하고, 나머지는 '있음'을 긍정적인 상황으로 간주합니다.
+                    // '단차'는 '없음'을 긍정적인 상황(장애물 없음)으로 간주
                     if (facility.includes('단차')) {
                         statusText = isAvailable ? '있음' : '없음';
                         // 단차가 '없음'이면 초록색, '있음'이면 빨간색
                         statusClass = isAvailable ? 'status-negative' : 'status-positive'; 
                     } else {
                         statusText = isAvailable ? '있음' : '없음';
-                        // 경사로, 화장실, 블록, 엘리베이터가 '있음'이면 초록색, '없음'이면 빨간색
+                        // 나머지 시설이 '있음'이면 초록색, '없음'이면 빨간색
                         statusClass = isAvailable ? 'status-positive' : 'status-negative';
                     }
 
@@ -619,25 +613,20 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                 naver.maps.Event.addListener(polygon, 'click', function (e) {
                     e.stopOverlays = true;
                     
-                    // ★★★ 실내 모드 진입 시 UI 변경 함수 호출 ★★★
                     enterIndoorMode(buildingId);
 
                     polygon.setOptions({ fillColor: '#C490E4' });
                     
-                    // 현재 위치 마커가 있다면 제거
                     if (currentPositionMarker) {
                         currentPositionMarker.setMap(null);
                         geolocationBtn.classList.remove('active'); 
                     }
 
-                    // 해당 건물의 층 버튼 렌더링
                     renderFloorButtons(buildingId);
                     
-                    // 기본 층(1F 또는 첫 층) 표시
                     const defaultFloor = config.floors.includes('1f') ? '1f' : config.floors[0];
                     showFloor(buildingId, defaultFloor);
                     
-                    // 무장애 시설 정보 팝업 내용 업데이트
                     updateAccessPopup(buildingId); 
                 });
             }
@@ -704,7 +693,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                         },
                         function(error) {
                             console.error("Geolocation Error:", error);
-                            // alert 대신 coordDisplay를 활용하여 메시지 출력
+                            
                             let errorMsg = '위치 정보를 찾을 수 없거나 접근이 거부되었습니다.';
                             if (error.code === 1) {
                                 errorMsg = '위치 정보 접근 권한이 거부되었습니다.';
