@@ -337,30 +337,31 @@ height: 100%; }
             // ★★★ 핵심: 마우스 휠 이벤트 리스너 추가 (미세 조정) ★★★
             const ZOOM_STEP = 0.1; // 줌 레벨을 0.1 단위로 변경
             
-            mapContainer.addEventListener('wheel', function(e) {
-                // 기본 브라우저 스크롤 동작 방지 (지도만 줌 되도록)
-                e.preventDefault(); 
+             mapContainer.addEventListener("wheel", function (e) {
+                e.preventDefault();     // 기본 확대/축소 금지 (정수 줌 강제 방지)
+            }, { passive: false });
 
-                const currentZoom = map.getZoom();
+                // 네가 원하는 커스텀 미세 줌
+            const ZOOM_STEP = 0.1;   // 휠 1회 = 0.1단계 확대/축소
+
+            mapContainer.addEventListener("wheel", function (e) {
+                e.preventDefault();
+
+                let currentZoom = map.getZoom();
                 let newZoom = currentZoom;
 
-                if (e.deltaY < 0) {
-                    // 휠 위로: 확대
-                    newZoom = currentZoom + ZOOM_STEP;
-                } else if (e.deltaY > 0) {
-                    // 휠 아래로: 축소
-                    newZoom = currentZoom - ZOOM_STEP;
-                }
-                
-                // 줌 레벨을 반올림하여 소수점 둘째 자리까지 유지 (부동 소수점 오류 방지)
+                if (e.deltaY < 0) newZoom += ZOOM_STEP;   // 확대
+                else newZoom -= ZOOM_STEP;                // 축소
+
+                // 소수점 2자리까지
                 newZoom = Math.round(newZoom * 100) / 100;
-                
-                // 유효한 줌 범위(1~21)를 벗어나지 않도록 클램프
+
+                // 네이버 지도 허용 범위
                 newZoom = Math.min(Math.max(newZoom, 1), 21);
 
-                // 지도에 미세하게 조정된 줌 레벨 적용
+                // 소수점 줌 적용
                 map.setZoom(newZoom);
-            }, { passive: false }); // passive: false로 설정하여 preventDefault()를 허용
+            }, { passive: false });
 
 
             let groundOverlay = null; 
@@ -806,3 +807,4 @@ height: 100%; }
     </script>
 </body>
 </html>
+
