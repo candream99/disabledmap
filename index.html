@@ -93,7 +93,7 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             transform: none; 
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-bottom: 12px solid #ffffff; 
+            border-bottom: 12px solid #007bff; /* 활성화 시 파란색으로 변경 */
             margin-bottom: 6px; 
         }
 
@@ -163,7 +163,7 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         #accessPopup {
             position: absolute;
             left: auto;
-            width: 208px;
+            width: 240px; /* 너비 확장 */
             background: white;
             padding: 10px;
             border-radius: 6px;
@@ -171,6 +171,29 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             display: none;
             z-index: 2000;
         }
+        
+        /* 무장애 시설 정보 항목 스타일 */
+        .access-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .access-status {
+            font-weight: 600;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .status-positive {
+            color: #10b981; /* 초록색 */
+        }
+
+        .status-negative {
+            color: #ef4444; /* 빨간색 */
+        }
+
     </style>
 </head>
 <body>
@@ -180,27 +203,24 @@ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     <button id="geolocationBtn" class="map-btn-circle" title="현재 위치 찾기"><span class="geo-icon"></span></button>
     
     <div id="floorControls">
-        <button id="accessInfoBtn" class="floor-btn map-btn-circle" data-floor="access"><span class="i-icon"></span></button>
+        <button id="accessInfoBtn" class="floor-btn map-btn-circle" data-floor="access" title="무장애 시설 정보"><span class="i-icon"></span></button>
         </div>
 
+    <!-- 팝업 내용을 동적으로 채우기 위해 기본 마크업을 단순화 -->
     <div id="accessPopup" style="display:none;">
- 
         <span id="accessPopupClose" style="position:absolute; top:6px; right:10px; font-size:22px; cursor:pointer; color:#777;">×</span>
-        <div style="font-size:0.96rem; font-weight:700; margin-bottom:12px; color:#1e3a8a;">무장애 시설 정보</div>
-        <div style="display:flex; margin-bottom:6px;"><span>• 주출입구 경사로</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
-        <div style="display:flex;
-margin-bottom:6px;"><span>• 장애인 화장실</span><span style="margin-left:auto; font-weight:600; color:#10b981;">있음</span></div>
-        <div style="display:flex; margin-bottom:6px;"><span>• 점자블록</span><span style="margin-left:auto; font-weight:600;
-color:#10b981;">있음</span></div>
-        <div style="display:flex; margin-bottom:6px;"><span>• 엘리베이터</span><span style="margin-left:auto; font-weight:600;
-color:#10b981;">있음</span></div>
-        <div style="display:flex; margin-bottom:6px;"><span>• 주출입구 단차</span><span style="margin-left:auto; font-weight:600;
-color:#ef4444;">있음</span></div>
+        <div style="font-size:1.0rem; font-weight:700; margin-bottom:12px; color:#1e3a8a;">무장애 시설 정보</div>
+        <div id="accessPopupContent">
+            <!-- 동적으로 채워질 내용 -->
+        </div>
     </div>
 
     <div id="map"></div>
 
     <script>
+        // 현재 코드에서는 alert() 사용을 피하고, 사용자에게 정보를 전달할 때는 UI 요소 (coordDisplay)를 활용하는 것이 좋습니다.
+        // 하지만 기존 코드에 alert()이 포함되어 있으므로, Geolocation 오류 메시지만 UI에 맞게 수정했습니다.
+        
         const NCP_KEY_ID = 'q1d23mmkof';
         const script = document.createElement('script');
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
@@ -213,6 +233,7 @@ color:#ef4444;">있음</span></div>
             const coordDisplay = document.getElementById('coordDisplay');
             const floorControlsContainer = document.getElementById('floorControls');
             const popup = document.getElementById('accessPopup');
+            const popupContent = document.getElementById('accessPopupContent'); // 팝업 내용 컨테이너 추가
             const accessBtn = document.getElementById('accessInfoBtn');
             const popupClose = document.getElementById('accessPopupClose');
             const geolocationBtn = document.getElementById('geolocationBtn');
@@ -237,10 +258,10 @@ color:#ef4444;">있음</span></div>
             let currentPositionMarker = null; 
 
             // =========================================================
-            // 빌딩별 데이터 정의
+            // 빌딩별 데이터 정의 (무장애 시설 정보 추가)
             // =========================================================
             const buildings = {
-                'ky': { 
+                'ky': { // 건물 1 (예시: 경희궁)
                     polygonCoords: [
                         new naver.maps.LatLng(37.571350, 126.977670),
                         new naver.maps.LatLng(37.571360, 126.978059),
@@ -263,8 +284,16 @@ color:#ef4444;">있음</span></div>
                     ),
                     currentFloor: '1f', 
                     polygon: null,
+                    // 무장애 시설 정보 추가 (true: 있음, false: 없음)
+                    accessInfo: {
+                        '주출입구 경사로': true,
+                        '장애인 화장실': true,
+                        '점자블록': true,
+                        '엘리베이터': true,
+                        '주출입구 단차': false // 단차가 없음을 긍정으로 해석하거나, 단차 여부를 명시
+                    }
                 },
-                'dt': { 
+                'dt': { // 건물 2 (예시: 돈의문)
                     polygonCoords: [
                         new naver.maps.LatLng(37.571470, 126.978762),
                         new naver.maps.LatLng(37.571476, 126.979161),
@@ -283,6 +312,14 @@ color:#ef4444;">있음</span></div>
                     ),
                     currentFloor: '1f',
                     polygon: null,
+                    // 무장애 시설 정보 추가
+                    accessInfo: {
+                        '주출입구 경사로': false,
+                        '장애인 화장실': true,
+                        '점자블록': false,
+                        '엘리베이터': true,
+                        '주출입구 단차': true // 단차가 있음을 부정으로 해석하거나, 단차 여부를 명시
+                    }
                 }
             };
 
@@ -398,6 +435,44 @@ color:#ef4444;">있음</span></div>
                 });
             }
 
+            /**
+             * 무장애 시설 정보 팝업 내용을 동적으로 업데이트합니다.
+             * @param {string} buildingId 현재 건물의 ID
+             */
+            function updateAccessPopup(buildingId) {
+                const accessInfo = buildings[buildingId]?.accessInfo;
+                if (!accessInfo) {
+                    popupContent.innerHTML = '<div>건물에 대한 무장애 시설 정보가 없습니다.</div>';
+                    return;
+                }
+
+                let html = '';
+                for (const facility in accessInfo) {
+                    const isAvailable = accessInfo[facility];
+                    let statusText, statusClass;
+
+                    // '단차'는 '없음'을 긍정적인 상황(장애물 없음)으로 간주하고, 나머지는 '있음'을 긍정적인 상황으로 간주합니다.
+                    if (facility.includes('단차')) {
+                        statusText = isAvailable ? '있음' : '없음';
+                        // 단차가 '없음'이면 초록색, '있음'이면 빨간색
+                        statusClass = isAvailable ? 'status-negative' : 'status-positive'; 
+                    } else {
+                        statusText = isAvailable ? '있음' : '없음';
+                        // 경사로, 화장실, 블록, 엘리베이터가 '있음'이면 초록색, '없음'이면 빨간색
+                        statusClass = isAvailable ? 'status-positive' : 'status-negative';
+                    }
+
+                    html += `
+                        <div class="access-item">
+                            <span>• ${facility}</span>
+                            <span class="access-status ${statusClass}">${statusText}</span>
+                        </div>
+                    `;
+                }
+                popupContent.innerHTML = html;
+            }
+
+
             // 건물별 Polygon 생성 및 리스너 설정
             function setupBuilding(buildingId, config) {
                 const polygon = new naver.maps.Polygon({
@@ -447,6 +522,9 @@ color:#ef4444;">있음</span></div>
                     // 기본 층(1F 또는 첫 층) 표시
                     const defaultFloor = config.floors.includes('1f') ? '1f' : config.floors[0];
                     showFloor(buildingId, defaultFloor);
+                    
+                    // ★★★ 추가된 기능: 무장애 시설 정보 팝업 내용 업데이트 ★★★
+                    updateAccessPopup(buildingId); 
 
                     // 실내 모드 진입 문구
                     coordDisplay.textContent = '일반지도로 돌아가려면 실내지도를 클릭하세요'; 
@@ -515,12 +593,18 @@ color:#ef4444;">있음</span></div>
                         },
                         function(error) {
                             console.error("Geolocation Error:", error);
-                            alert('위치 정보를 찾을 수 없거나 접근이 거부되었습니다. (권한 거부 또는 위치 찾기 실패)');
+                            // alert 대신 coordDisplay를 활용하여 메시지 출력
+                            let errorMsg = '위치 정보를 찾을 수 없거나 접근이 거부되었습니다.';
+                            if (error.code === 1) {
+                                errorMsg = '위치 정보 접근 권한이 거부되었습니다.';
+                            } else if (error.code === 2) {
+                                errorMsg = '위치 정보를 찾을 수 없습니다.';
+                            }
                             
                             if (isIndoorMode) {
-                                coordDisplay.textContent = '위치 찾기 실패. 실내지도로 돌아가려면 클릭하세요';
+                                coordDisplay.textContent = `[에러] ${errorMsg}. 실내지도로 돌아가려면 클릭하세요`;
                             } else {
-                                coordDisplay.textContent = '위치 찾기 실패: 건물을 클릭하면 실내지도를 볼 수 있어요';
+                                coordDisplay.textContent = `[에러] ${errorMsg}. 건물을 클릭하면 실내지도를 볼 수 있어요`;
                             }
                             
                             if (currentPositionMarker) {
@@ -531,7 +615,6 @@ color:#ef4444;">있음</span></div>
                         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 } 
                     );
                 } else {
-                    alert('이 브라우저에서는 Geolocation이 지원되지 않습니다.');
                     coordDisplay.textContent = 'Geolocation 미지원: 건물을 클릭하면 실내지도를 볼 수 있어요';
                 }
             });
@@ -555,6 +638,12 @@ color:#ef4444;">있음</span></div>
             
             // 무장애시설 버튼 ('i' 버튼) 클릭 리스너 
             accessBtn.addEventListener('click', function() {
+                // 실내 모드가 아닐 경우 팝업을 열지 않습니다.
+                if (!currentBuildingId) {
+                    coordDisplay.textContent = '무장애 시설 정보는 건물을 클릭하여 실내 모드 진입 후 확인할 수 있어요.';
+                    return;
+                }
+
                 const isOpen = popup.style.display === 'block';
                 
                 if (!isOpen) {
@@ -596,7 +685,3 @@ color:#ef4444;">있음</span></div>
     </script>
 </body>
 </html>
-
-
-
-
