@@ -27,8 +27,9 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             top: 20px; /* 위치를 약간 아래로 내림 */
             left: 50%;
             transform: translateX(-50%);
-            width: calc(100% - 40px); /* 너비를 약간 줄여 양옆 여백 확보 */
-            max-width: 500px;
+            /* [수정] 너비를 화면 너비의 80%로 설정하여 모바일에서 여백 증가 */
+            width: 80vw; 
+            max-width: 500px; /* 데스크톱에서는 500px을 넘지 않도록 유지 */
             height: 48px;
             background: #ffffff;
             border-radius: 24px; /* 양옆을 완전히 둥글게 (pill shape) */
