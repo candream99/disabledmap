@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>네이버 벡터맵 테스트 - 무장애 시설 팝업 최종본 (층별 경계 분리)</title>
+    <title>네이버 벡터맵 테스트 - 무장애 시설 팝업 최종본 (타워8 추가)</title>
     <style>
         /* ------------------------------------------------ */
         /* 모바일 스크롤 잠금 */
@@ -441,7 +441,7 @@
         <input type="text" id="searchInput" placeholder="건물이름을 입력하세요">
         <button id="searchBtn" class="search-icon-btn" title="검색">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
             </svg>
         </button>
         <button id="closeSearchBtn" class="search-icon-btn" title="검색 취소">
@@ -550,16 +550,25 @@ color:#777;">×</span>
             var currentPositionMarker = null;
             
             // =========================================================
-            // 빌딩별 데이터 정의 (층별 경계 분리 적용)
+            // 빌딩별 데이터 정의 (층별 경계 분리 및 타워8 추가)
             // =========================================================
+            
+            // 기존 교보빌딩의 기본 경계
             var ky_default_bounds = new naver.maps.LatLngBounds(
-                new naver.maps.LatLng(37.570512, 126.977632), // 기존 SW
-                new naver.maps.LatLng(37.571415, 126.978244)  // 기존 NE
+                new naver.maps.LatLng(37.570512, 126.977632), // SW
+                new naver.maps.LatLng(37.571415, 126.978244)  // NE
             );
+            // D타워의 기본 경계
             var dt_default_bounds = new naver.maps.LatLngBounds(
                 new naver.maps.LatLng(37.570459, 126.978649), 
                 new naver.maps.LatLng(37.571626, 126.979210)  
             );
+            // 타워8의 기본 경계 (요청 좌표 적용)
+            var t8_default_bounds = new naver.maps.LatLngBounds(
+                new naver.maps.LatLng(37.570405, 126.980209), // SW
+                new naver.maps.LatLng(37.570902, 126.981077)  // NE
+            );
+
 
             var buildings = {
                 'ky': { // 건물 1 (예시: 교보빌딩)
@@ -575,18 +584,15 @@ color:#777;">×</span>
                     ],
                     floors: ['b1', '1f', '2f'],
                     images: {
-                        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/kb_b111.png',
+                        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
                         '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky11.png', 
                         '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
                     },
-                    // 층별 경계 정보를 객체로 분리하여 저장
                     floorBounds: { 
-                        'b1': new naver.maps.LatLngBounds( // B1: 사용자가 요청한 새로운 경계
-                            new naver.maps.LatLng(37.571590, 126.978531), // SW
-                            new naver.maps.LatLng(37.570465, 126.977552)  // NE
-                        ),
-                        '1f': ky_default_bounds, // 1F: 기존 경계 사용
-                        '2f': ky_default_bounds, // 2F: 기존 경계 사용
+                        // B1의 경계를 기존의 넓은 경계로 다시 설정 (이미지 안 보이는 오류 수정)
+                        'b1': ky_default_bounds, 
+                        '1f': ky_default_bounds, 
+                        '2f': ky_default_bounds, 
                     },
                     currentFloor: '1f', 
                     polygon: null,
@@ -619,10 +625,9 @@ color:#777;">×</span>
                         'b4': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt_b4.png',
                         '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt1.png',
                     },
-                    // 층별 경계 정보를 객체로 분리하여 저장
                     floorBounds: { 
-                        'b4': dt_default_bounds, // B4: 기존 경계 사용
-                        '1f': dt_default_bounds, // 1F: 기존 경계 사용
+                        'b4': dt_default_bounds, 
+                        '1f': dt_default_bounds, 
                     },
                     currentFloor: '1f',
                     polygon: null,
@@ -639,6 +644,45 @@ color:#777;">×</span>
                         image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/d_tower.jpg', 
                         address: '서울 종로구 송월길 2',
                         operating_hours: '10:00 - 19:00 (매일 운영)'
+                    }
+                },
+                't8': { // 건물 3: 타워8 (새로 추가)
+                    polygonCoords: [
+                        new naver.maps.LatLng(37.570859, 126.980318),
+                        new naver.maps.LatLng(37.570854, 126.980784),
+                        new naver.maps.LatLng(37.570515, 126.980785),
+                        new naver.maps.LatLng(37.570514, 126.980841),
+                        new naver.maps.LatLng(37.570417, 126.980840),
+                        new naver.maps.LatLng(37.570418, 126.980288),
+                        new naver.maps.LatLng(37.570518, 126.980287),
+                        new naver.maps.LatLng(37.570518, 126.980315),
+                    ],
+                    floors: ['1f', 'b1', 'b2'], 
+                    images: {
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/T8_1.png',
+                        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/T8_1.png',
+                        'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/T8_1.png',
+                    },
+                    floorBounds: { 
+                        '1f': t8_default_bounds,
+                        'b1': t8_default_bounds, 
+                        'b2': t8_default_bounds,
+                    },
+                    currentFloor: '1f',
+                    polygon: null,
+                    accessInfo: {
+                        '주출입구 경사로': true,
+                        '장애인 화장실': false, 
+                        '장애인 주차장': true,
+                        '엘리베이터': true,
+                        '주출입구 단차': false 
+                    },
+                    // 건물 상세 정보
+                    buildingInfo: {
+                        name: '타워8',
+                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/t88.jpg', 
+                        address: '서울 종로구 청진동 246', // 임의 주소
+                        operating_hours: '08:00 - 22:00 (주말 포함)' // 임의 영업시간
                     }
                 }
             };
@@ -722,10 +766,10 @@ color:#777;">×</span>
                 coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
             }
 
-            // 층 지도(GroundOverlay) 표시 (수정된 부분: floorBounds 사용)
+            // 층 지도(GroundOverlay) 표시 
             function showFloor(buildingId, floor) {
                 var config = buildings[buildingId];
-                // 💥 수정: config.floorBounds[floor]를 사용하여 층별 경계를 가져옵니다.
+                // 층별 경계 사용
                 var floorBound = config?.floorBounds[floor];
                 
                 if (!config || !config.images[floor] || !floorBound) {
@@ -955,7 +999,7 @@ color:#777;">×</span>
                         exitSearchMode();
                     }
                 } else {
-                    coordDisplay.textContent = `[검색 실패] '${buildingName}'에 해당하는 건물을 찾을 수 없습니다. (예: 교보빌딩, D타워)`;
+                    coordDisplay.textContent = `[검색 실패] '${buildingName}'에 해당하는 건물을 찾을 수 없습니다. (예: 교보빌딩, D타워, 타워8)`;
                 }
             }
 
@@ -1235,9 +1279,3 @@ color:#777;">×</span>
     </script>
 </body>
 </html>
-
-
-
-
-
-
