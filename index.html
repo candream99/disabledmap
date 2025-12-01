@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>네이버 벡터맵 테스트 - 무장애 시설 팝업 위치 및 너비 수정</title>
+    <title>네이버 벡터맵 테스트 - 무장애 시설 팝업 최종본</title>
     <style>
-        body { margin: 0;
-padding: 0; height: 100vh; font-family: 'Malgun Gothic', sans-serif; }
+        /* ------------------------------------------------ */
+        /* 모바일 스크롤 잠금 (추가/수정) */
+        /* ------------------------------------------------ */
+        body { 
+            margin: 0;
+            padding: 0; 
+            height: 100vh; /* 뷰포트 높이로 고정 */
+            font-family: 'Malgun Gothic', sans-serif; 
+            overflow: hidden; /* 페이지 자체의 스크롤을 완전히 막음 */
+        }
         #map { width: 100%;
 height: 100%; }
         /* ------------------------------------------------ */
@@ -57,7 +65,7 @@ font-size: 16px;
         }
         
         /* ------------------------------------------------ */
-        /* coordDisplay 스타일 (모든 모드에 동일하게 적용됨) */
+        /* coordDisplay 스타일 */
         /* ------------------------------------------------ */
         #coordDisplay {
             position: absolute;
@@ -217,7 +225,7 @@ width: 25px;
 }
         /* ------------------------------------- */
         
-        /* 무장애 팝업 */
+        /* 무장애 팝업 (수정: max-height와 overflow-y 추가) */
         #accessPopup {
             position: absolute;
 left: auto; /* JS에서 위치 계산 */
@@ -231,8 +239,8 @@ padding: 10px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
             display: none;
             z-index: 2000;
-            /* 팝업 내용이 길 경우 스크롤 가능하도록 추가 (선택 사항) */
-            max-height: calc(100vh - 40px); /* 화면 높이 - 상하 마진 */
+            /* 팝업 내용이 길 경우 스크롤 가능하도록 추가 */
+            max-height: calc(100vh - 40px); /* 화면 높이 - 상하 마진(20px * 2) */
             overflow-y: auto;
 }
 
@@ -526,6 +534,28 @@ color:#777;">×</span>
             };
 
             // =========================================================
+            // 모바일 터치 이벤트 버블링/스크롤 방지 (새로 추가된 핵심 로직)
+            // =========================================================
+
+            /**
+             * 특정 요소 내부에서 터치 이동(드래그)을 막아
+             * 브라우저의 기본 오버스크롤 및 화면 이동을 방지합니다.
+             */
+            function preventTouchMove(elementId) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    // 터치 이동(드래그) 이벤트 발생 시 브라우저 기본 동작 방지
+                    element.addEventListener('touchmove', function(e) {
+                        e.preventDefault();
+                    }, { passive: false });
+                }
+            }
+
+            // 검색창과 버튼 컨테이너 내부 터치 이동 잠금
+            preventTouchMove('searchBox');
+            preventTouchMove('floorControls');
+            
+            // =========================================================
             // 핵심 로직 함수
             // =========================================================
 
@@ -711,7 +741,7 @@ color:#777;">×</span>
 
                 
                 // =========================================================
-                // 2. 무장애 시설 정보 섹션 렌더링
+                // 2. 무장애 시설 정보 섹션 렌더링 (수정 반영)
                 // =========================================================
                 if (!accessInfo) {
         
@@ -948,18 +978,13 @@ color:#777;">×</span>
               
                     // i버튼의 위치 계산
                     const buttonRect = accessBtn.getBoundingClientRect();
-                    // 팝업창의 top 위치를 i버튼 상단으로 설정 (이제 사용하지 않음)
-                    // const popupTop = buttonRect.top;
-                 
-  
+                    
                     // 기존 (buttonRect.right + 20)에서 15px 왼쪽으로 이동 (총 + 5px)
                     const newPopupLeft = buttonRect.right + 5; 
 
                     // 💥 수정: 팝업 하단을 화면 하단에서 20px 띄워 고정 💥
-                    // 팝업의 vertical scroll이 가능하도록 CSS에 max-height도 추가되었습니다.
                     popup.style.bottom = '20px';
-                    // top 설정은 bottom 설정에 의해 무시되므로 제거합니다.
-                    // popup.style.top = popupTop + 'px'; 
+                    // 팝업의 top 속성은 제거하거나 무시됩니다.
                     
                     popup.style.left = newPopupLeft + 'px'; /* 수정된 left 값 적용 */
                     
