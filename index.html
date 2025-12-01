@@ -231,6 +231,9 @@ padding: 10px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
             display: none;
             z-index: 2000;
+            /* 팝업 내용이 길 경우 스크롤 가능하도록 추가 (선택 사항) */
+            max-height: calc(100vh - 40px); /* 화면 높이 - 상하 마진 */
+            overflow-y: auto;
 }
 
 /* --- 👇 추가된 섹션 스타일 👇 --- */
@@ -318,6 +321,7 @@ min-width: 40px;
 </head>
 <body>
     <div id="map"></div>
+    
     <div id="searchBox">
         <button id="hamburgerBtn" title="메뉴">
             <span class="burger-line"></span>
@@ -338,18 +342,18 @@ class="outdoor-mode-coord">건물을 클릭하면 실내지도를 볼 수 있어
         </div>
 
 <div id="accessPopup" style="display:none;">
-    <span id="accessPopupClose" style="position:absolute; top:6px; right:10px; font-size:22px; cursor:pointer;
+        <span id="accessPopupClose" style="position:absolute; top:6px; right:10px; font-size:22px; cursor:pointer;
 color:#777;">×</span>
-    
-    <div id="accessPopupBody">
-        <div id="buildingInfoSection" class="popup-section">
-            </div>
         
-        <div id="accessFacilitySection" class="popup-section">
-            </div>
-    </div>
-
-   </div>
+        <div id="accessPopupBody">
+            <div id="buildingInfoSection" class="popup-section">
+                </div>
+            
+            <div id="accessFacilitySection" class="popup-section">
+                </div>
+        </div>
+  
+       </div>
 
     <script>
         
@@ -392,7 +396,7 @@ color:#777;">×</span>
                 }),
             
 };
-            // 💥 'map' ID를 가진 요소를 사용하여 지도 초기화 💥
+            // 지도 초기화
             const map = new naver.maps.Map('map', mapOptions);
             map.setMapTypeId('normal');
             const labelLayer = new naver.maps.LabelLayer();
@@ -469,8 +473,8 @@ color:#777;">×</span>
                     // 건물 상세 정보
                     buildingInfo: {
       
-                        name: '교보빌딩',
-                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/kyobo_gwanghwamun.jpg', // 예시 이미지
+                        name: '경희궁',
+                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/sample_image/kyunghee.jpg', // 예시 이미지
                         address: '서울 종로구 새문안로 45',
                         operating_hours: 
                             '09:00 - 18:00 (월요일 휴무)'
@@ -512,8 +516,8 @@ color:#777;">×</span>
                     // 건물 상세 정보
                 
                     buildingInfo: {
-                        name: '광화문 D타워',
-                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/d_tower.jpg', // 예시 이미지
+                        name: '돈의문 박물관 마을',
+                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/sample_image/donuimun.jpg', // 예시 이미지
                         address: '서울 종로구 송월길 2',
             
                         operating_hours: '10:00 - 19:00 (매일 운영)'
@@ -707,7 +711,7 @@ color:#777;">×</span>
 
                 
                 // =========================================================
-                // 2. 무장애 시설 정보 섹션 렌더링 (기존 로직)
+                // 2. 무장애 시설 정보 섹션 렌더링
                 // =========================================================
                 if (!accessInfo) {
         
@@ -716,7 +720,11 @@ color:#777;">×</span>
                 }
 
                 let html = '';
-                html += '<div style="font-size:1.0rem; font-weight:600; margin-bottom:12px; color:#1e3a8a;">무장애 시설정보</div>';
+                
+                // 요청하신 제목을 두 번째 섹션의 첫 줄로 추가
+                html += '<div style="font-size:1.0rem; font-weight:700; margin-bottom:12px; color:#1e3a8a;">무장애 시설정보</div>';
+
+
                 for (const facility in accessInfo) {
                     const isAvailable = accessInfo[facility];
                     let statusText, statusClass;
@@ -940,16 +948,20 @@ color:#777;">×</span>
               
                     // i버튼의 위치 계산
                     const buttonRect = accessBtn.getBoundingClientRect();
-                    // 팝업창의 top 위치를 i버튼 상단으로 설정
-                    const popupTop = buttonRect.top;
+                    // 팝업창의 top 위치를 i버튼 상단으로 설정 (이제 사용하지 않음)
+                    // const popupTop = buttonRect.top;
                  
   
                     // 기존 (buttonRect.right + 20)에서 15px 왼쪽으로 이동 (총 + 5px)
                     const newPopupLeft = buttonRect.right + 5; 
 
-                    popup.style.top = popupTop + 'px'; 
-                    popup.style.left 
-                        = newPopupLeft + 'px'; /* 수정된 left 값 적용 */
+                    // 💥 수정: 팝업 하단을 화면 하단에서 20px 띄워 고정 💥
+                    // 팝업의 vertical scroll이 가능하도록 CSS에 max-height도 추가되었습니다.
+                    popup.style.bottom = '20px';
+                    // top 설정은 bottom 설정에 의해 무시되므로 제거합니다.
+                    // popup.style.top = popupTop + 'px'; 
+                    
+                    popup.style.left = newPopupLeft + 'px'; /* 수정된 left 값 적용 */
                     
                     // 팝업 열기
                     popup.style.display = 'block';
@@ -981,7 +993,3 @@ color:#777;">×</span>
     </script>
 </body>
 </html>
-
-
-
-
