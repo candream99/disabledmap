@@ -28,17 +28,17 @@
             z-index: 2000;
         }
         
-        #hamburgerBtn { /* (스타일 유지) */
+        #hamburgerBtn { 
             width: 24px; height: 24px; background: none; border: none;
             padding: 0; margin-right: 10px; cursor: pointer;
             display: flex; flex-direction: column; justify-content: space-around;
             align-items: center;
         }
-        .burger-line { /* (스타일 유지) */
+        .burger-line { 
             display: block; width: 18px; height: 2px;
             background-color: #333; border-radius: 1px;
         }
-        #searchPlaceholder { /* (스타일 유지) */
+        #searchPlaceholder { 
             flex-grow: 1; font-size: 16px; color: #a0a0a0; 
             pointer-events: none; user-select: none;
         }
@@ -56,7 +56,7 @@
             overflow: hidden; text-overflow: ellipsis;
         }
         
-        /* 공통 원형 버튼 스타일 (유지) */
+        /* 공통 원형 버튼 스타일 */
         .map-btn-circle {
             width: 40px; height: 40px; padding: 0; cursor: pointer;
             background: #ffffff; border: none; border-radius: 50%;
@@ -90,14 +90,12 @@
         }
 
         /* ------------------------------------------------ */
-        /* [수정] 무장애 팝업 (모바일 스타일: 너비를 JS에서 제어) */
+        /* 무장애 팝업 (모바일/데스크톱 공통 기본) */
         /* ------------------------------------------------ */
         #accessPopup {
             position: absolute;
-            bottom: 20px; /* 하단 고정 */
-            top: auto;
-            width: auto; /* JS에서 픽셀 단위로 설정할 예정 */
-            max-width: 90vw; /* 안전 장치 */
+            bottom: 20px; 
+            width: auto; /* JS에서 유동적으로 설정 */
             background: white; padding: 15px;
             border-radius: 12px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
@@ -107,7 +105,7 @@
         }
         
         /* ------------------------------------------------ */
-        /* 데스크톱 스타일 (769px 이상) - 버튼 위치 좌측 하단으로 유지 */
+        /* 데스크톱 스타일 (769px 이상) - 팝업 최대 너비 설정 */
         /* ------------------------------------------------ */
         @media (min-width: 769px) {
             body { 
@@ -124,59 +122,59 @@
                 left: 10px; right: auto; bottom: 88px;
             }
             
-            /* 무장애 팝업 (데스크톱 스타일: 좌측 버튼 옆, 너비 확대) */
+            /* 무장애 팝업 (데스크톱 스타일: 좌측 버튼 옆, 최대 너비 350px) */
             #accessPopup {
                 top: auto;
                 bottom: 20px; 
-                max-width: 350px; /* 데스크톱: 더 넓은 너비는 CSS로 유지 */
+                max-width: 350px; 
                 border-radius: 8px;
                 padding: 15px;
             }
         }
 
-        /* 나머지 공통 스타일 (유지) */
+        /* 나머지 공통 스타일 */
         .floor-btn { font-size: 14px; }
         .map-btn-circle.active { background: #007bff; color: #fff; font-weight: bold; }
         #accessInfoBtn { margin-bottom: 18px; font-size: 0; line-height: 0; }
-        #accessInfoBtn .i-icon { /* (스타일 유지) */
+        #accessInfoBtn .i-icon { 
             display: block; width: 25px; height: 25px;
             background-size: contain; background-repeat: no-repeat;
             background-position: center;
             background-image: url('https://raw.githubusercontent.com/candream99/disabledmap/main/i_button.png');
         }
-        #accessInfoBtn.active .i-icon { /* (스타일 유지) */
+        #accessInfoBtn.active .i-icon { 
             background-image: url('https://raw.githubusercontent.com/candream99/disabledmap/main/i_button2.png');
         }
-        #accessPopupClose { /* (스타일 유지) */
+        #accessPopupClose { 
             position:absolute; top:6px; right:10px; font-size:22px; cursor:pointer; color:#777;
         }
-        .popup-section { /* (스타일 유지) */
+        .popup-section { 
             margin-bottom: 12px; padding-bottom: 8px;
             border-bottom: 1px solid #eee;
         }
-        .popup-section:last-child { /* (스타일 유지) */
+        .popup-section:last-child { 
             margin-bottom: 0; padding-bottom: 0; border-bottom: none;
         }
-        #buildingInfoSection { /* (스타일 유지) */
+        #buildingInfoSection { 
             display: flex; align-items: flex-start; gap: 10px;
         }
-        #buildingImage { /* (스타일 유지) */
+        #buildingImage { 
             width: 33.33%; height: auto; object-fit: cover; border-radius: 4px;
         }
         #buildingTextInfo { flex-grow: 1; }
         #buildingName { font-weight: bold; font-size: 1rem; margin-bottom: 4px; }
-        .info-item { /* (스타일 유지) */
+        .info-item { 
             display: flex; align-items: flex-start; font-size: 0.85rem;
             color: #555; margin-bottom: 2px;
         }
-        .info-item i { /* (스타일 유지) */
+        .info-item i { 
             width: 14px; text-align: center; margin-right: 5px; line-height: 1.5;
         }
-        .access-item { /* (스타일 유지) */
+        .access-item { 
             display: flex; justify-content: space-between; margin-bottom: 8px;
             font-size: 0.95rem;
         }
-        .access-status { /* (스타일 유지) */
+        .access-status { 
             font-weight: 600; min-width: 40px; text-align: right;
         }
         .status-positive { color: #10b981; }
@@ -222,7 +220,7 @@
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NCP_KEY_ID}&vmode=3`;
 
         // ---------------------------------------------------------
-        // ⭐ 핵심: 모바일/데스크톱 환경 구분 함수
+        // 핵심: 모바일/데스크톱 환경 구분 함수
         // ---------------------------------------------------------
         function isMobile() {
             // 768px 이하를 모바일로 간주
@@ -261,7 +259,7 @@
             labelLayer.setMap(map);
 
             // ---------------------------------------------------------
-            // ⭐ 데스크톱에서만 커스텀 휠 이벤트 리스너 추가 (기존 로직 유지)
+            // 데스크톱에서만 커스텀 휠 이벤트 리스너 추가 (기존 로직 유지)
             // ---------------------------------------------------------
             if (!isMobile()) {
                 const ZOOM_STEP = 0.1;
@@ -290,7 +288,7 @@
             // 빌딩별 데이터 정의 (생략 없이 유지)
             // =========================================================
             const buildings = {
-                'ky': { // 건물 1 (예시: 경희궁)
+                'ky': { 
                     polygonCoords: [
                         new naver.maps.LatLng(37.571350, 126.977670),
                         new naver.maps.LatLng(37.571360, 126.978059),
@@ -323,7 +321,6 @@
                     }
                 },
                 'dt': { 
-                    // 건물 2 (예시: 돈의문)
                     polygonCoords: [
                         new naver.maps.LatLng(37.571470, 126.978762), new naver.maps.LatLng(37.571476, 126.979161),
                         new naver.maps.LatLng(37.570627, 126.979181), new naver.maps.LatLng(37.570557, 126.979117),
@@ -365,7 +362,7 @@
             }
 
             // ---------------------------------------------------------
-            // ⭐ 핵심: 모바일에서만 터치 이동 잠금 실행 (유지)
+            // 모바일에서만 터치 이동 잠금 실행 (유지)
             // ---------------------------------------------------------
             if (isMobile()) {
                 preventTouchMove('searchBox');
@@ -375,8 +372,6 @@
             }
             // ---------------------------------------------------------
             
-            // ... (enterIndoorMode, exitIndoorMode, showFloor, renderFloorButtons, updateAccessPopup, setupBuilding 함수는 변경 없음) ...
-
             // ---------------------------------------------------------
             // enterIndoorMode 함수 (기존 로직 유지)
             // ---------------------------------------------------------
@@ -699,7 +694,7 @@
             });
 
             // ---------------------------------------------------------
-            // ⭐ [수정] 팝업 위치 및 모바일 너비 조정 로직
+            // ⭐ [최종 수정] 팝업 위치 및 모바일 너비 조정 로직
             // ---------------------------------------------------------
             accessBtn.addEventListener('click', function() {
                 if (!currentBuildingId) {
@@ -712,7 +707,7 @@
                 if (!isOpen) {
                     const buttonRect = accessBtn.getBoundingClientRect();
                     const popupGap = 5;
-                    const minMarginRight = 10; // 우측 최소 여백
+                    const minMarginRight = '10px'; // 화면 우측 최소 여백
 
                     // 1. 팝업 좌측 위치 (요청대로 버튼 우측에 고정)
                     const newPopupLeft = buttonRect.right + popupGap;
@@ -720,24 +715,18 @@
                     popup.style.bottom = '20px'; 
                     popup.style.top = 'auto'; 
                     popup.style.left = newPopupLeft + 'px';
-                    popup.style.right = 'auto';
-
-                    // 2. 모바일 (768px 이하)에서만 너비 계산 및 조정
+                    
                     if (isMobile()) {
-                        // 사용 가능한 최대 안전 너비: 화면 너비 - (팝업 시작 위치) - (우측 최소 여백)
-                        let maxSafeWidth = window.innerWidth - newPopupLeft - minMarginRight;
-                        
-                        // 이상적인 최대 너비 280px와 실제 사용 가능한 너비 중 더 작은 값을 최종 너비로 사용
-                        const idealMaxWidth = 280; 
-                        const finalWidth = Math.min(idealMaxWidth, maxSafeWidth);
-
-                        // 팝업이 잘리지 않도록 계산된 픽셀 너비를 적용
-                        popup.style.width = finalWidth + 'px';
+                        // 2. 모바일 (768px 이하): 좌측 고정, 우측을 10px 띄워 유동적으로 너비 설정
+                        // 'right' 속성까지 설정하면 'left'와 'right' 사이의 공간을 팝업이 채우게 되어 너비가 유동적이고 잘림이 방지됨.
+                        popup.style.right = minMarginRight; 
+                        popup.style.width = 'auto'; 
                         popup.style.maxWidth = 'none'; // CSS의 max-width 무시
                     } else {
-                        // 데스크톱: CSS의 max-width: 350px가 적용되도록 초기화
+                        // 3. 데스크톱 (769px 이상): 좌측 고정, 우측 해제, CSS의 max-width(350px) 사용
+                        popup.style.right = 'auto'; 
                         popup.style.width = 'auto';
-                        popup.style.maxWidth = ''; // CSS의 max-width 속성 복원
+                        popup.style.maxWidth = '350px'; // 데스크톱 max-width를 명시적으로 적용
                     }
 
                     // 팝업 열기
