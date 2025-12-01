@@ -588,12 +588,15 @@ color:#777;">×</span>
                         '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky11.png', 
                         '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
                     },
-                    floorBounds: { 
-                        // B1의 경계를 기존의 넓은 경계로 다시 설정 (이미지 안 보이는 오류 수정)
-                        'b1': ky_default_bounds, 
-                        '1f': ky_default_bounds, 
-                        '2f': ky_default_bounds, 
+floorBounds: { 
+                        'b1': new naver.maps.LatLngBounds( // B1: 사용자가 요청한 새로운 경계
+                            new naver.maps.LatLng(37.571590, 126.978531), // SW
+                            new naver.maps.LatLng(37.570465, 126.977552)  // NE
+                        ),
+                        '1f': ky_default_bounds, // 1F: 기존 경계 사용
+                        '2f': ky_default_bounds, // 2F: 기존 경계 사용
                     },
+
                     currentFloor: '1f', 
                     polygon: null,
                     accessInfo: {
@@ -1279,3 +1282,4 @@ color:#777;">×</span>
     </script>
 </body>
 </html>
+
