@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>네이버 벡터맵 테스트 - 레이아웃 수정</title>
+    <title>네이버 벡터맵 테스트 - 무장애 시설 팝업 최종본</title>
     <style>
         /* ------------------------------------------------ */
-        /* 모바일 스크롤 잠금 */
+        /* 모바일 스크롤 잠금 (추가/수정) */
         /* ------------------------------------------------ */
         body { 
             margin: 0;
@@ -16,23 +16,6 @@
             overflow: hidden; /* 페이지 자체의 스크롤을 완전히 막음 */
         }
         #map { width: 100%; height: 100%; }
-
-        /* ------------------------------------------------ */
-        /* 왼쪽 패널 스타일 */
-        /* ------------------------------------------------ */
-        #leftPanel {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 320px; /* 패널 너비 고정 */
-            height: 100%;
-            background-color: #ffffff;
-            box-shadow: 4px 0 12px rgba(0,0,0,0.15);
-            z-index: 1000; /* 지도 위에 표시 */
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
 
         /* ------------------------------------------------ */
         /* 검색창 스타일 */
@@ -74,30 +57,10 @@
         }
 
         /* ------------------------------------------------ */
-        /* 좌표 표시 (coordDisplay) 스타일 - 상단 중앙으로 수정 */
-        /* ------------------------------------------------ */
-        #coordDisplay {
-            position: absolute;
-            /* 상단 중앙 배치 */
-            top: 10px; 
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(255, 255, 255, 0.9);
-            color: #333;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 14px;
-            z-index: 1000; /* 지도 요소 위로 */
-            pointer-events: none; /* 지도 클릭 이벤트 방해 방지 */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* ------------------------------------------------ */
         /* 버튼 공통 스타일 */
         /* ------------------------------------------------ */
         .map-button {
             position: absolute;
-            /* 기본적으로 오른쪽에서 20px 위치 */
             right: 20px; 
             width: 44px;
             height: 44px;
@@ -112,7 +75,7 @@
             font-size: 20px;
             color: #333;
             z-index: 900;
-            transition: background-color 0.2s, box-shadow 0.2s, left 0.3s; /* left 속성 전환 추가 */
+            transition: background-color 0.2s, box-shadow 0.2s;
         }
         .map-button:hover {
             background-color: #f0f0f0;
@@ -130,7 +93,7 @@
         #accessBtn { bottom: 20px; } /* 맨 아래 고정 */
         
         /* ------------------------------------------------ */
-        /* 무장애 시설정보 팝업 스타일 */
+        /* 무장애 시설정보 팝업 스타일 (수정: bottom 고정) */
         /* ------------------------------------------------ */
         #accessPopup {
             position: absolute;
@@ -171,28 +134,6 @@
             color: #333;
         }
 
-        /* ------------------------------------------------ */
-        /* 모바일 반응형 처리 */
-        /* ------------------------------------------------ */
-        @media (max-width: 768px) {
-            #leftPanel {
-                width: 90%; /* 모바일에서 너비 확장 */
-                max-width: none;
-                z-index: 1100;
-            }
-            /* 모바일에서 버튼은 오른쪽 20px에 유지 */
-            .map-button {
-                right: 20px;
-                left: auto !important; /* JS에서 설정된 left 값을 오버라이드 */
-            }
-            /* 모바일에서 팝업 위치 */
-            #accessPopup {
-                left: 50% !important;
-                transform: translateX(-50%);
-                bottom: 10px;
-            }
-        }
-
     </style>
     <!-- 네이버 지도 API 로드 -->
     <!-- YOUR_CLIENT_ID를 실제 클라이언트 ID로 교체하세요. -->
@@ -200,19 +141,11 @@
 </head>
 <body>
     <div id="map"></div>
-    <div id="leftPanel">
-        <h2>지도 설정 및 정보</h2>
-        <p>이곳은 왼쪽 패널 영역입니다. 버튼과 팝업은 이 패널과 겹치지 않도록 배치됩니다.</p>
-        <button onclick="togglePanel(false)">패널 닫기</button>
-    </div>
     <div id="searchBox">
         <button>🔍</button>
         <input type="text" placeholder="장소 검색..." />
         <button>🎤</button>
     </div>
-
-    <!-- 좌표 표시를 상단 중앙으로 이동 -->
-    <div id="coordDisplay"></div> 
 
     <!-- 버튼들 -->
     <button id="zoomInBtn" class="map-button">+</button>
@@ -231,81 +164,10 @@
     </div>
 
     <script>
-        const clientId = 'YOUR_CLIENT_ID'; // 실제 클라이언트 ID로 교체 필요
+        // 이 스크립트 파일은 1201rev4.html의 내용을 그대로 복원한 것입니다.
+        // 클라이언트 ID는 반드시 교체해야 합니다.
+        const clientId = 'YOUR_CLIENT_ID'; 
 
-        // ------------------------------------------------
-        // JavaScript 헬퍼 함수
-        // ------------------------------------------------
-        
-        /**
-         * 지정된 요소의 CSS left 속성을 계산하여 설정합니다.
-         * 왼쪽 패널의 너비와 마진을 고려합니다.
-         * @param {HTMLElement} element - 위치를 조정할 요소
-         */
-        function setButtonPosition(element) {
-            const panel = document.getElementById('leftPanel');
-            const panelWidth = panel.offsetWidth; // 현재 패널의 너비 (320px)
-            const margin = 50; // 패널 오른쪽으로부터 50px
-            
-            // 패널이 화면에 표시되는 경우에만 left 속성 설정
-            if (panelWidth > 0) {
-                const newLeft = panelWidth + margin;
-                element.style.left = `${newLeft}px`;
-                element.style.right = 'auto'; // right 속성 무시
-            } else {
-                // 패널이 닫혔거나 숨겨진 경우, 오른쪽 기본 위치로 돌아감
-                element.style.left = 'auto';
-                element.style.right = '20px'; 
-            }
-        }
-        
-        /**
-         * 모든 버튼의 위치를 업데이트합니다.
-         */
-        function updateAllButtonPositions() {
-            const buttons = [
-                document.getElementById('zoomInBtn'),
-                document.getElementById('zoomOutBtn'),
-                document.getElementById('outdoorIndoorBtn'),
-                document.getElementById('accessBtn')
-            ];
-            buttons.forEach(setButtonPosition);
-
-            // 팝업 위치도 재계산
-            const accessPopup = document.getElementById('accessPopup');
-            if (accessPopup.style.display === 'block') {
-                 // 팝업은 버튼의 바로 오른쪽에 배치되도록 setPopupPosition을 호출하거나 직접 계산
-                 // 여기서는 setPopupPosition 로직을 따라 버튼의 위치에 맞게 업데이트
-                const accessBtn = document.getElementById('accessBtn');
-                const buttonRect = accessBtn.getBoundingClientRect();
-                const newPopupLeft = buttonRect.right + 5; 
-                accessPopup.style.left = newPopupLeft + 'px';
-            }
-        }
-
-        /**
-         * 왼쪽 패널의 표시 상태를 토글합니다.
-         * @param {boolean} [shouldToggle=true] - 토글할지 여부. false면 닫기만 함.
-         */
-        function togglePanel(shouldToggle = true) {
-            const panel = document.getElementById('leftPanel');
-            const isOpened = panel.offsetWidth > 0;
-            
-            if (shouldToggle) {
-                // 토글
-                panel.style.width = isOpened ? '0px' : '320px';
-                panel.style.padding = isOpened ? '0px' : '20px';
-            } else {
-                // 닫기
-                panel.style.width = '0px';
-                panel.style.padding = '0px';
-            }
-            
-            // 패널 너비 변경 후 버튼 위치 업데이트
-            // CSS transition이 완료될 때까지 기다리는 것이 이상적이지만, 여기서는 즉시 호출
-            setTimeout(updateAllButtonPositions, 300); // CSS transition 시간(0.3s) 후 업데이트
-        }
-        
         // ------------------------------------------------
         // 네이버 지도 API 로드 및 초기화
         // ------------------------------------------------
@@ -321,12 +183,14 @@
                 scaleControl: true,
             });
 
-            const coordDisplay = document.getElementById('coordDisplay');
+            // coordDisplay는 이 버전에는 포함되지 않았습니다.
+            // const coordDisplay = document.getElementById('coordDisplay');
             const accessBtn = document.getElementById('accessBtn');
-            const accessPopup = document.getElementById('accessPopup');
-            const popupClose = accessPopup.querySelector('.popup-close-btn');
+            const popup = document.getElementById('accessPopup');
+            const popupClose = popup.querySelector('.popup-close-btn');
 
-            // 1. 지도 이동 시 좌표 표시 업데이트 이벤트
+            // 1. 지도 이동 시 좌표 표시 업데이트 이벤트 (이 버전에는 coordDisplay가 없어 주석 처리)
+            /*
             naver.maps.Event.addListener(map, 'idle', function () {
                 const center = map.getCenter();
                 const indoorLevel = map.getIndoorLevel() || '실외';
@@ -335,12 +199,9 @@
                 // coordDisplay 업데이트
                 coordDisplay.innerHTML = `위도: ${center.lat().toFixed(5)}, 경도: ${center.lng().toFixed(5)} | 층: ${indoorLevel} | 타입: ${mapType.replace('normal', '일반').replace('satellite', '위성')}`;
             });
+            */
 
-            // 2. 초기 버튼 위치 설정 및 화면 크기 변경 시 업데이트
-            updateAllButtonPositions();
-            window.addEventListener('resize', updateAllButtonPositions);
-            
-            // 3. 버튼 이벤트 리스너
+            // 2. 버튼 이벤트 리스너
 
             // 예시: 실내외 모드 전환 버튼
             const indoorOutdoorBtn = document.getElementById('outdoorIndoorBtn');
@@ -365,47 +226,29 @@
                 map.setZoom(map.getZoom() - 1, true);
             });
 
-            // 4. 무장애 시설정보 팝업 토글 이벤트
+            // 3. 무장애 시설정보 팝업 토글 이벤트 (수정된 팝업 위치 로직 포함)
             accessBtn.addEventListener('click', function() {
-                const isPopupVisible = accessPopup.style.display === 'block';
+                const isPopupVisible = popup.style.display === 'block';
 
                 if (!isPopupVisible) {
                     // i버튼의 현재 위치 계산
                     const buttonRect = accessBtn.getBoundingClientRect();
                     
-                    // 패널 너비가 0일 경우(닫힌 경우), 팝업은 오른쪽 정렬(right: 20px)
-                    // 패널 너비가 320px일 경우, 팝업은 패널 오른쪽 + 50px + 5px(버튼과의 간격)에 위치
+                    // 기존 (buttonRect.right + 20)에서 15px 왼쪽으로 이동 (총 + 5px)
+                    const newPopupLeft = buttonRect.right + 5; 
+
+                    // 팝업 하단을 화면 하단에서 20px 띄워 고정 (CSS에서 처리)
+                    // popup.style.bottom = '20px'; 
+                    // 팝업의 top 속성은 제거하거나 무시됩니다.
                     
-                    let newPopupLeft;
-
-                    if (document.getElementById('leftPanel').offsetWidth > 0) {
-                        // 패널이 열려 있을 때: 버튼 오른쪽 + 5px
-                        newPopupLeft = buttonRect.right + 5; 
-                    } else {
-                        // 패널이 닫혀 있을 때: 화면 오른쪽에서 팝업 너비 + 20px 만큼 띄워서 오른쪽 정렬
-                        // 이 로직은 CSS right: 20px이 설정되었을 때, 팝업이 버튼 오른쪽에 배치되는 것을 가정함.
-                        // 정확한 계산을 위해 버튼의 left 값을 사용합니다.
-                        newPopupLeft = buttonRect.right + 5; 
-                        
-                        // 모바일 뷰포트에서는 중앙 정렬 (CSS 미디어 쿼리에서 처리)
-                        if (window.innerWidth <= 768) {
-                             // 모바일에서는 중앙 정렬을 위해 left: 50%와 transform: translateX(-50%)를 사용
-                             accessPopup.style.left = '50%';
-                             accessPopup.style.transform = 'translateX(-50%)';
-                        } else {
-                             // 데스크톱에서는 버튼 오른쪽 정렬
-                             accessPopup.style.left = newPopupLeft + 'px'; 
-                             accessPopup.style.transform = 'none';
-                        }
-                    }
-
-                    // 팝업 하단을 화면 하단에서 20px 띄워 고정 (CSS에서 이미 처리됨)
-                    // accessPopup.style.bottom = '20px'; 
-                    accessPopup.style.display = 'block';
+                    popup.style.left = newPopupLeft + 'px'; /* 수정된 left 값 적용 */
+                    
+                    // 팝업 열기
+                    popup.style.display = 'block';
                     this.classList.add('active');
                 } else {
                     // 팝업 닫기
-                    accessPopup.style.display = 'none';
+                    popup.style.display = 'none';
                     this.classList.remove('active');
                 }
             });
@@ -413,34 +256,10 @@
             // 무장애 시설정보 팝업 닫기 이벤트 (X 버튼 클릭)
             if (popupClose) {
                 popupClose.onclick = function() {
-                    accessPopup.style.display = 'none';
+                    popup.style.display = 'none';
                     accessBtn.classList.remove('active');
                 };
             }
-            
-            // 5. 왼쪽 패널 토글 버튼 추가 (예시)
-            const panelToggleBtn = document.createElement('button');
-            panelToggleBtn.innerHTML = '▶';
-            panelToggleBtn.style.position = 'absolute';
-            panelToggleBtn.style.top = '10px';
-            panelToggleBtn.style.left = '320px';
-            panelToggleBtn.style.zIndex = '1001';
-            panelToggleBtn.style.border = 'none';
-            panelToggleBtn.style.background = '#fff';
-            panelToggleBtn.style.padding = '10px';
-            panelToggleBtn.style.cursor = 'pointer';
-            panelToggleBtn.style.transition = 'left 0.3s';
-
-            panelToggleBtn.onclick = function() {
-                togglePanel();
-                const isOpened = document.getElementById('leftPanel').offsetWidth > 0;
-                panelToggleBtn.innerHTML = isOpened ? '◀' : '▶';
-                panelToggleBtn.style.left = isOpened ? '320px' : '0px';
-            };
-            document.body.appendChild(panelToggleBtn);
-            
-            // 초기 버튼 위치 설정
-            updateAllButtonPositions();
         };
 
     </script>
