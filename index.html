@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>네이버 벡터맵 테스트 - 무장애 시설 팝업 최종본 (검색 필터링 포함)</title>
+    <title>네이버 벡터맵 테스트 - 무장애 시설 팝업 최종본 (층별 경계 분리)</title>
     <style>
         /* ------------------------------------------------ */
         /* 모바일 스크롤 잠금 */
@@ -441,7 +441,7 @@
         <input type="text" id="searchInput" placeholder="건물이름을 입력하세요">
         <button id="searchBtn" class="search-icon-btn" title="검색">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
             </svg>
         </button>
         <button id="closeSearchBtn" class="search-icon-btn" title="검색 취소">
@@ -500,7 +500,6 @@ color:#777;">×</span>
 
             var floorControlsContainer = document.getElementById('floorControls');
             var popup = document.getElementById('accessPopup');
-            var popupBody = document.getElementById('accessPopupBody');
             var buildingInfoSection = document.getElementById('buildingInfoSection');
             var accessFacilitySection = document.getElementById('accessFacilitySection');
             
@@ -551,8 +550,17 @@ color:#777;">×</span>
             var currentPositionMarker = null;
             
             // =========================================================
-            // 빌딩별 데이터 정의 
+            // 빌딩별 데이터 정의 (층별 경계 분리 적용)
             // =========================================================
+            var ky_default_bounds = new naver.maps.LatLngBounds(
+                new naver.maps.LatLng(37.570512, 126.977632), // 기존 SW
+                new naver.maps.LatLng(37.571415, 126.978244)  // 기존 NE
+            );
+            var dt_default_bounds = new naver.maps.LatLngBounds(
+                new naver.maps.LatLng(37.570459, 126.978649), 
+                new naver.maps.LatLng(37.571626, 126.979210)  
+            );
+
             var buildings = {
                 'ky': { // 건물 1 (예시: 교보빌딩)
                     polygonCoords: [
@@ -571,10 +579,15 @@ color:#777;">×</span>
                         '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky11.png', 
                         '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
                     },
-                    imageBounds: new naver.maps.LatLngBounds(
-                        new naver.maps.LatLng(37.570512, 126.977632), 
-                        new naver.maps.LatLng(37.571415, 126.978244)  
-                    ),
+                    // 층별 경계 정보를 객체로 분리하여 저장
+                    floorBounds: { 
+                        'b1': new naver.maps.LatLngBounds( // B1: 사용자가 요청한 새로운 경계
+                            new naver.maps.LatLng(37.570438, 126.977545), // SW
+                            new naver.maps.LatLng(37.570468, 126.977551)  // NE
+                        ),
+                        '1f': ky_default_bounds, // 1F: 기존 경계 사용
+                        '2f': ky_default_bounds, // 2F: 기존 경계 사용
+                    },
                     currentFloor: '1f', 
                     polygon: null,
                     accessInfo: {
@@ -606,10 +619,11 @@ color:#777;">×</span>
                         'b4': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt_b4.png',
                         '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt1.png',
                     },
-                    imageBounds: new naver.maps.LatLngBounds(
-                        new naver.maps.LatLng(37.570459, 126.978649), 
-                        new naver.maps.LatLng(37.571626, 126.979210)  
-                    ),
+                    // 층별 경계 정보를 객체로 분리하여 저장
+                    floorBounds: { 
+                        'b4': dt_default_bounds, // B4: 기존 경계 사용
+                        '1f': dt_default_bounds, // 1F: 기존 경계 사용
+                    },
                     currentFloor: '1f',
                     polygon: null,
                     accessInfo: {
@@ -648,7 +662,7 @@ color:#777;">×</span>
             preventTouchMove('searchListContainer'); 
             
             // =========================================================
-            // 핵심 로직 함수 (생략 없이 모두 포함)
+            // 핵심 로직 함수
             // =========================================================
 
             /**
@@ -708,10 +722,16 @@ color:#777;">×</span>
                 coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
             }
 
-            // 층 지도(GroundOverlay) 표시
+            // 층 지도(GroundOverlay) 표시 (수정된 부분: floorBounds 사용)
             function showFloor(buildingId, floor) {
                 var config = buildings[buildingId];
-                if (!config || !config.images[floor]) return;
+                // 💥 수정: config.floorBounds[floor]를 사용하여 층별 경계를 가져옵니다.
+                var floorBound = config?.floorBounds[floor];
+                
+                if (!config || !config.images[floor] || !floorBound) {
+                    console.error('해당 층의 이미지 또는 경계 정보가 없습니다:', buildingId, floor);
+                    return;
+                }
 
                 currentBuildingId = buildingId;
                 config.currentFloor = floor; 
@@ -732,7 +752,7 @@ color:#777;">×</span>
 
                 groundOverlay = new naver.maps.GroundOverlay(
                     config.images[floor],
-                    config.imageBounds,
+                    floorBound, // 👈 층별 경계 사용
                     {
                         map: map,
                         clickable: true,
@@ -843,17 +863,17 @@ color:#777;">×</span>
             }
             
             // =========================================================
-            // 건물 검색 리스트 및 이동 로직 (수정된 부분)
+            // 건물 검색 리스트 및 이동 로직 
             // =========================================================
             
             /**
              * 건물 목록을 생성하여 searchListContainer에 렌더링하고 클릭 이벤트를 연결합니다.
              * @param {string} filterQuery - 필터링할 검색어
              */
-            function renderBuildingList(filterQuery) { // filterQuery 매개변수 추가
+            function renderBuildingList(filterQuery) { 
                 var html = '';
                 var isListEmpty = true;
-                var normalizedQuery = filterQuery.trim().toLowerCase().replace(/\s/g, ''); // 쿼리 정규화 (공백 제거, 소문자)
+                var normalizedQuery = filterQuery.trim().toLowerCase().replace(/\s/g, ''); 
 
                 for (var id in buildings) {
                     var config = buildings[id];
@@ -954,7 +974,7 @@ color:#777;">×</span>
                 coordDisplay.textContent = '아래 목록에서 건물을 선택하거나 이름을 검색하세요.'; 
                 searchInput.focus(); 
                 
-                // ✨ 건물 목록 렌더링 및 표시 (빈 쿼리로 전체 목록 표시)
+                // 건물 목록 렌더링 및 표시 (빈 쿼리로 전체 목록 표시)
                 renderBuildingList('');
                 searchListContainer.style.display = 'block';
             }
@@ -977,7 +997,7 @@ color:#777;">×</span>
             }
             
             // =========================================================
-            // 건물 Polygon 생성 및 리스너 설정 (기존과 동일)
+            // 건물 Polygon 생성 및 리스너 설정 
             // =========================================================
 
             function setupBuilding(buildingId, config) {
@@ -1030,7 +1050,7 @@ color:#777;">×</span>
             }
 
             // =========================================================
-            // 현재 위치 (Geolocation) 기능 (기존과 동일)
+            // 현재 위치 (Geolocation) 기능 
             // =========================================================
             geolocationBtn.addEventListener('click', function() {
                 var isIndoorMode = currentBuildingId !== null; 
@@ -1120,7 +1140,7 @@ color:#777;">×</span>
             });
             
             // =========================================================
-            // 초기화 및 이벤트 리스너 설정 (수정된 부분)
+            // 초기화 및 이벤트 리스너 설정 
             // =========================================================
 
             // 모든 건물 설정
@@ -1139,10 +1159,10 @@ color:#777;">×</span>
                 }
             });
             
-            // ✨ 검색 플레이스홀더 클릭 리스너 (검색 모드 진입)
+            // 검색 플레이스홀더 클릭 리스너 (검색 모드 진입)
             searchPlaceholder.addEventListener('click', enterSearchMode);
             
-            // ✨ 검색 입력 필드에서 입력이 발생할 때마다 리스트를 필터링
+            // 검색 입력 필드에서 입력이 발생할 때마다 리스트를 필터링
             searchInput.addEventListener('input', function() {
                 renderBuildingList(searchInput.value);
             });
