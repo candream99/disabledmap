@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>네이버 벡터맵 테스트 - 무장애 시설 팝업 최종본 (검색 리스트 포함)</title>
+    <title>네이버 벡터맵 테스트 - 무장애 시설 팝업 최종본 (검색 필터링 포함)</title>
     <style>
         /* ------------------------------------------------ */
         /* 모바일 스크롤 잠금 */
@@ -480,24 +480,23 @@ color:#777;">×</span>
 
     <script>
         
-        // **var로 변경**: 구형 브라우저 호환성 확보
         var NCP_KEY_ID = 'q1d23mmkof';
         var script = document.createElement('script');
         script.src = 'https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' + NCP_KEY_ID + '&vmode=3';
 
         script.onload = function () 
 {
-            // 전역 DOM 요소 변수 - **var로 변경**
+            // 전역 DOM 요소 변수
             var mapContainer = document.getElementById('map');
             var searchBox = document.getElementById('searchBox'); 
             var coordDisplay = document.getElementById('coordDisplay');
   
-            // 새로 추가된 검색 관련 DOM 요소 변수 - **var로 변경**
+            // 검색 관련 DOM 요소 변수
             var searchPlaceholder = document.getElementById('searchPlaceholder');
             var searchInput = document.getElementById('searchInput');
             var searchBtn = document.getElementById('searchBtn');
             var closeSearchBtn = document.getElementById('closeSearchBtn');
-            var searchListContainer = document.getElementById('searchListContainer'); // 검색 목록 컨테이너 추가
+            var searchListContainer = document.getElementById('searchListContainer'); 
 
             var floorControlsContainer = document.getElementById('floorControls');
             var popup = document.getElementById('accessPopup');
@@ -509,7 +508,7 @@ color:#777;">×</span>
             var popupClose = document.getElementById('accessPopupClose');
             var geolocationBtn = document.getElementById('geolocationBtn');
             
-            // 지도 옵션 - **var로 변경**
+            // 지도 옵션
             var mapOptions = {
                 center: new naver.maps.LatLng(37.5710, 126.9784),
                 zoom: 17, 
@@ -522,24 +521,24 @@ color:#777;">×</span>
   }),
             
 };
-            // 지도 초기화 - **var로 변경**
+            // 지도 초기화
             var map = new naver.maps.Map('map', mapOptions);
             map.setMapTypeId('normal');
             var labelLayer = new naver.maps.LabelLayer();
             labelLayer.setMap(map);
 
-            // 마우스 휠 이벤트 리스너 추가 (미세 조정) - **var로 변경**
+            // 마우스 휠 이벤트 리스너 추가 (미세 조정)
             var ZOOM_STEP = 0.1;
             mapContainer.addEventListener("wheel", function (e) {
-                e.preventDefault();     // 기본 확대/축소 금지
+                e.preventDefault();     
 
                 var currentZoom = map.getZoom();
                 var newZoom = currentZoom;
 
-                if (e.deltaY < 0) newZoom += ZOOM_STEP;   // 확대
+                if (e.deltaY < 0) newZoom += ZOOM_STEP;   
          
  
-                else newZoom -= ZOOM_STEP;                // 축소
+                else newZoom -= ZOOM_STEP;                
 
                 newZoom = Math.round(newZoom * 100) / 100;
                 newZoom = Math.min(Math.max(newZoom, 1), 21);
@@ -635,7 +634,7 @@ color:#777;">×</span>
             // =========================================================
 
             function preventTouchMove(elementId) {
-                var element = document.getElementById(elementId); // **var로 변경**
+                var element = document.getElementById(elementId);
  
                 if (element) {
                     element.addEventListener('touchmove', function(e) {
@@ -646,10 +645,10 @@ color:#777;">×</span>
 
             preventTouchMove('searchBox');
             preventTouchMove('floorControls');
-            preventTouchMove('searchListContainer'); // 검색 목록 컨테이너 추가
+            preventTouchMove('searchListContainer'); 
             
             // =========================================================
-            // 핵심 로직 함수
+            // 핵심 로직 함수 (생략 없이 모두 포함)
             // =========================================================
 
             /**
@@ -659,22 +658,17 @@ color:#777;">×</span>
                 // 검색 모드 종료
                 exitSearchMode(); 
             
-                // 검색창 숨기기
                 searchBox.style.display = 'none';
-                // coordDisplay의 위치를 상단(top: 10px)으로 올림
                 coordDisplay.style.top = '10px';
                 
-                var config = buildings[buildingId]; // **var로 변경**
+                var config = buildings[buildingId];
                 if (config && config.polygonCoords && config.polygonCoords.length > 0) {
-                    // 1. 폴리곤 좌표를 포함하는 LatLngBounds 생성
-                    var bounds = new naver.maps.LatLngBounds(); // **var로 변경**
+                    var bounds = new naver.maps.LatLngBounds();
                     config.polygonCoords.forEach(function(coord) { bounds.extend(coord); });
                     
-                    // 2. LatLngBounds의 중심 좌표 계산 (건물의 중심)
-                    var centerPoint = bounds.getCenter(); // **var로 변경**
-                    // 3. 지도를 건물 중심으로 이동하고 줌 레벨을 요청된 18로 고정
+                    var centerPoint = bounds.getCenter();
                     map.setCenter(centerPoint);
-                    map.setZoom(18); // 요청대로 항상 18로 고정
+                    map.setZoom(18); 
                 }
                 
                 currentBuildingId = buildingId;
@@ -697,7 +691,7 @@ color:#777;">×</span>
                 accessBtn.classList.remove('active');
                 
                 // 모든 건물 폴리곤 복원
-                for (var id in buildings) { // **var로 변경**
+                for (var id in buildings) {
                     if (buildings[id].polygon) {
                         buildings[id].polygon.setMap(map);
                         buildings[id].polygon.setOptions({ fillColor: 'transparent' }); 
@@ -716,7 +710,7 @@ color:#777;">×</span>
 
             // 층 지도(GroundOverlay) 표시
             function showFloor(buildingId, floor) {
-                var config = buildings[buildingId]; // **var로 변경**
+                var config = buildings[buildingId];
                 if (!config || !config.images[floor]) return;
 
                 currentBuildingId = buildingId;
@@ -724,7 +718,7 @@ color:#777;">×</span>
                 
                 if (groundOverlay) groundOverlay.setMap(null);
                 // 다른 건물 폴리곤 숨기기
-                for (var id in buildings) { // **var로 변경**
+                for (var id in buildings) {
                     if (id !== buildingId && buildings[id].polygon) {
                         buildings[id].polygon.setMap(null);
                     }
@@ -747,7 +741,7 @@ color:#777;">×</span>
                 );
                 // 버튼 상태 업데이트: 층 버튼만 비활성화 후 선택된 버튼 활성화
                 document.querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)').forEach(function(btn) { btn.classList.remove('active'); });
-                var floorBtn = document.querySelector('#floorControls .floor-btn[data-floor="' + floor + '"]'); // **var로 변경**
+                var floorBtn = document.querySelector('#floorControls .floor-btn[data-floor="' + floor + '"]');
                 if (floorBtn) floorBtn.classList.add('active');
 
                 // 실내 모드 종료 리스너 (GroundOverlay 클릭 시)
@@ -759,14 +753,14 @@ color:#777;">×</span>
 
             // 층 버튼 동적 생성 및 렌더링
             function renderFloorButtons(buildingId) {
-                var config = buildings[buildingId]; // **var로 변경**
+                var config = buildings[buildingId];
                 // 기존 층 버튼만 제거 (i 버튼 제외)
                 document.querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)').forEach(function(btn) { btn.remove(); });
-                var defaultFloor = config.floors.includes('1f') ? '1f' : config.floors[0]; // **var로 변경**
+                var defaultFloor = config.floors.includes('1f') ? '1f' : config.floors[0];
                 config.currentFloor = defaultFloor;
                 // 새로운 층 버튼 생성 및 추가
-                config.floors.forEach(function(floor) { // **var로 변경**
-                    var btn = document.createElement('button'); // **var로 변경**
+                config.floors.forEach(function(floor) {
+                    var btn = document.createElement('button');
                     btn.className = 'floor-btn map-btn-circle'; 
                     btn.dataset.floor = floor;
                     btn.textContent = floor.toUpperCase();
@@ -788,9 +782,9 @@ color:#777;">×</span>
              * 무장애 시설 정보 팝업 내용을 동적으로 업데이트합니다.
              */
             function updateAccessPopup(buildingId) {
-                var config = buildings[buildingId]; // **var로 변경**
-                var accessInfo = config?.accessInfo; // **var로 변경**
-                var buildingInfo = config?.buildingInfo; // **var로 변경**
+                var config = buildings[buildingId];
+                var accessInfo = config?.accessInfo;
+                var buildingInfo = config?.buildingInfo;
                 
                 // 팝업 내용 전체 초기화 
                 buildingInfoSection.innerHTML = '';
@@ -824,11 +818,11 @@ color:#777;">×</span>
                     return;
                 }
 
-                var html = ''; // **var로 변경**
+                var html = '';
                 html += '<div style="font-size:1.0rem; font-weight:700; margin-bottom:12px; color:#1e3a8a;">무장애 시설정보</div>';
-                for (var facility in accessInfo) { // **var로 변경**
-                    var isAvailable = accessInfo[facility]; // **var로 변경**
-                    var statusText, statusClass; // **var로 변경**
+                for (var facility in accessInfo) {
+                    var isAvailable = accessInfo[facility];
+                    var statusText, statusClass;
 
                     if (facility.includes('단차')) {
                         statusText = isAvailable ? '있음' : '없음';
@@ -849,16 +843,18 @@ color:#777;">×</span>
             }
             
             // =========================================================
-            // 건물 검색 리스트 및 이동 로직 (새로 추가 및 수정)
+            // 건물 검색 리스트 및 이동 로직 (수정된 부분)
             // =========================================================
             
             /**
              * 건물 목록을 생성하여 searchListContainer에 렌더링하고 클릭 이벤트를 연결합니다.
+             * @param {string} filterQuery - 필터링할 검색어
              */
-            function renderBuildingList() {
+            function renderBuildingList(filterQuery) { // filterQuery 매개변수 추가
                 var html = '';
                 var isListEmpty = true;
-                
+                var normalizedQuery = filterQuery.trim().toLowerCase().replace(/\s/g, ''); // 쿼리 정규화 (공백 제거, 소문자)
+
                 for (var id in buildings) {
                     var config = buildings[id];
                     var info = config.buildingInfo;
@@ -866,6 +862,12 @@ color:#777;">×</span>
                     var buildingName = info.name;
                     var buildingAddress = info.address;
                     var buildingHours = info.operating_hours;
+                    
+                    // 필터링 로직: 검색어와 이름이 일치하는지 확인
+                    var normalizedName = buildingName.trim().toLowerCase().replace(/\s/g, '');
+                    if (normalizedQuery && !normalizedName.includes(normalizedQuery)) {
+                         continue; // 검색어가 있고 이름에 포함되지 않으면 건너뛰기
+                    }
                     
                     html += `
                         <div class="search-result-item" data-building-id="${id}" data-building-name="${buildingName}">
@@ -887,7 +889,7 @@ color:#777;">×</span>
                 }
 
                 if (isListEmpty) {
-                    searchListContainer.innerHTML = '<div style="padding:10px; color:#555;">검색할 건물이 없습니다.</div>';
+                    searchListContainer.innerHTML = '<div style="padding:10px; color:#555;">검색 결과가 없습니다.</div>';
                 } else {
                     searchListContainer.innerHTML = html;
                 }
@@ -904,8 +906,6 @@ color:#777;">×</span>
 
             /**
              * 건물 이름으로 지도를 해당 건물 중심으로 이동시키는 함수
-             * @param {string} buildingName - 검색할 건물 이름
-             * @param {string} [directId] - 건물 목록에서 직접 클릭했을 경우 전달되는 ID
              */
             function searchAndGoToBuilding(buildingName, directId) {
                 var foundBuildingId = directId;
@@ -951,10 +951,10 @@ color:#777;">×</span>
                 searchInput.style.display = 'block';
                 searchBtn.style.display = 'flex';
                 closeSearchBtn.style.display = 'flex';
-                coordDisplay.textContent = '아래 목록에서 클릭하거나 이름을 검색하세요.'; // 안내 문구 변경
+                coordDisplay.textContent = '아래 목록에서 건물을 선택하거나 이름을 검색하세요.'; 
                 searchInput.focus(); 
                 
-                // 건물 목록 렌더링 및 표시
+                // ✨ 건물 목록 렌더링 및 표시 (빈 쿼리로 전체 목록 표시)
                 renderBuildingList('');
                 searchListContainer.style.display = 'block';
             }
@@ -977,11 +977,11 @@ color:#777;">×</span>
             }
             
             // =========================================================
-            // 건물 Polygon 생성 및 리스너 설정
+            // 건물 Polygon 생성 및 리스너 설정 (기존과 동일)
             // =========================================================
 
             function setupBuilding(buildingId, config) {
-                var polygon = new naver.maps.Polygon({ // **var로 변경**
+                var polygon = new naver.maps.Polygon({
                     map: map,
                     paths: [config.polygonCoords],
                     fillColor: 'transparent',
@@ -1022,7 +1022,7 @@ color:#777;">×</span>
 
                     renderFloorButtons(buildingId);
                     
-                    var defaultFloor = config.floors.includes('1f') ? '1f' : config.floors[0]; // **var로 변경**
+                    var defaultFloor = config.floors.includes('1f') ? '1f' : config.floors[0];
                     showFloor(buildingId, defaultFloor);
                     
                     updateAccessPopup(buildingId); 
@@ -1030,10 +1030,10 @@ color:#777;">×</span>
             }
 
             // =========================================================
-            // 현재 위치 (Geolocation) 기능
+            // 현재 위치 (Geolocation) 기능 (기존과 동일)
             // =========================================================
             geolocationBtn.addEventListener('click', function() {
-                var isIndoorMode = currentBuildingId !== null; // **var로 변경**
+                var isIndoorMode = currentBuildingId !== null; 
 
                 // 1. 이미 활성화 상태라면 (파란색 버튼) 
                 if (geolocationBtn.classList.contains('active')) {
@@ -1056,9 +1056,9 @@ color:#777;">×</span>
                     coordDisplay.textContent = '현재 위치를 찾는 중입니다...';
                     navigator.geolocation.getCurrentPosition(
                         function(position) {
-                            var lat = position.coords.latitude; // **var로 변경**
-                            var lng = position.coords.longitude; // **var로 변경**
-                            var currentLatLng = new naver.maps.LatLng(lat, lng); // **var로 변경**
+                            var lat = position.coords.latitude;
+                            var lng = position.coords.longitude;
+                            var currentLatLng = new naver.maps.LatLng(lat, lng);
 
                             map.setCenter(currentLatLng);
                             map.setZoom(17); 
@@ -1094,7 +1094,7 @@ color:#777;">×</span>
                         function(error) {
                             console.error("Geolocation Error:", error);
                             
-                            var errorMsg = '위치 정보를 찾을 수 없거나 접근이 거부되었습니다.'; // **var로 변경**
+                            var errorMsg = '위치 정보를 찾을 수 없거나 접근이 거부되었습니다.';
                             if (error.code === 1) {
                                 errorMsg = '위치 정보 접근 권한이 거부되었습니다.';
                             } else if (error.code === 2) {
@@ -1120,11 +1120,11 @@ color:#777;">×</span>
             });
             
             // =========================================================
-            // 초기화 및 이벤트 리스너 설정
+            // 초기화 및 이벤트 리스너 설정 (수정된 부분)
             // =========================================================
 
             // 모든 건물 설정
-            for (var id in buildings) { // **var로 변경**
+            for (var id in buildings) {
                 setupBuilding(id, buildings[id]);
             }
 
@@ -1139,12 +1139,17 @@ color:#777;">×</span>
                 }
             });
             
-            // 검색 플레이스홀더 클릭 리스너 (검색 모드 진입)
+            // ✨ 검색 플레이스홀더 클릭 리스너 (검색 모드 진입)
             searchPlaceholder.addEventListener('click', enterSearchMode);
             
-            // 검색 버튼 클릭 리스너
+            // ✨ 검색 입력 필드에서 입력이 발생할 때마다 리스트를 필터링
+            searchInput.addEventListener('input', function() {
+                renderBuildingList(searchInput.value);
+            });
+            
+            // 검색 버튼 클릭 리스너 (검색 후 지도로 이동)
             searchBtn.addEventListener('click', function() {
-                var query = searchInput.value; // **var로 변경**
+                var query = searchInput.value;
                 if (query.trim() !== '') {
                     searchAndGoToBuilding(query);
                 } else {
@@ -1152,10 +1157,10 @@ color:#777;">×</span>
                 }
             });
 
-            // 검색 입력 필드에서 Enter 키 입력 리스너
+            // 검색 입력 필드에서 Enter 키 입력 리스너 (검색 후 지도로 이동)
             searchInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
-                    var query = searchInput.value; // **var로 변경**
+                    var query = searchInput.value;
                     if (query.trim() !== '') {
                         searchAndGoToBuilding(query);
                     } else {
@@ -1174,11 +1179,11 @@ color:#777;">×</span>
                     return;
                 }
 
-                var isOpen = popup.style.display === 'block'; // **var로 변경**
+                var isOpen = popup.style.display === 'block';
                 
                 if (!isOpen) {
-                    var buttonRect = accessBtn.getBoundingClientRect(); // **var로 변경**
-                    var newPopupLeft = buttonRect.right + 5; // **var로 변경**
+                    var buttonRect = accessBtn.getBoundingClientRect();
+                    var newPopupLeft = buttonRect.right + 5;
 
                     popup.style.bottom = '20px';
                     popup.style.left = newPopupLeft + 'px'; 
@@ -1210,4 +1215,3 @@ color:#777;">×</span>
     </script>
 </body>
 </html>
-
