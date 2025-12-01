@@ -66,13 +66,28 @@
             text-align: center; line-height: 1;
         }
 
-        /* 현재 위치 버튼 (모바일 위치) */
+        /* ------------------------------------------------ */
+        /* [수정] 대위치 버튼 아이콘 복원 및 스타일 */
+        /* ------------------------------------------------ */
         #geolocationBtn {
-            position: absolute; bottom: 18px; left: 10px; z-index: 1500;
-            font-size: 0; 
+            font-size: 0; /* 텍스트 숨김 */
+        }
+        #geolocationBtn .geo-icon {
+            display: block; width: 20px; height: 20px;
+            background-image: url('https://raw.githubusercontent.com/candream99/disabledmap/main/icons/geolocation_normal.png');
+            background-size: contain; background-repeat: no-repeat;
+            background-position: center;
+        }
+        #geolocationBtn.active .geo-icon {
+            background-image: url('https://raw.githubusercontent.com/candream99/disabledmap/main/icons/geolocation_active.png');
         }
 
-        /* 층 컨트롤 컨테이너 (모바일 위치) */
+        /* 현재 위치 버튼 (모바일 위치: 좌측 하단) */
+        #geolocationBtn {
+            position: absolute; bottom: 18px; left: 10px; z-index: 1500;
+        }
+
+        /* 층 컨트롤 컨테이너 (모바일 위치: 좌측 하단) */
         #floorControls {
             position: absolute; bottom: 88px; left: 10px;
             display: none; flex-direction: column-reverse; 
@@ -96,30 +111,31 @@
         }
         
         /* ------------------------------------------------ */
-        /* 데스크톱 스타일 (769px 이상) */
+        /* 데스크톱 스타일 (769px 이상) - 버튼 위치 좌측 하단으로 변경 */
         /* ------------------------------------------------ */
         @media (min-width: 769px) {
             body { 
                 overflow: auto; /* 데스크톱에서 스크롤 잠금 해제 */
             }
 
-            /* 버튼 위치 변경: 좌측 하단 -> 우측 하단 */
+            /* [수정] 버튼 위치 변경: 우측 하단 -> 좌측 하단 */
             #geolocationBtn {
-                left: auto; right: 10px;
+                left: 10px; /* 좌측 고정 */
+                right: auto; /* 우측 설정 제거 */
             }
 
-            /* 층 컨트롤 위치 변경: 좌측 하단 -> 우측 하단 */
+            /* [수정] 층 컨트롤 위치 변경: 우측 하단 -> 좌측 하단 */
             #floorControls {
-                left: auto; right: 10px; 
-                /* 버튼 위치 재조정을 위해 bottom 값 변경 */
+                left: 10px; /* 좌측 고정 */
+                right: auto; /* 우측 설정 제거 */
                 bottom: 88px;
             }
             
-            /* 무장애 팝업 (데스크톱 스타일: 우측 버튼 옆, 너비 확대) */
+            /* 무장애 팝업 (데스크톱 스타일: 좌측 버튼 옆, 너비 확대) */
             #accessPopup {
                 /* right는 JS에서 계산 */
                 top: auto;
-                bottom: 20px; /* 데스크톱: 하단 고정 유지 (좌표 버튼 높이에 맞추기) */
+                bottom: 20px; /* 데스크톱: 하단 고정 유지 */
                 max-width: 350px; /* 데스크톱: 더 넓은 너비 */
                 border-radius: 8px;
                 padding: 15px;
@@ -416,7 +432,7 @@
                 currentBuildingId = null; 
             
                 searchBox.style.display = 'flex';
-                coordDisplay.style.top = isMobile() ? '78px' : '78px'; // 데스크톱에서도 78px 유지
+                coordDisplay.style.top = '78px'; // 모든 환경에서 78px 유지
                 coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
             }
             
@@ -691,7 +707,7 @@
             });
 
             // ---------------------------------------------------------
-            // ⭐ 핵심: 팝업 위치 계산 로직 분리
+            // ⭐ 핵심: 팝업 위치 계산 로직 분리 (좌측 버튼 기준으로 통일)
             // ---------------------------------------------------------
             accessBtn.addEventListener('click', function() {
                 if (!currentBuildingId) {
@@ -708,18 +724,9 @@
                     popup.style.bottom = '20px'; 
                     popup.style.top = 'auto'; // bottom 기준으로 위치 설정
 
-                    if (isMobile()) {
-                        // 모바일: 좌측 버튼 기준, 우측으로 5px 이동
-                        popup.style.left = (buttonRect.right + 5) + 'px'; 
-                        popup.style.right = 'auto';
-                    } else {
-                        // 데스크톱: 우측 버튼 기준, 좌측으로 팝업 너비만큼 이동
-                        const popupWidth = parseFloat(window.getComputedStyle(popup).maxWidth) || 350; // CSS의 max-width 값 사용
-                        
-                        // 버튼의 좌측에서 팝업의 너비 + 마진(15px) 만큼 이동
-                        popup.style.right = (window.innerWidth - buttonRect.left + 15) + 'px'; 
-                        popup.style.left = 'auto';
-                    }
+                    // 모바일 및 데스크톱 (버튼이 좌측에 있으므로): 좌측 버튼 기준, 우측으로 5px 이동
+                    popup.style.left = (buttonRect.right + 5) + 'px'; 
+                    popup.style.right = 'auto';
                     
                     // 팝업 열기
                     popup.style.display = 'block';
