@@ -338,20 +338,18 @@ class="outdoor-mode-coord">건물을 클릭하면 실내지도를 볼 수 있어
         </div>
 
 <div id="accessPopup" style="display:none;">
-        <span id="accessPopupClose" style="position:absolute; top:6px; right:10px; font-size:22px; cursor:pointer;
+    <span id="accessPopupClose" style="position:absolute; top:6px; right:10px; font-size:22px; cursor:pointer;
 color:#777;">×</span>
-        <div style="font-size:1.0rem; font-weight:700; margin-bottom:12px;
-color:#1e3a8a;">무장애 시설정보</div>
+    
+    <div id="accessPopupBody">
+        <div id="buildingInfoSection" class="popup-section">
+            </div>
         
-        <div id="accessPopupBody">
-            <div id="buildingInfoSection" class="popup-section">
-                </div>
-            
-            <div id="accessFacilitySection" class="popup-section">
-                </div>
-        </div>
-  
-       </div>
+        <div id="accessFacilitySection" class="popup-section">
+            </div>
+    </div>
+
+   </div>
 
     <script>
         
@@ -718,6 +716,7 @@ color:#1e3a8a;">무장애 시설정보</div>
                 }
 
                 let html = '';
+                html += '<div style="font-size:0.8rem; font-weight:600; margin-bottom:12px; color:#1e3a8a;">무장애 시설정보</div>';
                 for (const facility in accessInfo) {
                     const isAvailable = accessInfo[facility];
                     let statusText, statusClass;
@@ -982,4 +981,5 @@ color:#1e3a8a;">무장애 시설정보</div>
     </script>
 </body>
 </html>
+
 
