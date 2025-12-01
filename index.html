@@ -426,7 +426,7 @@ color:#1e3a8a;">무장애 시설정보</div>
                 searchBox.style.display = 'none';
                 // coordDisplay의 위치를 상단(top: 10px)으로 올림 (검색창이 사라지므로)
                 coordDisplay.style.top = '10px';
-                
+
                 // --- 👇 새롭게 추가된 핵심 로직 👇 ---
                 const config = buildings[buildingId];
                 if (config && config.polygonCoords && config.polygonCoords.length > 0) {
@@ -440,12 +440,13 @@ color:#1e3a8a;">무장애 시설정보</div>
                     // 3. 지도를 건물 중심으로 이동하고 줌 레벨을 1 증가 (배율 2배)
                     map.setCenter(centerPoint);
                     map.setZoom(map.getZoom() + 1);
-                
-                
+                }
+                // --- 👆 새롭게 추가된 핵심 로직 👆 ---
+
                 // 기타 실내 모드 진입 로직 실행
                 currentBuildingId = buildingId;
                 labelLayer.setMap(null);
-                floorControlsContainer.style.display = 'flex'; 
+                floorControlsContainer.style.display = 'flex';
                 coordDisplay.textContent = '일반지도로 돌아가려면 실내지도를 클릭하세요';
             }
 
@@ -794,5 +795,6 @@ color:#1e3a8a;">무장애 시설정보</div>
     </script>
 </body>
 </html>
+
 
 
