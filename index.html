@@ -640,6 +640,57 @@ color:#777;">×</span>
                         address: '서울 종로구 송월길 2',
                         operating_hours: '10:00 - 19:00 (매일 운영)'
                     }
+                },
+                't8': { // 건물 3: 타워8
+                    polygonCoords: [
+                        new naver.maps.LatLng(37.570859, 126.980318),
+                        new naver.maps.LatLng(37.570854, 126.980784),
+                        new naver.maps.LatLng(37.570515, 126.980785),
+                        new naver.maps.LatLng(37.570514, 126.980841),
+                        new naver.maps.LatLng(37.570417, 126.980840),
+                        new naver.maps.LatLng(37.570418, 126.980288),
+                        new naver.maps.LatLng(37.570518, 126.980287),
+                        new naver.maps.LatLng(37.570518, 126.980315),
+                    ],
+                    floors: ['b2', 'b1', '1f'], // 요청하신 층별 버튼 순서
+                    images: {
+                        'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/T8_1.png',
+                        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/T8_1.png',
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/T8_1.png',
+                    },
+                    // 층별 경계 정보를 객체로 분리하여 저장
+                    floorBounds: { 
+                        // 요청하신 동일한 북동(NE) 및 남서(SW) 좌표를 모든 층에 적용
+                        'b2': new naver.maps.LatLngBounds( 
+                            new naver.maps.LatLng(37.570405, 126.980209), // SW
+                            new naver.maps.LatLng(37.570902, 126.981077)  // NE
+                        ),
+                        'b1': new naver.maps.LatLngBounds( 
+                            new naver.maps.LatLng(37.570405, 126.980209), // SW
+                            new naver.maps.LatLng(37.570902, 126.981077)  // NE
+                        ),
+                        '1f': new naver.maps.LatLngBounds( 
+                            new naver.maps.LatLng(37.570405, 126.980209), // SW
+                            new naver.maps.LatLng(37.570902, 126.981077)  // NE
+                        ),
+                    },
+                    currentFloor: '1f',
+                    polygon: null,
+                    // 임의의 무장애 시설 정보
+                    accessInfo: {
+                        '주출입구 경사로': true,
+                        '장애인 화장실': false, 
+                        '장애인 주차장': true,
+                        '엘리베이터': true,
+                        '주출입구 단차': false 
+                    },
+                    // 건물 상세 정보
+                    buildingInfo: {
+                        name: '타워8',
+                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/t88.jpg', 
+                        address: '서울 종로구 청진동 167 (임의)',
+                        operating_hours: '08:00 - 22:00 (주말 포함)'
+                    }
                 }
             };
 
@@ -1235,6 +1286,7 @@ color:#777;">×</span>
     </script>
 </body>
 </html>
+
 
 
 
