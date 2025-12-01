@@ -426,6 +426,22 @@ color:#1e3a8a;">무장애 시설정보</div>
                 searchBox.style.display = 'none';
                 // coordDisplay의 위치를 상단(top: 10px)으로 올림 (검색창이 사라지므로)
                 coordDisplay.style.top = '10px';
+                
+                // --- 👇 새롭게 추가된 핵심 로직 👇 ---
+                const config = buildings[buildingId];
+                if (config && config.polygonCoords && config.polygonCoords.length > 0) {
+                    // 1. 폴리곤 좌표를 포함하는 LatLngBounds 생성
+                    const bounds = new naver.maps.LatLngBounds();
+                    config.polygonCoords.forEach(coord => bounds.extend(coord));
+                    
+                    // 2. LatLngBounds의 중심 좌표 계산 (건물의 중심)
+                    const centerPoint = bounds.getCenter();
+                    
+                    // 3. 지도를 건물 중심으로 이동하고 줌 레벨을 1 증가 (배율 2배)
+                    map.setCenter(centerPoint);
+                    map.setZoom(map.getZoom() + 1);
+                
+                
                 // 기타 실내 모드 진입 로직 실행
                 currentBuildingId = buildingId;
                 labelLayer.setMap(null);
@@ -778,4 +794,5 @@ color:#1e3a8a;">무장애 시설정보</div>
     </script>
 </body>
 </html>
+
 
