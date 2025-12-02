@@ -738,6 +738,53 @@ color:#777;">×</span>
         address: '서울 종로구 새문안로5길 37 (임의 주소)',
         operating_hours: '10:00 - 20:00 (주말 휴무, 임의)'
     }
+},
+                'st': { // 건물 5: S타워
+    polygonCoords: [
+        new naver.maps.LatLng(37.569910, 126.973684), // 위도, 경도
+        new naver.maps.LatLng(37.569904, 126.974217),
+        new naver.maps.LatLng(37.569688, 126.974214),
+        new naver.maps.LatLng(37.569688, 126.973680),
+    ],
+    floors: ['b2', 'b1', '1f'], // 요청하신 층: B2, B1, 1F
+    images: {
+        // 모든 층에 동일한 이미지 URL 적용
+        'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/st/st_1.png',
+        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/st/st_1.png',
+        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/st/st_1.png',
+    },
+    // 층별 경계 정보 (요청하신 대로 층마다 분리하여 동일한 경계 적용)
+    floorBounds: { 
+        'b2': new naver.maps.LatLngBounds(
+            new naver.maps.LatLng(37.569473, 126.973510), // SW (남서)
+            new naver.maps.LatLng(37.569981, 126.974348)  // NE (북동)
+        ),
+        'b1': new naver.maps.LatLngBounds(
+            new naver.maps.LatLng(37.569473, 126.973510), // SW
+            new naver.maps.LatLng(37.569981, 126.974348)  // NE
+        ),
+        '1f': new naver.maps.LatLngBounds(
+            new naver.maps.LatLng(37.569473, 126.973510), // SW
+            new naver.maps.LatLng(37.569981, 126.974348)  // NE
+        ),
+    },
+    currentFloor: '1f',
+    polygon: null,
+    // 임의의 무장애 시설 정보
+    accessInfo: {
+        '주출입구 경사로': true,
+        '장애인 화장실': true, 
+        '장애인 주차장': true,
+        '엘리베이터': true,
+        '주출입구 단차': false 
+    },
+    // 건물 상세 정보 (검색 리스트 및 팝업용)
+    buildingInfo: {
+        name: 'S타워',
+        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/st/s_t.jpg', // I버튼 팝업 및 검색 리스트 이미지
+        address: '서울 종로구 율곡로 22 (임의 주소)',
+        operating_hours: '평일 09:00 - 18:00 (임의)'
+    }
 }
             };
 
@@ -1333,6 +1380,7 @@ color:#777;">×</span>
     </script>
 </body>
 </html>
+
 
 
 
