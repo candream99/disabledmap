@@ -498,6 +498,11 @@ color:#777;">×</span>
             var searchBtn = document.getElementById('searchBtn');
             var closeSearchBtn = document.getElementById('closeSearchBtn');
             var searchListContainer = document.getElementById('searchListContainer'); 
+    searchListContainer.addEventListener('touchstart', function () {
+    if (document.activeElement === searchInput) {
+        searchInput.blur();
+    }
+});
 
             var floorControlsContainer = document.getElementById('floorControls');
             var popup = document.getElementById('accessPopup');
@@ -1380,6 +1385,7 @@ color:#777;">×</span>
     </script>
 </body>
 </html>
+
 
 
 
