@@ -13,10 +13,10 @@
             padding: 0; 
             height: 100vh; 
             font-family: 'Malgun Gothic', sans-serif;
-            overflow: hidden; 
+            overflow: hidden;
         }
         #map { width: 100%;
-            height: 100%; 
+            height: 100%;
         }
         
         /* ------------------------------------------------ */
@@ -69,7 +69,7 @@
         
         /* 검색 입력 필드 스타일 */
         #searchInput {
-            flex-grow: 1; 
+            flex-grow: 1;
             font-size: 16px;
             border: none;
             outline: none; 
@@ -78,7 +78,7 @@
             color: #333;
             background: transparent;
             width: calc(100% - 70px); 
-            display: none; 
+            display: none;
         }
         
         /* 검색 버튼 및 닫기 버튼 공통 스타일 */
@@ -97,12 +97,12 @@
         }
 
         #searchBtn {
-            margin-left: 5px; 
+            margin-left: 5px;
             display: none; 
         }
 
         #closeSearchBtn {
-            margin-left: 5px; 
+            margin-left: 5px;
             display: none; 
         }
         
@@ -126,12 +126,12 @@
             padding: 0 15px; 
             font-size: 14px;
             z-index: 1500;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2); 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            min-width: unset; 
+            min-width: unset;
         }
 
         /* ------------------------------------------------ */
@@ -148,9 +148,11 @@
             border-radius: 6px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
             z-index: 1500;
-            padding: 0 10px; /* 내부 padding 조정 */
+            padding: 0 10px;
+            /* 내부 padding 조정 */
             display: none; 
-            max-height: 60vh; /* 최대 높이 지정 */
+            max-height: 162px; /* 👈 수정: 두 개의 리스트만 보이도록 높이 제한 (약 81px * 2) */
+            /* 최대 높이 지정 */
             overflow-y: auto; /* 스크롤 가능 */
         }
 
@@ -175,7 +177,7 @@
 
         /* 이미지 스타일 */
         .result-image {
-            width: 60px; 
+            width: 60px;
             height: 60px;
             object-fit: cover;
             border-radius: 4px;
@@ -439,17 +441,20 @@
         </button>
         <div id="searchPlaceholder">건물이름을 검색하세요</div>
         <input type="text" id="searchInput" placeholder="건물이름을 입력하세요">
+   
         <button id="searchBtn" class="search-icon-btn" title="검색">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
             </svg>
         </button>
+       
         <button id="closeSearchBtn" class="search-icon-btn" title="검색 취소">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
               <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
             </svg>
         </button>
     </div>
+    
     
     <div id="coordDisplay" 
 class="outdoor-mode-coord">건물을 
@@ -465,7 +470,8 @@ class="outdoor-mode-coord">건물을
         </div>
 
     <div id="accessPopup" style="display:none;">
-        <span id="accessPopupClose" style="position:absolute; top:6px; right:10px; font-size:22px; cursor:pointer;
+        <span id="accessPopupClose" style="position:absolute;
+            top:6px; right:10px; font-size:22px; cursor:pointer;
 color:#777;">×</span>
         
         <div id="accessPopupBody">
@@ -474,6 +480,7 @@ color:#777;">×</span>
             
             <div id="accessFacilitySection" class="popup-section">
                 </div>
+       
         </div>
   
        </div>
@@ -487,7 +494,8 @@ color:#777;">×</span>
         script.onload = function () 
 {
             // 전역 DOM 요소 변수
-            var mapContainer = document.getElementById('map');
+            var mapContainer 
+= document.getElementById('map');
             var searchBox = document.getElementById('searchBox'); 
             var coordDisplay = document.getElementById('coordDisplay');
   
@@ -495,24 +503,24 @@ color:#777;">×</span>
             var searchPlaceholder = document.getElementById('searchPlaceholder');
             var searchInput = document.getElementById('searchInput');
             var searchBtn = document.getElementById('searchBtn');
-            var closeSearchBtn = document.getElementById('closeSearchBtn');
+var closeSearchBtn = document.getElementById('closeSearchBtn');
             var searchListContainer = document.getElementById('searchListContainer'); 
 
             var floorControlsContainer = document.getElementById('floorControls');
             var popup = document.getElementById('accessPopup');
             var buildingInfoSection = document.getElementById('buildingInfoSection');
-            var accessFacilitySection = document.getElementById('accessFacilitySection');
+var accessFacilitySection = document.getElementById('accessFacilitySection');
             
             var accessBtn = document.getElementById('accessInfoBtn');
             var popupClose = document.getElementById('accessPopupClose');
             var geolocationBtn = document.getElementById('geolocationBtn');
-            
-            // 지도 옵션
+// 지도 옵션
             var mapOptions = {
                 center: new naver.maps.LatLng(37.5710, 126.9784),
                 zoom: 17, 
                 zoomControl: false, 
                 scrollWheelZoom: false, 
+          
                 pinchZoom: true,
                 mapTypes: new naver.maps.MapTypeRegistry({
                normal: naver.maps.NaverStyleMapTypeOptions.getVectorMap(),
@@ -520,15 +528,15 @@ color:#777;">×</span>
   }),
             
 };
-            // 지도 초기화
+// 지도 초기화
             var map = new naver.maps.Map('map', mapOptions);
-            map.setMapTypeId('normal');
+map.setMapTypeId('normal');
             var labelLayer = new naver.maps.LabelLayer();
             labelLayer.setMap(map);
 
             // 마우스 휠 이벤트 리스너 추가 (미세 조정)
             var ZOOM_STEP = 0.1;
-            mapContainer.addEventListener("wheel", function (e) {
+mapContainer.addEventListener("wheel", function (e) {
                 e.preventDefault();     
 
                 var currentZoom = map.getZoom();
@@ -537,160 +545,193 @@ color:#777;">×</span>
                 if (e.deltaY < 0) newZoom += ZOOM_STEP;   
          
  
+   
                 else newZoom -= ZOOM_STEP;                
 
                 newZoom = Math.round(newZoom * 100) / 100;
                 newZoom = Math.min(Math.max(newZoom, 1), 21);
 
                 map.setZoom(newZoom);
-            }, { passive: false });
+          
+}, { passive: false });
             
             var groundOverlay = null; 
             var currentBuildingId = null; 
             var currentPositionMarker = null;
-            
-            // =========================================================
+// =========================================================
             // 빌딩별 데이터 정의 (층별 경계 분리 적용)
             // =========================================================
             var ky_default_bounds = new naver.maps.LatLngBounds(
                 new naver.maps.LatLng(37.570512, 126.977632), // 기존 SW
                 new naver.maps.LatLng(37.571415, 126.978244)  // 기존 NE
-            );
+        
+);
             var dt_default_bounds = new naver.maps.LatLngBounds(
                 new naver.maps.LatLng(37.570459, 126.978649), 
                 new naver.maps.LatLng(37.571626, 126.979210)  
             );
-
-            var buildings = {
+var buildings = {
                 'ky': { // 건물 1 (예시: 교보빌딩)
                     polygonCoords: [
                         new naver.maps.LatLng(37.571350, 126.977670),
                         new naver.maps.LatLng(37.571360, 126.978059),
+  
                         new naver.maps.LatLng(37.571275, 126.978063),
                         new naver.maps.LatLng(37.571275, 126.978173),
                         new naver.maps.LatLng(37.570870, 126.978184),
-                        new naver.maps.LatLng(37.570872, 126.978082),
+                        
+new naver.maps.LatLng(37.570872, 126.978082),
                         new naver.maps.LatLng(37.570543, 126.978094),
                         new naver.maps.LatLng(37.570539, 126.977702),
                     ],
                     floors: ['b1', '1f', '2f'],
+   
                     images: {
                         'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/kb_b111.png',
                         '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky11.png', 
                         '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/ky_1.jpg',
-                    },
+      
+               },
                     // 층별 경계 정보를 객체로 분리하여 저장
                     floorBounds: { 
                         'b1': new naver.maps.LatLngBounds( // B1: 사용자가 요청한 새로운 경계
+      
                             new naver.maps.LatLng(37.571590, 126.978531), // SW
                             new naver.maps.LatLng(37.570465, 126.977552)  // NE
                         ),
+                 
                         '1f': ky_default_bounds, // 1F: 기존 경계 사용
                         '2f': ky_default_bounds, // 2F: 기존 경계 사용
                     },
                     currentFloor: '1f', 
+               
                     polygon: null,
                     accessInfo: {
                         '주출입구 경사로': true,
                         '장애인 화장실': true,
+                     
                         '징애인 주차장': true,
                         '엘리베이터': true,
                         '주출입구 단차': false 
                     },
-                    // 건물 상세 정보
+                    // 건물 상세 
+정보
                     buildingInfo: {
                         name: '교보빌딩',
                         image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/kb/kyobo_gwanghwamun.jpg', 
-                        address: '서울 종로구 새문안로 45',
+                        address: '서울 종로구 새문안로 
+45',
                         operating_hours: '09:00 - 18:00 (월요일 휴무)'
                     }
                 },
                 'dt': { 
+                 
                     // 건물 2 (예시: 광화문 D타워)
                     polygonCoords: [
                         new naver.maps.LatLng(37.571470, 126.978762),
                         new naver.maps.LatLng(37.571476, 126.979161),
+                   
                         new naver.maps.LatLng(37.570627, 126.979181),
                         new naver.maps.LatLng(37.570557, 126.979117),
                         new naver.maps.LatLng(37.570553, 126.978777),
                     ],
-                    floors: ['b4', '1f'], 
+                    floors: 
+['b4', '1f'], 
                     images: {
                         'b4': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt_b4.png',
                         '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/dt1.png',
                     },
+       
                     // 층별 경계 정보를 객체로 분리하여 저장
                     floorBounds: { 
                         'b4': dt_default_bounds, // B4: 기존 경계 사용
-                        '1f': dt_default_bounds, // 1F: 기존 경계 사용
+                        '1f': dt_default_bounds, // 1F: 기존 
+경계 사용
                     },
                     currentFloor: '1f',
                     polygon: null,
                     accessInfo: {
+                
                         '주출입구 경사로': false,
                         '장애인 화장실': true, 
                         '장애인 주차장': false,
                         '엘리베이터': true,
+            
                         '주출입구 단차': true 
                     },
                     // 건물 상세 정보
                     buildingInfo: {
+                     
                         name: '광화문 D타워',
                         image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/d_tower.jpg', 
                         address: '서울 종로구 송월길 2',
                         operating_hours: '10:00 - 19:00 (매일 운영)'
+            
                     }
                 },
                 't8': { // 건물 3: 타워8
                     polygonCoords: [
                         new naver.maps.LatLng(37.570859, 126.980318),
+        
                         new naver.maps.LatLng(37.570854, 126.980784),
                         new naver.maps.LatLng(37.570515, 126.980785),
                         new naver.maps.LatLng(37.570514, 126.980841),
                         new naver.maps.LatLng(37.570417, 126.980840),
+    
                         new naver.maps.LatLng(37.570418, 126.980288),
                         new naver.maps.LatLng(37.570518, 126.980287),
                         new naver.maps.LatLng(37.570518, 126.980315),
                     ],
+      
                     floors: ['b2', 'b1', '1f'], // 요청하신 층별 버튼 순서
                     images: {
                         'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/T8_b2.png',
                         'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/T8_b1.png',
+       
                         '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/T8_1.png',
                     },
                     // 층별 경계 정보를 객체로 분리하여 저장
                     floorBounds: { 
+              
                         // 요청하신 동일한 북동(NE) 및 남서(SW) 좌표를 모든 층에 적용
                         'b2': new naver.maps.LatLngBounds( 
                             new naver.maps.LatLng(37.570405, 126.980209), // SW
+                      
                             new naver.maps.LatLng(37.570902, 126.981077)  // NE
                         ),
                         'b1': new naver.maps.LatLngBounds( 
                             new naver.maps.LatLng(37.570405, 126.980209), // SW
+      
                             new naver.maps.LatLng(37.570902, 126.981077)  // NE
                         ),
                         '1f': new naver.maps.LatLngBounds( 
+                      
                             new naver.maps.LatLng(37.570405, 126.980209), // SW
                             new naver.maps.LatLng(37.570902, 126.981077)  // NE
                         ),
                     },
+             
                     currentFloor: '1f',
                     polygon: null,
                     // 임의의 무장애 시설 정보
                     accessInfo: {
-                        '주출입구 경사로': true,
+                        '주출입구 경사로': 
+true,
                         '장애인 화장실': false, 
                         '장애인 주차장': true,
                         '엘리베이터': true,
+                      
                         '주출입구 단차': false 
                     },
                     // 건물 상세 정보
                     buildingInfo: {
                         name: '타워8',
+      
                         image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/t88.jpg', 
                         address: '서울 종로구 청진동 167 (임의)',
                         operating_hours: '08:00 - 22:00 (주말 포함)'
                     }
+  
                 },
                 'officia': { // 건물 4: 광화문 오피시아
     polygonCoords: [
@@ -699,7 +740,8 @@ color:#777;">×</span>
         new naver.maps.LatLng(37.569580, 126.975261),
         new naver.maps.LatLng(37.569581, 126.974603),
     ],
-    floors: ['b2', 'b1', '1f'], // 요청하신 층: B2, B1, 1F
+    floors: ['b2', 'b1', '1f'], // 요청하신 층: B2, 
+B1, 1F
     images: {
         // 모든 층에 동일한 이미지 URL 적용
         'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/officia/officia_b1.png',
@@ -710,6 +752,7 @@ color:#777;">×</span>
     floorBounds: { 
         'b2': new naver.maps.LatLngBounds(
             new naver.maps.LatLng(37.569519, 126.974473), // SW (남서)
+  
             new naver.maps.LatLng(37.569976, 126.975331)  // NE (북동)
         ),
         'b1': new naver.maps.LatLngBounds(
@@ -717,7 +760,8 @@ color:#777;">×</span>
             new naver.maps.LatLng(37.569976, 126.975331)  // NE
         ),
         '1f': new naver.maps.LatLngBounds(
-            new naver.maps.LatLng(37.569519, 126.974473), // SW
+            new naver.maps.LatLng(37.569519, 126.974473), 
+// SW
             new naver.maps.LatLng(37.569976, 126.975331)  // NE
         ),
     },
@@ -729,6 +773,7 @@ color:#777;">×</span>
         '장애인 화장실': true, 
         '장애인 주차장': false,
         '엘리베이터': true,
+       
         '주출입구 단차': false 
     },
     // 건물 상세 정보 (검색 리스트 및 팝업용)
@@ -739,7 +784,8 @@ color:#777;">×</span>
         operating_hours: '10:00 - 20:00 (주말 휴무, 임의)'
     }
 },
-                'st': { // 건물 5: S타워
+                'st': { 
+// 건물 5: S타워
     polygonCoords: [
         new naver.maps.LatLng(37.569910, 126.973684), // 위도, 경도
         new naver.maps.LatLng(37.569904, 126.974217),
@@ -751,21 +797,21 @@ color:#777;">×</span>
         // 모든 층에 동일한 이미지 URL 적용
         'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/st/st_b1.png',
         'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/st/st_b1.png',
-        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/st/st_1.png',
+        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/st/st_1f.png',
     },
     // 층별 경계 정보 (요청하신 대로 층마다 분리하여 동일한 경계 적용)
     floorBounds: { 
         'b2': new naver.maps.LatLngBounds(
-            new naver.maps.LatLng(37.569473, 126.973510), // SW (남서)
-            new naver.maps.LatLng(37.569981, 126.974348)  // NE (북동)
+            new naver.maps.LatLng(37.569641, 126.973629), // SW (남서)
+            new naver.maps.LatLng(37.569956, 126.974272)  // NE (북동)
         ),
         'b1': new naver.maps.LatLngBounds(
-            new naver.maps.LatLng(37.569473, 126.973510), // SW
-            new naver.maps.LatLng(37.569981, 126.974348)  // NE
+            new naver.maps.LatLng(37.569641, 126.973629), // SW
+            new naver.maps.LatLng(37.569956, 126.974272)  // NE
         ),
         '1f': new naver.maps.LatLngBounds(
-            new naver.maps.LatLng(37.569473, 126.973510), // SW
-            new naver.maps.LatLng(37.569981, 126.974348)  // NE
+            new naver.maps.LatLng(37.569641, 126.973629), // SW
+            new naver.maps.LatLng(37.569956, 126.974272)  // NE
         ),
     },
     currentFloor: '1f',
@@ -781,31 +827,32 @@ color:#777;">×</span>
     // 건물 상세 정보 (검색 리스트 및 팝업용)
     buildingInfo: {
         name: 'S타워',
-        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/st/s_t.jpg', // I버튼 팝업 및 검색 리스트 이미지
-        address: '서울 종로구 율곡로 22 (임의 주소)',
-        operating_hours: '평일 09:00 - 18:00 (임의)'
+        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/st/s_tower.jpg', // I버튼 팝업 및 검색 리스트 이미지
+        address: '서울 종로구 신문로1가 238',
+        operating_hours: '24시간 운영'
     }
 }
             };
 
-            // =========================================================
-            // 모바일 터치 이벤트 버블링/스크롤 방지
-            // =========================================================
-
+            // 모든 건물 폴리곤 생성 및 지도에 추가하는 함수
+            function initializeBuildings() {
+                for (var id in buildings) {
+                    setupBuilding(id, buildings[id]);
+                }
+            }
+            // 터치 이벤트 전파 방지 (모바일 스크롤시 지도 확대/축소 방지)
             function preventTouchMove(elementId) {
                 var element = document.getElementById(elementId);
- 
                 if (element) {
-                    element.addEventListener('touchmove', function(e) {
-                        e.preventDefault();
-                    }, { passive: false });
+                    element.addEventListener('touchmove', function (e) {
+                        e.stopPropagation();
+                    }, { passive: true });
                 }
             }
 
-            preventTouchMove('searchBox');
             preventTouchMove('floorControls');
-            preventTouchMove('searchListContainer'); 
-            
+            preventTouchMove('searchListContainer');
+
             // =========================================================
             // 핵심 로직 함수
             // =========================================================
@@ -815,21 +862,21 @@ color:#777;">×</span>
              */
             function enterIndoorMode(buildingId) {
                 // 검색 모드 종료
-                exitSearchMode(); 
-            
+                exitSearchMode();
                 searchBox.style.display = 'none';
                 coordDisplay.style.top = '10px';
-                
+
                 var config = buildings[buildingId];
                 if (config && config.polygonCoords && config.polygonCoords.length > 0) {
                     var bounds = new naver.maps.LatLngBounds();
-                    config.polygonCoords.forEach(function(coord) { bounds.extend(coord); });
-                    
+                    config.polygonCoords.forEach(function(coord) {
+                        bounds.extend(coord);
+                    });
                     var centerPoint = bounds.getCenter();
                     map.setCenter(centerPoint);
-                    map.setZoom(18); 
+                    map.setZoom(18);
                 }
-                
+
                 currentBuildingId = buildingId;
                 labelLayer.setMap(null);
                 floorControlsContainer.style.display = 'flex';
@@ -841,6 +888,7 @@ color:#777;">×</span>
              */
             function exitIndoorMode() {
                 if (!currentBuildingId) return;
+
                 if (groundOverlay) {
                     groundOverlay.setMap(null);
                 }
@@ -848,19 +896,21 @@ color:#777;">×</span>
                 // 팝업창 닫기 및 'i' 버튼 active 해제
                 popup.style.display = 'none';
                 accessBtn.classList.remove('active');
-                
+
                 // 모든 건물 폴리곤 복원
                 for (var id in buildings) {
                     if (buildings[id].polygon) {
                         buildings[id].polygon.setMap(map);
-                        buildings[id].polygon.setOptions({ fillColor: 'transparent' }); 
+                        buildings[id].polygon.setOptions({
+                            fillColor: 'transparent'
+                        });
                     }
                 }
-            
+                
                 floorControlsContainer.style.display = 'none';
                 labelLayer.setMap(map);
-                currentBuildingId = null; 
-            
+                currentBuildingId = null;
+
                 // 일반 모드로 복귀 시 UI 변경
                 searchBox.style.display = 'flex';
                 coordDisplay.style.top = '78px';
@@ -870,18 +920,20 @@ color:#777;">×</span>
             // 층 지도(GroundOverlay) 표시 (수정된 부분: floorBounds 사용)
             function showFloor(buildingId, floor) {
                 var config = buildings[buildingId];
+                
                 // 💥 수정: config.floorBounds[floor]를 사용하여 층별 경계를 가져옵니다.
                 var floorBound = config?.floorBounds[floor];
-                
+
                 if (!config || !config.images[floor] || !floorBound) {
                     console.error('해당 층의 이미지 또는 경계 정보가 없습니다:', buildingId, floor);
                     return;
                 }
 
                 currentBuildingId = buildingId;
-                config.currentFloor = floor; 
+                config.currentFloor = floor;
                 
                 if (groundOverlay) groundOverlay.setMap(null);
+
                 // 다른 건물 폴리곤 숨기기
                 for (var id in buildings) {
                     if (id !== buildingId && buildings[id].polygon) {
@@ -892,7 +944,7 @@ color:#777;">×</span>
                 // 현재 위치 마커가 있다면 제거
                 if (currentPositionMarker) {
                     currentPositionMarker.setMap(null);
-                    geolocationBtn.classList.remove('active'); 
+                    geolocationBtn.classList.remove('active');
                 }
 
                 groundOverlay = new naver.maps.GroundOverlay(
@@ -904,41 +956,49 @@ color:#777;">×</span>
                         opacity: 1,
                     }
                 );
+
                 // 버튼 상태 업데이트: 층 버튼만 비활성화 후 선택된 버튼 활성화
-                document.querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)').forEach(function(btn) { btn.classList.remove('active'); });
+                document.querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)').forEach(function(btn) {
+                    btn.classList.remove('active');
+                });
                 var floorBtn = document.querySelector('#floorControls .floor-btn[data-floor="' + floor + '"]');
                 if (floorBtn) floorBtn.classList.add('active');
 
                 // 실내 모드 종료 리스너 (GroundOverlay 클릭 시)
                 naver.maps.Event.addListener(groundOverlay, 'click', function (e) {
                     e.stopOverlays = true;
-                    exitIndoorMode(); 
+                    exitIndoorMode();
                 });
             }
 
-            // 층 버튼 동적 생성 및 렌더링
+            // 층 버튼 생성 및 이벤트 연결
             function renderFloorButtons(buildingId) {
                 var config = buildings[buildingId];
-                // 기존 층 버튼만 제거 (i 버튼 제외)
-                document.querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)').forEach(function(btn) { btn.remove(); });
-                var defaultFloor = config.floors.includes('1f') ? '1f' : config.floors[0];
-                config.currentFloor = defaultFloor;
-                // 새로운 층 버튼 생성 및 추가
-                config.floors.forEach(function(floor) {
+                if (!config) return;
+
+                // 기존 층 버튼 제거 (Access 버튼은 제외)
+                document.querySelectorAll('#floorControls .floor-btn:not(#accessInfoBtn)').forEach(function(btn) {
+                    btn.remove();
+                });
+                
+                var defaultFloor = config.currentFloor;
+
+                // 층 버튼을 역순으로 생성하여 아래에서 위로 쌓이도록 함
+                config.floors.slice().reverse().forEach(function(floor) {
                     var btn = document.createElement('button');
-                    btn.className = 'floor-btn map-btn-circle'; 
+                    btn.className = 'floor-btn map-btn-circle';
                     btn.dataset.floor = floor;
                     btn.textContent = floor.toUpperCase();
                     
                     // 'i' 버튼 바로 위에 오도록 prepend
                     floorControlsContainer.prepend(btn);
-
+                    
                     if (floor === defaultFloor) {
                         btn.classList.add('active');
                     }
-
+                    
                     btn.addEventListener('click', function() {
-                       showFloor(buildingId, floor);
+                        showFloor(buildingId, floor);
                     });
                 });
             }
@@ -950,11 +1010,10 @@ color:#777;">×</span>
                 var config = buildings[buildingId];
                 var accessInfo = config?.accessInfo;
                 var buildingInfo = config?.buildingInfo;
-                
-                // 팝업 내용 전체 초기화 
+
+                // 팝업 내용 전체 초기화
                 buildingInfoSection.innerHTML = '';
                 accessFacilitySection.innerHTML = '';
-
 
                 // 1. 건물 정보 섹션 렌더링
                 if (buildingInfo) {
@@ -963,12 +1022,10 @@ color:#777;">×</span>
                         <div id="buildingTextInfo">
                             <div id="buildingName">${buildingInfo.name}</div>
                             <div class="info-item">
-                                <i>📍</i>
-                                <span>${buildingInfo.address}</span>
+                                <i>📍</i> <span>${buildingInfo.address}</span>
                             </div>
                             <div class="info-item">
-                                <i>🕒</i>
-                                <span>${buildingInfo.operating_hours}</span>
+                                <i>🕒</i> <span>${buildingInfo.operating_hours}</span>
                             </div>
                         </div>
                     `;
@@ -976,8 +1033,7 @@ color:#777;">×</span>
                     buildingInfoSection.innerHTML = '<div>건물 기본 정보가 없습니다.</div>';
                 }
 
-                
-                // 2. 무장애 시설 정보 섹션 렌더링 
+                // 2. 무장애 시설 정보 섹션 렌더링
                 if (!accessInfo) {
                     accessFacilitySection.innerHTML = '<div>건물에 대한 무장애 시설 정보가 없습니다.</div>';
                     return;
@@ -985,13 +1041,15 @@ color:#777;">×</span>
 
                 var html = '';
                 html += '<div style="font-size:1.0rem; font-weight:700; margin-bottom:12px; color:#1e3a8a;">무장애 시설정보</div>';
+                
                 for (var facility in accessInfo) {
                     var isAvailable = accessInfo[facility];
                     var statusText, statusClass;
 
                     if (facility.includes('단차')) {
-                        statusText = isAvailable ? '있음' : '없음';
-                        statusClass = isAvailable ? 'status-negative' : 'status-positive'; 
+                        statusText = isAvailable ? 
+'있음' : '없음';
+                        statusClass = isAvailable ? 'status-negative' : 'status-positive';
                     } else {
                         statusText = isAvailable ? '있음' : '없음';
                         statusClass = isAvailable ? 'status-positive' : 'status-negative';
@@ -1008,22 +1066,22 @@ color:#777;">×</span>
             }
             
             // =========================================================
-            // 건물 검색 리스트 및 이동 로직 
+            // 건물 검색 리스트 및 이동 로직
             // =========================================================
-            
+
             /**
              * 건물 목록을 생성하여 searchListContainer에 렌더링하고 클릭 이벤트를 연결합니다.
              * @param {string} filterQuery - 필터링할 검색어
              */
-            function renderBuildingList(filterQuery) { 
+            function renderBuildingList(filterQuery) {
                 var html = '';
                 var isListEmpty = true;
-                var normalizedQuery = filterQuery.trim().toLowerCase().replace(/\s/g, ''); 
+                
+                var normalizedQuery = filterQuery.trim().toLowerCase().replace(/\s/g, '');
 
                 for (var id in buildings) {
                     var config = buildings[id];
                     var info = config.buildingInfo;
-                    
                     var buildingName = info.name;
                     var buildingAddress = info.address;
                     var buildingHours = info.operating_hours;
@@ -1031,7 +1089,8 @@ color:#777;">×</span>
                     // 필터링 로직: 검색어와 이름이 일치하는지 확인
                     var normalizedName = buildingName.trim().toLowerCase().replace(/\s/g, '');
                     if (normalizedQuery && !normalizedName.includes(normalizedQuery)) {
-                         continue; // 검색어가 있고 이름에 포함되지 않으면 건너뛰기
+                        continue;
+                        // 검색어가 있고 이름에 포함되지 않으면 건너뛰기
                     }
                     
                     html += `
@@ -1040,12 +1099,10 @@ color:#777;">×</span>
                             <div class="result-text-info">
                                 <div class="result-name">${buildingName}</div>
                                 <div class="result-info-item">
-                                    <i>📍</i>
-                                    <span>${buildingAddress}</span>
+                                    <i>📍</i> <span>${buildingAddress}</span>
                                 </div>
                                 <div class="result-info-item">
-                                    <i>🕒</i>
-                                    <span>${buildingHours}</span>
+                                    <i>🕒</i> <span>${buildingHours}</span>
                                 </div>
                             </div>
                         </div>
@@ -1053,12 +1110,14 @@ color:#777;">×</span>
                     isListEmpty = false;
                 }
 
-                if (isListEmpty) {
-                    searchListContainer.innerHTML = '<div style="padding:10px; color:#555;">검색 결과가 없습니다.</div>';
-                } else {
-                    searchListContainer.innerHTML = html;
+                if (isListEmpty && normalizedQuery) {
+                    html = `<div style="padding: 15px; text-align: center; color: #777;">"${filterQuery}"에 해당하는 건물을 찾을 수 없습니다.</div>`;
+                } else if (!normalizedQuery && isListEmpty) {
+                    html = `<div style="padding: 15px; text-align: center; color: #777;">등록된 건물이 없습니다.</div>`;
                 }
                 
+                searchListContainer.innerHTML = html;
+
                 // 리스트 아이템에 클릭 이벤트 연결
                 document.querySelectorAll('.search-result-item').forEach(function(item) {
                     item.addEventListener('click', function() {
@@ -1075,10 +1134,11 @@ color:#777;">×</span>
             function searchAndGoToBuilding(buildingName, directId) {
                 var foundBuildingId = directId;
                 
-                if (!foundBuildingId) {
+                if (!foundBuildingId) { 
                     // 검색 버튼/Enter로 검색했을 경우 (기존 로직 유지)
-                    var normalizedName = buildingName.trim().toLowerCase().replace(/\s/g, ''); 
-                    for (var id in buildings) { 
+                    var normalizedName = buildingName.trim().toLowerCase().replace(/\s/g, '');
+
+                    for (var id in buildings) {
                         var configName = buildings[id].buildingInfo.name.trim().toLowerCase().replace(/\s/g, '');
                         if (configName.includes(normalizedName) || normalizedName.includes(configName)) {
                             foundBuildingId = id;
@@ -1086,21 +1146,23 @@ color:#777;">×</span>
                         }
                     }
                 }
-                
+
                 if (foundBuildingId) {
                     var config = buildings[foundBuildingId];
+                    
                     if (config.polygonCoords && config.polygonCoords.length > 0) {
                         var bounds = new naver.maps.LatLngBounds();
-                        config.polygonCoords.forEach(function(coord) { bounds.extend(coord); });
-                        
+                        config.polygonCoords.forEach(function(coord) {
+                            bounds.extend(coord);
+                        });
                         map.setCenter(bounds.getCenter());
-                        map.setZoom(17); 
-                        
+                        map.setZoom(17);
                         coordDisplay.textContent = `[검색 성공] '${buildingName}'로 이동했습니다.`;
                         exitSearchMode();
                     }
                 } else {
-                    coordDisplay.textContent = `[검색 실패] '${buildingName}'에 해당하는 건물을 찾을 수 없습니다. (예: 교보빌딩, D타워)`;
+                    coordDisplay.textContent = `[검색 실패] '${buildingName}'에 해당하는 건물을 찾을 수 없습니다.
+ (예: 교보빌딩, D타워)`;
                 }
             }
 
@@ -1109,15 +1171,16 @@ color:#777;">×</span>
              */
             function enterSearchMode() {
                 if (currentBuildingId) {
-                    coordDisplay.textContent = '실내 모드에서는 검색할 수 없습니다. 일반 지도로 돌아가세요.';
+                    coordDisplay.textContent = '실내 모드에서는 검색할 수 없습니다.
+ 일반 지도로 돌아가세요.';
                     return;
                 }
                 searchPlaceholder.style.display = 'none';
                 searchInput.style.display = 'block';
                 searchBtn.style.display = 'flex';
                 closeSearchBtn.style.display = 'flex';
-                coordDisplay.textContent = '아래 목록에서 건물을 선택하거나 이름을 검색하세요.'; 
-                searchInput.focus(); 
+                coordDisplay.textContent = '아래 목록에서 건물을 선택하거나 이름을 검색하세요.';
+                searchInput.focus();
                 
                 // 건물 목록 렌더링 및 표시 (빈 쿼리로 전체 목록 표시)
                 renderBuildingList('');
@@ -1128,7 +1191,7 @@ color:#777;">×</span>
              * 검색 모드 UI를 종료하고 초기 상태로 복원
              */
             function exitSearchMode() {
-                searchInput.value = ''; 
+                searchInput.value = '';
                 searchInput.style.display = 'none';
                 searchBtn.style.display = 'none';
                 closeSearchBtn.style.display = 'none';
@@ -1137,14 +1200,12 @@ color:#777;">×</span>
                 // 건물 목록 숨기기 및 초기화
                 searchListContainer.style.display = 'none';
                 searchListContainer.innerHTML = '';
-                
                 coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
             }
-            
-            // =========================================================
-            // 건물 Polygon 생성 및 리스너 설정 
-            // =========================================================
 
+            // =========================================================
+            // 건물 Polygon 생성 및 리스너 설정
+            // =========================================================
             function setupBuilding(buildingId, config) {
                 var polygon = new naver.maps.Polygon({
                     map: map,
@@ -1156,51 +1217,56 @@ color:#777;">×</span>
                     strokeWeight: 2,
                     clickable: true,
                 });
-                config.polygon = polygon; 
+                config.polygon = polygon;
 
-                // 마우스 오버 리스너 
+                // 마우스 오버 리스너
                 naver.maps.Event.addListener(polygon, 'mouseover', function() {
                     if (!groundOverlay || groundOverlay.getMap() === null) {
                         polygon.setOptions({ fillColor: '#C490E4' });
                         coordDisplay.textContent = '클릭해서 실내지도를 보세요';
                     }
                 });
-                // 마우스 아웃 리스너 
+
+                // 마우스 아웃 리스너
                 naver.maps.Event.addListener(polygon, 'mouseout', function() {
                     if (!groundOverlay || groundOverlay.getMap() === null) {
                         polygon.setOptions({ fillColor: 'transparent' });
                         coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
                     }
                 });
-                // 클릭 리스너 (실내 모드 진입)
-                naver.maps.Event.addListener(polygon, 'click', function (e) {
-                    e.stopOverlays = true;
-                    
-                    enterIndoorMode(buildingId);
 
-                    polygon.setMap(null);
+                // 클릭 리스너 (실내 모드 진입)
+                naver.maps.Event.addListener(polygon, 'click', function(e) {
+                    e.stopOverlays = true;
+                    // 이미 실내 모드라면 일반 지도로 돌아가기
+                    if (currentBuildingId === buildingId) {
+                        exitIndoorMode();
+                        return;
+                    }
                     
+                    // 새로운 건물로 실내 모드 진입
+                    enterIndoorMode(buildingId);
+                    
+                    // 마커 제거
                     if (currentPositionMarker) {
                         currentPositionMarker.setMap(null);
-                        geolocationBtn.classList.remove('active'); 
+                        geolocationBtn.classList.remove('active');
                     }
-
-                    renderFloorButtons(buildingId);
                     
+                    renderFloorButtons(buildingId);
                     var defaultFloor = config.floors.includes('1f') ? '1f' : config.floors[0];
                     showFloor(buildingId, defaultFloor);
-                    
-                    updateAccessPopup(buildingId); 
+                    updateAccessPopup(buildingId);
                 });
             }
 
             // =========================================================
-            // 현재 위치 (Geolocation) 기능 
+            // 현재 위치 (Geolocation) 기능
             // =========================================================
             geolocationBtn.addEventListener('click', function() {
-                var isIndoorMode = currentBuildingId !== null; 
-
-                // 1. 이미 활성화 상태라면 (파란색 버튼) 
+                var isIndoorMode = currentBuildingId !== null;
+                
+                // 1. 이미 활성화 상태라면 (파란색 버튼)
                 if (geolocationBtn.classList.contains('active')) {
                     if (currentPositionMarker) {
                         currentPositionMarker.setMap(null);
@@ -1215,10 +1281,10 @@ color:#777;">×</span>
                     return;
                 }
 
-                
                 // 2. Geolocation 시작
                 if (navigator.geolocation) {
                     coordDisplay.textContent = '현재 위치를 찾는 중입니다...';
+                    
                     navigator.geolocation.getCurrentPosition(
                         function(position) {
                             var lat = position.coords.latitude;
@@ -1226,7 +1292,7 @@ color:#777;">×</span>
                             var currentLatLng = new naver.maps.LatLng(lat, lng);
 
                             map.setCenter(currentLatLng);
-                            map.setZoom(17); 
+                            map.setZoom(17);
 
                             // 기존 마커 제거
                             if (currentPositionMarker) {
@@ -1234,31 +1300,28 @@ color:#777;">×</span>
                             }
 
                             // 새로운 현재 위치 마커 생성 (파란색 도트)
-                            currentPositionMarker 
-                            = new naver.maps.Marker({
+                            currentPositionMarker = new naver.maps.Marker({
                                 map: map,
                                 position: currentLatLng,
                                 icon: {
-                                    content: 
-                                        '<div style="width:12px; height:12px; background-color:#007bff; border-radius:50%; border:2px solid #ffffff; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>',
+                                    content: '<div style="width:12px;
+                                height:12px; background-color:#007bff; border-radius:50%; border:2px solid #ffffff; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>',
                                     size: new naver.maps.Size(12, 12),
                                     anchor: new naver.maps.Point(6, 6)
-                               },
+                                },
                                 zIndex: 9999
                             });
-                            
+
                             // 문구 업데이트
                             if (isIndoorMode) {
                                 coordDisplay.textContent = '현재 위치로 이동했습니다. 실내지도는 그대로 표시됩니다.';
                             } else {
                                 coordDisplay.textContent = '현재 위치로 이동했습니다! 건물을 클릭하면 실내지도를 볼 수 있어요';
                             }
-                            geolocationBtn.classList.add('active'); 
-
+                            geolocationBtn.classList.add('active');
                         },
                         function(error) {
                             console.error("Geolocation Error:", error);
-                            
                             var errorMsg = '위치 정보를 찾을 수 없거나 접근이 거부되었습니다.';
                             if (error.code === 1) {
                                 errorMsg = '위치 정보 접근 권한이 거부되었습니다.';
@@ -1267,51 +1330,59 @@ color:#777;">×</span>
                             }
                             
                             if (isIndoorMode) {
-                                coordDisplay.textContent = `[에러] ${errorMsg}. 일반지도로 돌아가려면 클릭하세요`;
+                                coordDisplay.textContent = 
+`[에러] ${errorMsg}. 일반지도로 돌아가려면 클릭하세요`;
                             } else {
-                                coordDisplay.textContent = `[에러] ${errorMsg}. 건물을 클릭하면 실내지도를 볼 수 있어요`;
+                                coordDisplay.textContent = 
+`[에러] ${errorMsg}. 건물을 클릭하면 실내지도를 볼 수 있어요`;
                             }
-                            
-                            if (currentPositionMarker) {
-                                currentPositionMarker.setMap(null);
-                            }
-                            geolocationBtn.classList.remove('active');
-                        },
-                        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 } 
+                        }
                     );
                 } else {
-                    coordDisplay.textContent = 'Geolocation 미지원: 건물을 클릭하면 실내지도를 볼 수 있어요';
-                }
-            });
-            
-            // =========================================================
-            // 초기화 및 이벤트 리스너 설정 
-            // =========================================================
-
-            // 모든 건물 설정
-            for (var id in buildings) {
-                setupBuilding(id, buildings[id]);
-            }
-
-            // 지도 클릭 리스너 (기본 문구 유지 및 검색 모드 종료)
-            naver.maps.Event.addListener(map, 'click', function (e) {
-                if (!groundOverlay || groundOverlay.getMap() === null) {
-                     // 검색 모드일 경우 검색 모드를 종료
-                    if (searchInput.style.display === 'block') {
-                        exitSearchMode();
+                    // Geolocation API를 지원하지 않는 경우
+                    var errorMsg = "브라우저에서 위치 정보를 지원하지 않습니다.";
+                    if (isIndoorMode) {
+                        coordDisplay.textContent = 
+`[에러] ${errorMsg}. 일반지도로 돌아가려면 클릭하세요`;
+                    } else {
+                        coordDisplay.textContent = 
+`[에러] ${errorMsg}. 건물을 클릭하면 실내지도를 볼 수 있어요`;
                     }
-                    coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
                 }
             });
-            
+
+            // =========================================================
+            // 이벤트 리스너 설정
+            // =========================================================
+
+            // 모든 건물 폴리곤 초기화
+            initializeBuildings();
+
+            // 햄버거 버튼 클릭 리스너 (실내 모드에서 일반 지도로 돌아가기)
+            document.getElementById('hamburgerBtn').addEventListener('click', function() {
+                if (currentBuildingId) {
+                    exitIndoorMode();
+                } else {
+                    // 메뉴 기능 구현 예정 (현재는 exitIndoorMode와 동일하게 동작)
+                    // TODO: 메뉴 기능
+                }
+            });
+
+            // coordDisplay 클릭 리스너 (실내 모드 종료)
+            coordDisplay.addEventListener('click', function() {
+                if (currentBuildingId) {
+                    exitIndoorMode();
+                }
+            });
+
             // 검색 플레이스홀더 클릭 리스너 (검색 모드 진입)
             searchPlaceholder.addEventListener('click', enterSearchMode);
-            
+
             // 검색 입력 필드에서 입력이 발생할 때마다 리스트를 필터링
             searchInput.addEventListener('input', function() {
                 renderBuildingList(searchInput.value);
             });
-            
+
             // 검색 버튼 클릭 리스너 (검색 후 지도로 이동)
             searchBtn.addEventListener('click', function() {
                 var query = searchInput.value;
@@ -1337,7 +1408,7 @@ color:#777;">×</span>
             // 검색 취소 버튼 클릭 리스너
             closeSearchBtn.addEventListener('click', exitSearchMode);
 
-            // 무장애시설 버튼 ('i' 버튼) 클릭 리스너 
+            // 무장애 시설 정보 버튼 클릭 리스너
             accessBtn.addEventListener('click', function() {
                 if (!currentBuildingId) {
                     coordDisplay.textContent = '무장애 시설 정보는 건물을 클릭하여 실내 모드 진입 후 확인할 수 있어요.';
@@ -1380,16 +1451,3 @@ color:#777;">×</span>
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
