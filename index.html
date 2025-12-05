@@ -837,6 +837,55 @@ color:#777;">×</span>
                         address: '서울 종로구 청계천로 41 (임의 주소)', 
                         operating_hours: '09:00 - 21:00 (임의)'
                     }
+                },
+                'sc': { // 건물 6: 영풍빌딩 (사용자 요청 추가)
+                    polygonCoords: [
+                        new naver.maps.LatLng(37.571274, 126.982109),
+                        new naver.maps.LatLng(37.571257, 126.982778),
+                        new naver.maps.LatLng(37.570935, 126.982765),
+                        new naver.maps.LatLng(37.570934, 126.982725),
+                        new naver.maps.LatLng(37.570863, 126.982721),
+                        new naver.maps.LatLng(37.570672, 126.982456),
+                        new naver.maps.LatLng(37.570674, 126.982384),
+                        new naver.maps.LatLng(37.570612, 126.982302),
+                        new naver.maps.LatLng(37.570616, 126.982153),
+new naver.maps.LatLng(37.570712, 126.982050),
+new naver.maps.LatLng(37.570974, 126.982058),
+new naver.maps.LatLng(37.570969, 126.982094),
+                    ],
+                    floors: ['b1', '1f'], // 요청하신 층: B1, 1F
+                    images: {
+                        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/sc/sc_1.png', // 모든 층 동일 이미지
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/sc/sc_1.png',
+                    },
+                    // 층별 경계 정보 (요청하신 동일한 북동(NE) 및 남서(SW) 좌표를 모든 층에 적용)
+                    floorBounds: { 
+                        'b1': new naver.maps.LatLngBounds( 
+                            new naver.maps.LatLng(37.570605, 126.981884), // SW: 위도: 37.569438, 경도: 126.981870
+                            new naver.maps.LatLng(37.571639, 126.982899)  // NE: 위도: 37.569943, 경도: 126.982556
+                        ),
+                        '1f': new naver.maps.LatLngBounds( 
+                            new naver.maps.LatLng(37.570605, 126.981884), // SW
+                            new naver.maps.LatLng(37.571639, 126.982899)  // NE
+                        ),
+                    },
+                    currentFloor: '1f',
+                    polygon: null,
+                    // 임의의 무장애 시설 정보
+                    accessInfo: {
+                        '주출입구 경사로': true,
+                        '장애인 화장실': true, 
+                        '장애인 주차장': false, // 임의
+                        '엘리베이터': true,
+                        '주출입구 단차': false 
+                    },
+                    // 건물 상세 정보 (검색 리스트 및 팝업용)
+                    buildingInfo: { 
+                        name: 'SC제일은행', 
+                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/sc/sc_i.jpg', // I버튼 팝업 및 검색 리스트 이미지
+                        address: '서울 종로구 공평동 100', 
+                        operating_hours: '09:00 - 16:30'
+                    }
                 }
             };
 
@@ -1431,6 +1480,7 @@ color:#777;">×</span>
     </script>
 </body>
 </html>
+
 
 
 
