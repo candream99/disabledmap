@@ -791,7 +791,53 @@ color:#777;">×</span>
         address: '서울 종로구 율곡로 22 (임의 주소)',
         operating_hours: '평일 09:00 - 18:00 (임의)'
     }
-}
+},
+                'yp': { // 건물 6: 영풍빌딩 (사용자 요청 추가)
+                    polygonCoords: [
+                        new naver.maps.LatLng(37.569881, 126.981938),
+                        new naver.maps.LatLng(37.569879, 126.982329),
+                        new naver.maps.LatLng(37.569829, 126.982332),
+                        new naver.maps.LatLng(37.569828, 126.982395),
+                        new naver.maps.LatLng(37.569780, 126.982395),
+                        new naver.maps.LatLng(37.569777, 126.982463),
+                        new naver.maps.LatLng(37.569463, 126.982461),
+                        new naver.maps.LatLng(37.569462, 126.982068),
+                        new naver.maps.LatLng(37.569565, 126.981938),
+                    ],
+                    floors: ['b1', '1f'], // 요청하신 층: B1, 1F
+                    images: {
+                        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/yp/yp1.png', // 모든 층 동일 이미지
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/yp/yp1.png',
+                    },
+                    // 층별 경계 정보 (요청하신 동일한 북동(NE) 및 남서(SW) 좌표를 모든 층에 적용)
+                    floorBounds: { 
+                        'b1': new naver.maps.LatLngBounds( 
+                            new naver.maps.LatLng(37.569438, 126.981870), // SW: 위도: 37.569438, 경도: 126.981870
+                            new naver.maps.LatLng(37.569943, 126.982556)  // NE: 위도: 37.569943, 경도: 126.982556
+                        ),
+                        '1f': new naver.maps.LatLngBounds( 
+                            new naver.maps.LatLng(37.569438, 126.981870), // SW
+                            new naver.maps.LatLng(37.569943, 126.982556)  // NE
+                        ),
+                    },
+                    currentFloor: '1f',
+                    polygon: null,
+                    // 임의의 무장애 시설 정보
+                    accessInfo: {
+                        '주출입구 경사로': true,
+                        '장애인 화장실': true, 
+                        '장애인 주차장': false, // 임의
+                        '엘리베이터': true,
+                        '주출입구 단차': false 
+                    },
+                    // 건물 상세 정보 (검색 리스트 및 팝업용)
+                    buildingInfo: { 
+                        name: '영풍빌딩', 
+                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/yp/yp_i.jpg', // I버튼 팝업 및 검색 리스트 이미지
+                        address: '서울 종로구 청계천로 41 (임의 주소)', 
+                        operating_hours: '09:00 - 21:00 (임의)'
+                    }
+                }
             };
 
             // =========================================================
@@ -1385,6 +1431,7 @@ color:#777;">×</span>
     </script>
 </body>
 </html>
+
 
 
 
