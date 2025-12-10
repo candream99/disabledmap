@@ -698,6 +698,60 @@ color:#777;">×</span>
                         operating_hours: '08:00 - 22:00 (주말 포함)'
                     }
                 },
+                'dp': { // 건물 (사용자 요청 추가): 덕수궁 디팰리스
+                    polygonCoords: [
+                        new naver.maps.LatLng(37.568747, 126.971657),
+                        new naver.maps.LatLng(37.568764, 126.971716),
+                        new naver.maps.LatLng(37.568785, 126.971707),
+                        new naver.maps.LatLng(37.568924, 126.972264),
+                        new naver.maps.LatLng(37.568905, 126.972278),
+                        new naver.maps.LatLng(37.568918, 126.972331),
+                        new naver.maps.LatLng(37.568654, 126.972437),
+                        new naver.maps.LatLng(37.568638, 126.972382),
+                        new naver.maps.LatLng(37.568619, 126.972390),
+                        new naver.maps.LatLng(37.568479, 126.971828),
+                        new naver.maps.LatLng(37.568501, 126.971818),
+                        new naver.maps.LatLng(37.568483, 126.971760),
+                    ],
+                    floors: ['1f', 'b1', 'b3'], // 1F, B1, B3 버튼 생성
+                    images: {
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dp/dp_1.png',
+                        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dp/dp_2.png',
+                        'b3': 'https://raw.githubusercontent.com/candream99/disabledmap/main/dp/dp_2.png',
+                    },
+                    // 층별 이미지 경계 정보
+                    floorBounds: { 
+                        '1f': new naver.maps.LatLngBounds( 
+                            new naver.maps.LatLng(37.568384, 126.971603), // 1F SW
+                            new naver.maps.LatLng(37.569001, 126.972464)  // 1F NE
+                        ),
+                        'b1': new naver.maps.LatLngBounds( 
+                            new naver.maps.LatLng(37.568245, 126.971606), // B1 SW
+                            new naver.maps.LatLng(37.569161, 126.972561)  // B1 NE
+                        ),
+                        'b3': new naver.maps.LatLngBounds( 
+                            new naver.maps.LatLng(37.568245, 126.971606), // B3 SW
+                            new naver.maps.LatLng(37.569161, 126.972561)  // B3 NE
+                        ),
+                    },
+                    currentFloor: '1f',
+                    polygon: null,
+                    // 임의의 무장애 시설 정보
+                    accessInfo: {
+                        '주출입구 경사로': true,
+                        '장애인 화장실': true,
+                        '장애인 주차장': true,
+                        '엘리베이터': true,
+                        '주출입구 단차': false 
+                    },
+                    // 건물 상세 정보 (검색 리스트 및 팝업용)
+                    buildingInfo: {
+                        name: '덕수궁 디팰리스',
+                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/dp/dp.png', // 검색 및 팝업 이미지
+                        address: '서울 종로구 사직로 9길 30 (임의 주소)', // 임의 주소
+                        operating_hours: '09:00 - 20:00 (매일 운영)' // 임의 운영시간
+                    }
+                },
                 'officia': { // 건물 4: 광화문 오피시아
     polygonCoords: [
         new naver.maps.LatLng(37.569884, 126.974610), // 위도, 경도
@@ -1480,6 +1534,7 @@ new naver.maps.LatLng(37.570969, 126.982094),
     </script>
 </body>
 </html>
+
 
 
 
