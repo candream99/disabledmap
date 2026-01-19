@@ -180,11 +180,58 @@
             cursor: pointer;
             z-index: 2200;
         }
-        #geolocationBtn {
-            position: absolute;
-            bottom: 18px;
-            left: 18px;
-        }
+/* 현재위치 버튼 자체의 스타일 */
+#geolocationBtn {
+    position: absolute;
+    bottom: 18px;
+    left: 18px;
+    display: flex;         /* 아이콘을 중앙에 맞추기 위해 추가 */
+    align-items: center;   /* 아이콘을 세로 중앙에 맞추기 위해 추가 */
+    justify-content: center; /* 아이콘을 가로 중앙에 맞추기 위해 추가 */
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #ccc;
+}
+
+/* 기본 상태: 원형 타겟 모양 아이콘 */
+#geolocationBtn .geo-icon {
+    display: block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #333; 
+    border-radius: 50%;
+    position: relative;
+    box-sizing: border-box;
+    background-color: transparent;
+}
+
+#geolocationBtn .geo-icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
+    height: 4px;
+    background-color: #333; 
+    border-radius: 50%;
+}
+
+/* 활성화 상태 (추적 중): 파란색 화살표 모양으로 변경 */
+#geolocationBtn.active .geo-icon {
+    border: none;
+    background-color: transparent;
+    width: 0;
+    height: 0;
+    transform: rotate(-45deg); /* 화살표 방향을 약간 틀어주면 더 자연스럽습니다 */
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 12px solid #007bff;
+}
+
+#geolocationBtn.active .geo-icon::after {
+    content: none;
+}
 
         #floorControls {
             position: absolute;
@@ -226,7 +273,9 @@
         <div id="coordDisplay">건물을 클릭하면 실내지도를 볼 수 있어요</div>
 
         <!-- 현재 위치 버튼 -->
-        <button id="geolocationBtn" class="map-btn-circle"></button>
+        <button id="geolocationBtn" class="map-btn-circle">
+            <span class="geo-icon"></span>
+        </button>
 
         <!-- 층 버튼 컨트롤 -->
         <div id="floorControls"></div>
@@ -942,6 +991,7 @@ document.head.appendChild(script);
 
 </body>
 </html>
+
 
 
 
