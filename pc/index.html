@@ -938,6 +938,97 @@ new naver.maps.LatLng(37.570969, 126.982094),
         });
     }
 
+    // =========================================================
+            // 현재 위치 (Geolocation) 기능 
+            // =========================================================
+            geolocationBtn.addEventListener('click', function() {
+                var isIndoorMode = currentBuildingId !== null; 
+
+                // 1. 이미 활성화 상태라면 (파란색 버튼) 
+                if (geolocationBtn.classList.contains('active')) {
+                    if (currentPositionMarker) {
+                        currentPositionMarker.setMap(null);
+                    }
+                    geolocationBtn.classList.remove('active');
+                    
+                    if (isIndoorMode) {
+                        coordDisplay.textContent = '일반지도로 돌아가려면 실내지도를 클릭하세요';
+                    } else {
+                        coordDisplay.textContent = '건물을 클릭하면 실내지도를 볼 수 있어요';
+                    }
+                    return;
+                }
+
+                
+                // 2. Geolocation 시작
+                if (navigator.geolocation) {
+                    coordDisplay.textContent = '현재 위치를 찾는 중입니다...';
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            var lat = position.coords.latitude;
+                            var lng = position.coords.longitude;
+                            var currentLatLng = new naver.maps.LatLng(lat, lng);
+
+                            map.setCenter(currentLatLng);
+                            map.setZoom(17); 
+
+                            // 기존 마커 제거
+                            if (currentPositionMarker) {
+                                currentPositionMarker.setMap(null);
+                            }
+
+                            // 새로운 현재 위치 마커 생성 (파란색 도트)
+                            currentPositionMarker 
+                            = new naver.maps.Marker({
+                                map: map,
+                                position: currentLatLng,
+                                icon: {
+                                    content: 
+                                        '<div style="width:12px; height:12px; background-color:#007bff; border-radius:50%; border:2px solid #ffffff; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>',
+                                    size: new naver.maps.Size(12, 12),
+                                    anchor: new naver.maps.Point(6, 6)
+                               },
+                                zIndex: 9999
+                            });
+                            
+                            // 문구 업데이트
+                            if (isIndoorMode) {
+                                coordDisplay.textContent = '현재 위치로 이동했습니다. 실내지도는 그대로 표시됩니다.';
+                            } else {
+                                coordDisplay.textContent = '현재 위치로 이동했습니다! 건물을 클릭하면 실내지도를 볼 수 있어요';
+                            }
+                            geolocationBtn.classList.add('active'); 
+
+                        },
+                        function(error) {
+                            console.error("Geolocation Error:", error);
+                            
+                            var errorMsg = '위치 정보를 찾을 수 없거나 접근이 거부되었습니다.';
+                            if (error.code === 1) {
+                                errorMsg = '위치 정보 접근 권한이 거부되었습니다.';
+                            } else if (error.code === 2) {
+                                errorMsg = '위치 정보를 찾을 수 없습니다.';
+                            }
+                            
+                            if (isIndoorMode) {
+                                coordDisplay.textContent = `[에러] ${errorMsg}. 일반지도로 돌아가려면 클릭하세요`;
+                            } else {
+                                coordDisplay.textContent = `[에러] ${errorMsg}. 건물을 클릭하면 실내지도를 볼 수 있어요`;
+                            }
+                            
+                            if (currentPositionMarker) {
+                                currentPositionMarker.setMap(null);
+                            }
+                            geolocationBtn.classList.remove('active');
+                        },
+                        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 } 
+                    );
+                } else {
+                    coordDisplay.textContent = 'Geolocation 미지원: 건물을 클릭하면 실내지도를 볼 수 있어요';
+                }
+            });
+            
+
     /* 검색 리스트 렌더 */
     function renderList(q=""){
         q = q.trim().toLowerCase();
@@ -991,6 +1082,7 @@ document.head.appendChild(script);
 
 </body>
 </html>
+
 
 
 
