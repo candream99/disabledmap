@@ -303,7 +303,7 @@ script.onload = function() {
         const bounds = new naver.maps.LatLngBounds();
         config.polygonCoords.forEach(c=>bounds.extend(c));
         map.setCenter(bounds.getCenter());
-        map.setZoom(18);
+        map.setZoom(19);
 
         labelLayer.setMap(null);
         coordDisplay.textContent = "일반지도로 돌아가려면 실내지도를 클릭하세요";
@@ -926,7 +926,7 @@ new naver.maps.LatLng(37.570969, 126.982094),
                 const bounds = new naver.maps.LatLngBounds();
                 b.polygonCoords.forEach(c=>bounds.extend(c));
                 map.setCenter(bounds.getCenter());
-                map.setZoom(17);
+                map.setZoom(19);
                 coordDisplay.textContent = `'${b.buildingInfo.name}'로 이동했습니다`;
             };
         });
@@ -942,6 +942,7 @@ document.head.appendChild(script);
 
 </body>
 </html>
+
 
 
 
