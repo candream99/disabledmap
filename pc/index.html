@@ -325,8 +325,8 @@ script.onload = function() {
         indoorInfoPanel.innerHTML = `
             <img src="${b.buildingInfo.image_url}">
             <div class="title">${b.buildingInfo.name}</div>
-            <div class="meta">📍 ${b.buildingInfo.address}</div>
-            <div class="meta">🕒 ${b.buildingInfo.operating_hours}</div>
+            <div class="meta">🏠︎ ${b.buildingInfo.address}</div>
+            <div class="meta">◴ ${b.buildingInfo.operating_hours}</div>
 
             <div class="section-title">무장애 시설 정보</div>
             ${Object.entries(b.accessInfo).map(([k,v]) => `
@@ -992,6 +992,7 @@ document.head.appendChild(script);
 
 </body>
 </html>
+
 
 
 
