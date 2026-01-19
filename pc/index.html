@@ -425,12 +425,12 @@ script.onload = function() {
             buildingInfo:{
                 name:"교보빌딩",
                 image_url:"https://raw.githubusercontent.com/candream99/disabledmap/main/kb/kyobo_gwanghwamun.jpg",
-                address:"서울 종로구 새문안로 45",
+                address:"서울특별시 종로구 종로 1",
                 operating_hours:"09:00 - 18:00"
             },
             accessInfo:{
                 "주출입구 경사로":true,
-                "장애인 화장실":true,
+                "장애인 화장실":false,
                 "장애인 주차장":true,
                 "엘리베이터":true,
                 "주출입구 단차":false
@@ -500,8 +500,8 @@ script.onload = function() {
                     buildingInfo: {
                         name: '광화문 D타워',
                         image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/dt/d_tower.jpg', 
-                        address: '서울 종로구 송월길 2',
-                        operating_hours: '10:00 - 19:00 (매일 운영)'
+                        address: '서울특별시 종로구 종로3길 17',
+                        operating_hours: '10:00 - 21:00 (매일 운영)'
                     }
                 },
          't8': { // 건물 3: 타워8
@@ -541,8 +541,8 @@ script.onload = function() {
                     polygon: null,
                     // 임의의 무장애 시설 정보
                     accessInfo: {
-                        '주출입구 경사로': true,
-                        '장애인 화장실': false, 
+                        '주출입구 경사로': false,
+                        '장애인 화장실': true, 
                         '장애인 주차장': true,
                         '엘리베이터': true,
                         '주출입구 단차': false 
@@ -551,8 +551,8 @@ script.onload = function() {
                     buildingInfo: {
                         name: '타워8',
                         image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/T8/t88.jpg', 
-                        address: '서울 종로구 청진동 167 (임의)',
-                        operating_hours: '08:00 - 22:00 (주말 포함)'
+                        address: '서울특별시 종로구 종로5길 7',
+                        operating_hours: '09:00 - 22:00 (주말 포함)'
                     }
                 },
                 'dp': { // 건물 (사용자 요청 추가): 덕수궁 디팰리스
@@ -595,7 +595,7 @@ script.onload = function() {
                     polygon: null,
                     // 임의의 무장애 시설 정보
                     accessInfo: {
-                        '주출입구 경사로': true,
+                        '주출입구 경사로': false,
                         '장애인 화장실': true,
                         '장애인 주차장': true,
                         '엘리베이터': true,
@@ -605,8 +605,8 @@ script.onload = function() {
                     buildingInfo: {
                         name: '덕수궁 디팰리스',
                         image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/dp/dp.png', // 검색 및 팝업 이미지
-                        address: '서울 종로구 사직로 9길 30 (임의 주소)', // 임의 주소
-                        operating_hours: '09:00 - 20:00 (매일 운영)' // 임의 운영시간
+                        address: '서울특별시 종로구 새문안로2길 10', // 임의 주소
+                        operating_hours: '09:00 - 21:00 (매일 운영)' // 임의 운영시간
                     }
                 },
                 'officia': { // 건물 4: 광화문 오피시아
@@ -642,9 +642,9 @@ script.onload = function() {
     polygon: null,
     // 임의의 무장애 시설 정보
     accessInfo: {
-        '주출입구 경사로': true,
-        '장애인 화장실': true, 
-        '장애인 주차장': false,
+        '주출입구 경사로': false,
+        '장애인 화장실': false, 
+        '장애인 주차장': true,
         '엘리베이터': true,
         '주출입구 단차': false 
     },
@@ -652,8 +652,8 @@ script.onload = function() {
     buildingInfo: {
         name: '광화문 오피시아',
         image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/officia/officia_.jpg', // I버튼 팝업 및 검색 리스트 이미지
-        address: '서울 종로구 새문안로5길 37 (임의 주소)',
-        operating_hours: '10:00 - 20:00 (주말 휴무, 임의)'
+        address: '서울특별시 종로구 새문안로 92',
+        operating_hours: '10:00 - 21:00 (주말 휴무, 임의)'
     }
 },
                 'st': { // 건물 5: S타워
@@ -690,7 +690,7 @@ script.onload = function() {
     // 임의의 무장애 시설 정보
     accessInfo: {
         '주출입구 경사로': true,
-        '장애인 화장실': true, 
+        '장애인 화장실': false, 
         '장애인 주차장': true,
         '엘리베이터': true,
         '주출입구 단차': false 
@@ -699,8 +699,8 @@ script.onload = function() {
     buildingInfo: {
         name: 'S타워',
         image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/st/s_t.jpg', // I버튼 팝업 및 검색 리스트 이미지
-        address: '서울 종로구 율곡로 22 (임의 주소)',
-        operating_hours: '평일 09:00 - 18:00 (임의)'
+        address: '서울특별시 종로구 새문안로 82',
+        operating_hours: '평일 09:00 - 21:00 (임의)'
     }
 },
                 'yp': { // 건물 6: 영풍빌딩 (사용자 요청 추가)
@@ -736,20 +736,20 @@ script.onload = function() {
                     // 임의의 무장애 시설 정보
                     accessInfo: {
                         '주출입구 경사로': true,
-                        '장애인 화장실': true, 
-                        '장애인 주차장': false, // 임의
+                        '장애인 화장실': false, 
+                        '장애인 주차장': true, // 임의
                         '엘리베이터': true,
-                        '주출입구 단차': false 
+                        '주출입구 단차': true 
                     },
                     // 건물 상세 정보 (검색 리스트 및 팝업용)
                     buildingInfo: { 
                         name: '영풍빌딩', 
                         image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/yp/yp_i.jpg', // I버튼 팝업 및 검색 리스트 이미지
-                        address: '서울 종로구 청계천로 41 (임의 주소)', 
-                        operating_hours: '09:00 - 21:00 (임의)'
+                        address: '서울 종로구 청계천로 41', 
+                        operating_hours: '09:00 - 22:00'
                     }
                 },
-                'sc': { // 건물 6: 영풍빌딩 (사용자 요청 추가)
+                'sc': { // 건물 6: sc제일은행빌딩 (사용자 요청 추가)
                     polygonCoords: [
                         new naver.maps.LatLng(37.571274, 126.982109),
                         new naver.maps.LatLng(37.571257, 126.982778),
@@ -784,9 +784,9 @@ new naver.maps.LatLng(37.570969, 126.982094),
                     polygon: null,
                     // 임의의 무장애 시설 정보
                     accessInfo: {
-                        '주출입구 경사로': true,
-                        '장애인 화장실': true, 
-                        '장애인 주차장': false, // 임의
+                        '주출입구 경사로': false,
+                        '장애인 화장실': false, 
+                        '장애인 주차장': true, // 임의
                         '엘리베이터': true,
                         '주출입구 단차': false 
                     },
@@ -794,7 +794,7 @@ new naver.maps.LatLng(37.570969, 126.982094),
                     buildingInfo: { 
                         name: 'SC제일은행', 
                         image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/sc/sc_i.jpg', // I버튼 팝업 및 검색 리스트 이미지
-                        address: '서울 종로구 공평동 100', 
+                        address: '서울특별시 종로구 종로 47', 
                         operating_hours: '09:00 - 16:30'
                     }
                 },
@@ -835,10 +835,10 @@ new naver.maps.LatLng(37.570969, 126.982094),
                     // 무장애 시설 정보 (요청에 따라 임의의 값 설정)
                     accessInfo: {
                         '주출입구 경사로': true,
-                        '장애인 화장실': true, 
+                        '장애인 화장실': false, 
                         '장애인 주차장': true,
                         '엘리베이터': true,
-                        '주출입구 단차': false 
+                        '주출입구 단차': true 
                     },
                     // 건물 상세 정보 (검색 리스트 및 팝업용)
                     buildingInfo: {
@@ -942,4 +942,5 @@ document.head.appendChild(script);
 
 </body>
 </html>
+
 
