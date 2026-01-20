@@ -903,28 +903,35 @@ function renderList(q) {
     closeIntroBtn.onclick = () => {
         introPanel.style.display = "none";
     };
+/* [통합] 메인 로고 클릭 시: 소개창 닫기 + 지도 초기화 */
+    document.getElementById("mainLogoBtn").addEventListener("click", function() {
+        // 1. 소개창이 열려있다면 닫기
+        introPanel.style.display = "none";
 
-    // 3. 메인 로고 클릭 시 초기화 로직 (기존에 만든 로고 클릭 이벤트 안에 한 줄 추가)
-    document.getElementById("mainLogoBtn").addEventListener("click", function() {
-        introPanel.style.display = "none"; // 소개창이 열려있다면 닫기 (추가된 줄)
-    
-    /* [추가] 로고 클릭 시 초기화 (첫 페이지로 복귀) */
-    document.getElementById("mainLogoBtn").addEventListener("click", function() {
+        // 2. 실내 모드라면 빠져나오기
         if (currentBuildingId) {
             exitIndoorMode();
         }
+
+        // 3. 검색창 초기화 및 리스트 전체 보기
         searchInput.value = "";
         renderList("");
+
+        // 4. 지도 시점을 초기 위치로 이동 (서울 중심)
         map.setCenter(new naver.maps.LatLng(37.5710, 126.9784));
         map.setZoom(17);
+        
+        // 5. 좌표 안내 문구 초기화
         coordDisplay.textContent = "건물을 클릭하면 실내지도를 볼 수 있어요";
         
+        // 6. 자기 위치 표시 마커 제거
         if (currentPositionMarker) {
             currentPositionMarker.setMap(null);
             currentPositionMarker = null;
             geolocationBtn.classList.remove("active");
         }
     });
+    
 
     /* ▲▲▲▲▲ 붙여넣기 끝 ▲▲▲▲▲ */
 };
@@ -932,6 +939,7 @@ document.head.appendChild(script);
 </script>
 </body>
 </html>
+
 
 
 
