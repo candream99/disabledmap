@@ -407,47 +407,34 @@
             #sidebar { display: none; }
         }
         /* [추가] 지하철 노선도 팝업 스타일 */
-/* [수정] 팝업창 크기 및 스타일 조정 */
-#subwayPopup {
-    display: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 3000;
-    background: #fff;
-    
-    /* 화면 크기에 맞춰 꽉 차게 보이도록 설정 */
-    width: 90%; 
-    height: 90%; 
-    padding: 40px 10px 10px 10px; /* 상단 패딩은 닫기 버튼 공간 확보용 */
-    
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    box-sizing: border-box; /* 패딩 포함 크기 계산 */
-    overflow: hidden; /* iframe이 튀어나가지 않게 */
-}
-
-/* [추가] iframe 스타일 */
-#subwayPopup iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-}
+    #subwayPopup {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 3000;
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        max-width: 90%;
+        max-height: 90%;
+        overflow: auto;
+    }
 
     /* 팝업 닫기 버튼 */
     #closeSubwayBtn {
         position: absolute;
-        top: 5px;
+        top: 10px;
         right: 15px;
-        font-size: 30px;
+        font-size: 28px;
         font-weight: bold;
         color: #555;
         background: none;
         border: none;
         cursor: pointer;
-        z-index: 3100;
+        z-index: 1;
     }
 
     #closeSubwayBtn:hover { color: #000; }
@@ -522,15 +509,11 @@
         </button>
         <div id="floorControls"></div>
 
-<div id="subwayPopup">
-    <button id="closeSubwayBtn">&times;</button>
-    
-    <iframe 
-        src="https://www.seoulmetro.co.kr/kr/cyberStation.do" 
-        title="지하철 노선도"
-        allow="fullscreen">
-    </iframe>
-</div>
+        <div id="subwayPopup">
+        <button id="closeSubwayBtn">&times;</button>
+        <div class="subway-map-container">
+            <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/pc/subway.pdf" alt="지하철 노선도">
+        </div>
     </div>
     </section>
 
