@@ -406,6 +406,54 @@
         @media (max-width: 920px) {
             #sidebar { display: none; }
         }
+        /* [추가] 지하철 노선도 팝업 스타일 */
+    #subwayPopup {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 3000;
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        max-width: 90%;
+        max-height: 90%;
+        overflow: auto;
+    }
+
+    /* 팝업 닫기 버튼 */
+    #closeSubwayBtn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 28px;
+        font-weight: bold;
+        color: #555;
+        background: none;
+        border: none;
+        cursor: pointer;
+        z-index: 1;
+    }
+
+    #closeSubwayBtn:hover { color: #000; }
+
+    /* 이미지 컨테이너 및 이미지 스타일 */
+    .subway-map-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .subway-map-container img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        border: 1px solid #eee;
+    }
+
+    /* ▲▲▲ 붙여넣기 끝 ▲▲▲ */
     </style>
 </head>
 
@@ -422,10 +470,10 @@
             <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/pc/information.png" alt="소개 아이콘">
             <span class="btn-text">소개</span>
         </button>
-        <button class="gnb-btn">
-            <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/pc/subway.png" alt="지하철 아이콘">
-            <span class="btn-text">지하철</span>
-        </button>
+<button class="gnb-btn" id="subwayBtn">
+    <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/pc/subway.png" alt="지하철 아이콘">
+    <span class="btn-text">지하철</span>
+</button>
         <button class="gnb-btn">
             <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/pc/document.jpg" alt="약관 아이콘">
             <span class="btn-text">이용약관</span>
@@ -460,6 +508,13 @@
             <span class="geo-icon"></span>
         </button>
         <div id="floorControls"></div>
+
+        <div id="subwayPopup">
+        <button id="closeSubwayBtn">&times;</button>
+        <div class="subway-map-container">
+            <img src="https://via.placeholder.com/800x600.png?text=Subway+Map+Image" alt="지하철 노선도">
+        </div>
+    </div>
     </section>
 
 </div>
@@ -484,6 +539,9 @@ script.onload = function() {
     const introBtn = document.getElementById("introBtn");
     const introPanel = document.getElementById("introPanel");
     const closeIntroBtn = document.getElementById("closeIntroBtn");
+    const subwayBtn = document.getElementById("subwayBtn");
+    const subwayPopup = document.getElementById("subwayPopup");
+    const closeSubwayBtn = document.getElementById("closeSubwayBtn");
 
     /* 지도 생성 */
     var map = new naver.maps.Map("map", {
@@ -934,11 +992,32 @@ function renderList(q) {
     
 
     /* ▲▲▲▲▲ 붙여넣기 끝 ▲▲▲▲▲ */
+    // 1. 지하철 버튼 클릭 시 팝업 열기
+    subwayBtn.addEventListener("click", () => {
+        subwayPopup.style.display = "block";
+    });
+
+    // 2. 닫기(X) 버튼 클릭 시 팝업 닫기
+    closeSubwayBtn.addEventListener("click", () => {
+        subwayPopup.style.display = "none";
+    });
+
+    // 3. (선택사항) 팝업 바깥 배경 클릭 시 닫기 기능 추가
+    // #mapContainer에 클릭 이벤트를 걸어 팝업 바깥 클릭을 감지합니다.
+    document.getElementById("mapContainer").addEventListener("click", (e) => {
+        // 클릭된 요소가 subwayPopup 자체이거나 그 자식 요소가 아니라면 닫습니다.
+        if (subwayPopup.style.display === "block" && !subwayPopup.contains(e.target) && e.target !== subwayBtn && !subwayBtn.contains(e.target)) {
+             subwayPopup.style.display = "none";
+        }
+    });
+
+    /* ▲▲▲ [추가] 끝 ▲▲▲ */
 };
 document.head.appendChild(script);
 </script>
 </body>
 </html>
+
 
 
 
