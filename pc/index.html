@@ -514,25 +514,26 @@ script.onload = function() {
     }
 
     /* 리스트 렌더링 */
-    function renderList(q) {
-        const arr = Object.keys(buildings).map(id => ({ id, info: buildings[id].buildingInfo }));
-        buildingList.innerHTML = arr.filter(x => {
-            if (!q) return true;
-            return x.info.name.toLowerCase().includes(q.toLowerCase());
-        }).map(x => `
-            <div class="building-card" data-id="${x.id}">
-                <img class="building-thumb" src="${x.info.image_url}">
-                <div class="building-info">
-                    <div class="building-name">${x.info.name}</div>
-                    <div class="building-meta">🏠︎ ${x.info.address}</div>
-                </div>
+function renderList(q) {
+    const arr = Object.keys(buildings).map(id => ({ id, info: buildings[id].buildingInfo }));
+    buildingList.innerHTML = arr.filter(x => {
+        if (!q) return true;
+        return x.info.name.toLowerCase().includes(q.toLowerCase());
+    }).map(x => `
+        <div class="building-card" data-id="${x.id}">
+            <img class="building-thumb" src="${x.info.image_url}">
+            <div class="building-info">
+                <div class="building-name">${x.info.name}</div>
+                <div class="building-meta">🏠︎ ${x.info.address}</div>
+                <div class="building-meta">◴ ${x.info.operating_hours}</div>
             </div>
-        `).join("");
+        </div>
+    `).join("");
 
-        document.querySelectorAll(".building-card").forEach(el => {
-            el.onclick = () => enterIndoorMode(el.dataset.id);
-        });
-    }
+    document.querySelectorAll(".building-card").forEach(el => {
+        el.onclick = () => enterIndoorMode(el.dataset.id);
+    });
+}
 
     renderList("");
     searchInput.oninput = () => renderList(searchInput.value);
@@ -541,3 +542,4 @@ document.head.appendChild(script);
 </script>
 </body>
 </html>
+
