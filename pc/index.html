@@ -92,6 +92,78 @@
             overflow: hidden;
         }
 
+/* 기업 소개 패널 스타일 */
+#introPanel {
+    position: absolute;
+    left: 64px; /* GNB 너비만큼 띄움 */
+    top: 0;
+    width: 20%; /* 검색 패널과 동일한 비율 */
+    min-width: 260px;
+    max-width: 420px;
+    height: 100%;
+    background: #ffffff;
+    z-index: 1500; /* 사이드바보다 위에 위치 */
+    display: none; /* 초기 상태는 숨김 */
+    flex-direction: column;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+    border-right: 1px solid #e5e7eb;
+    overflow-y: auto;
+    padding: 60px 24px 40px 24px;
+    box-sizing: border-box;
+}
+
+/* 닫기 버튼 (X) */
+#closeIntroBtn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 32px;
+    font-weight: 300;
+    color: #999;
+    cursor: pointer;
+    line-height: 1;
+}
+
+#closeIntroBtn:hover {
+    color: #333;
+}
+
+.intro-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.intro-logo {
+    width: 160px;
+    height: auto;
+    margin-bottom: 40px;
+}
+
+.intro-title {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.4;
+    color: #111;
+    margin-bottom: 24px;
+    word-break: keep-all;
+    text-align: left;
+    width: 100%;
+}
+
+.intro-body {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #444;
+    text-align: justify;
+}
+
+.intro-body p {
+    margin-bottom: 20px;
+}
+        
         /* 검색영역 */
         #searchArea {
             padding: 14px;
@@ -346,7 +418,7 @@
     </div>
     
     <div class="gnb-menu">
-        <button class="gnb-btn">
+        <button class="gnb-btn" id="introBtn">
             <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/pc/information.png" alt="소개 아이콘">
             <span class="btn-text">소개</span>
         </button>
@@ -368,6 +440,18 @@
         <div id="buildingList"></div>
         <div id="indoorInfoPanel"></div>
     </aside>
+
+<div id="introPanel">
+    <button id="closeIntroBtn">&times;</button>
+    <div class="intro-content">
+        <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/wm.png" alt="월드메디 로고" class="intro-logo">
+        <h2 class="intro-title">모두를 위한 공간의 연결, 월드메디 '무장애지도'</h2>
+        <div class="intro-body">
+            <p>2026년 현재 대한민국 휠체어 이용자는 30만 명에 육박하며, 고령 인구 1,000만 명 시대에 진입함에 따라 보행 보조기 사용자 수는 급격히 늘어날 전망입니다. 하지만 대형화되고 복잡해지는 현대의 건축물은 보행 약자들에게 거대한 장벽과 같습니다. 월드메디는 이러한 사회적 문제를 해결하고 모든 이의 평등한 이동권을 보장하기 위해 혁신적인 '무장애지도' 서비스를 제공합니다.</p>
+            <p>단순한 지도를 넘어 공간의 민주화를 지향하는 월드메디의 실내 지도는 복잡한 건물 내부 정보를 모바일과 데스크톱 환경에서 직관적으로 제공합니다. 지속적인 데이터 업데이트를 통해 가장 신뢰할 수 있는 경로를 안내하며, 공공기관부터 민간 대형 시설까지 서비스 영역을 확장하고 있습니다. 누구나 장애 없이 자유롭게 공간을 누릴 수 있는 세상, 월드메디가 실내 지도를 통해 실현해 나가는 핵심 가치입니다.</p>
+        </div>
+    </div>
+</div>
 
     <section id="mapContainer">
         <div id="map"></div>
@@ -397,6 +481,9 @@ script.onload = function() {
     const floorControls = document.getElementById("floorControls");
     const coordDisplay = document.getElementById("coordDisplay");
     const geolocationBtn = document.getElementById("geolocationBtn");
+    const introBtn = document.getElementById("introBtn");
+    const introPanel = document.getElementById("introPanel");
+    const closeIntroBtn = document.getElementById("closeIntroBtn");
 
     /* 지도 생성 */
     var map = new naver.maps.Map("map", {
@@ -807,6 +894,20 @@ function renderList(q) {
 
     renderList("");
     searchInput.oninput = () => renderList(searchInput.value);
+// 1. 소개 버튼 클릭 시 패널 열기
+    introBtn.onclick = () => {
+        introPanel.style.display = "flex";
+    };
+
+    // 2. X 버튼 클릭 시 패널 닫기
+    closeIntroBtn.onclick = () => {
+        introPanel.style.display = "none";
+    };
+
+    // 3. 메인 로고 클릭 시 초기화 로직 (기존에 만든 로고 클릭 이벤트 안에 한 줄 추가)
+    document.getElementById("mainLogoBtn").addEventListener("click", function() {
+        introPanel.style.display = "none"; // 소개창이 열려있다면 닫기 (추가된 줄)
+    
     /* [추가] 로고 클릭 시 초기화 (첫 페이지로 복귀) */
     document.getElementById("mainLogoBtn").addEventListener("click", function() {
         if (currentBuildingId) {
@@ -831,6 +932,7 @@ document.head.appendChild(script);
 </script>
 </body>
 </html>
+
 
 
 
