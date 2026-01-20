@@ -938,7 +938,11 @@ function renderList(q) {
         }
     });
     
-
+/* ▼▼▼ [수정] 지하철 버튼 클릭 시: 서울교통공사 사이트 새 창으로 열기 ▼▼▼ */
+    document.getElementById("subwayBtn").addEventListener("click", function() {
+        // 새 창(새 탭)에서 해당 URL 열기
+        window.open("http://www.seoulmetro.co.kr/kr/cyberStation.do#", "_blank");
+    });
 
 
     /* ▲▲▲ [추가] 끝 ▲▲▲ */
@@ -947,6 +951,7 @@ document.head.appendChild(script);
 </script>
 </body>
 </html>
+
 
 
 
