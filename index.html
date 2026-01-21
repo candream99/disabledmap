@@ -438,37 +438,38 @@
             color: #ef4444;
         }
         /* [추가] 우측 하단 버튼 그룹 (지하철, 소개) 스타일 */
+/* [수정] 우측 하단 버튼 그룹 (지하철, 소개) 스타일 - 원형으로 변경 */
 .right-bottom-btn {
     position: absolute;
-    right: 20px;        /* 오른쪽 여백 */
-    width: 45px;        /* 기존 현재위치 버튼과 비슷한 크기 */
+    right: 20px;
+    width: 45px;        /* 현재위치 버튼과 동일한 크기 */
     height: 45px;
     background-color: #ffffff;
-    border: 1px solid #ccc;
-    border-radius: 4px; /* 사각형 모서리 둥글게 (기존 버튼 스타일에 맞춤) */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    z-index: 1000;      /* 지도 위에 표시 */
+    border: 1px solid #ccc; /* 테두리 색상 */
+    border-radius: 50%; /* ★ 핵심: 50%로 설정하여 완벽한 원형으로 만듦 ★ */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* 그림자 효과 */
+    z-index: 1000;
     cursor: pointer;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: center; /* 아이콘 가로 중앙 정렬 */
+    align-items: center;     /* 아이콘 세로 중앙 정렬 */
     padding: 0;
 }
 
-/* 버튼 내부 이미지 크기 조절 */
+/* 버튼 내부 이미지 크기 (원형 버튼 안에 알맞게 들어가는 크기) */
 .right-bottom-btn img {
-    width: 28px;
-    height: 28px;
+    width: 24px;  /* 이미지 크기를 약간 줄여 원 안에 예쁘게 담기게 조정 */
+    height: 24px;
     object-fit: contain;
 }
 
-/* 위치 지정 */
+/* 위치 지정 (기존과 동일) */
 #introBtn {
-    bottom: 20px; /* 현재위치 버튼과 동일선상 (바닥에서 20px) */
+    bottom: 20px; 
 }
 
 #subwayBtn {
-    bottom: 75px; /* 소개 버튼(45px) + 간격(10px) + 여백(20px) = 75px */
+    bottom: 75px; 
 }
 
 /* [추가] 소개 팝업창 스타일 */
@@ -1701,6 +1702,7 @@ new naver.maps.LatLng(37.570969, 126.982094),
     </script>
 </body>
 </html>
+
 
 
 
