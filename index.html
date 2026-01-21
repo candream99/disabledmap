@@ -437,6 +437,79 @@
         .status-negative {
             color: #ef4444;
         }
+        /* [추가] 우측 하단 버튼 그룹 (지하철, 소개) 스타일 */
+.right-bottom-btn {
+    position: absolute;
+    right: 20px;        /* 오른쪽 여백 */
+    width: 45px;        /* 기존 현재위치 버튼과 비슷한 크기 */
+    height: 45px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 4px; /* 사각형 모서리 둥글게 (기존 버튼 스타일에 맞춤) */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 1000;      /* 지도 위에 표시 */
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+/* 버튼 내부 이미지 크기 조절 */
+.right-bottom-btn img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+
+/* 위치 지정 */
+#introBtn {
+    bottom: 20px; /* 현재위치 버튼과 동일선상 (바닥에서 20px) */
+}
+
+#subwayBtn {
+    bottom: 75px; /* 소개 버튼(45px) + 간격(10px) + 여백(20px) = 75px */
+}
+
+/* [추가] 소개 팝업창 스타일 */
+#mobileIntroOverlay {
+    display: none; /* 기본 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* 반투명 검은 배경 */
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.mobile-intro-content {
+    position: relative;
+    width: 90%;
+    max-width: 400px;
+    background: transparent; /* 배경 투명 (이미지 자체만 보여줌) */
+    text-align: center;
+}
+
+.mobile-intro-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.mobile-intro-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    font-size: 30px;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
 
     </style>
 </head>
@@ -466,6 +539,20 @@
     <div id="coordDisplay" 
 class="outdoor-mode-coord">건물을 
  클릭하면 실내지도를 볼 수 있어요</div>
+    <button id="subwayBtn" class="right-bottom-btn" title="지하철 노선도 보기">
+    <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/pc/subway.png" alt="지하철">
+</button>
+
+<button id="introBtn" class="right-bottom-btn" title="서비스 소개">
+    <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/pc/subway.png" alt="소개">
+</button>
+
+<div id="mobileIntroOverlay">
+    <div class="mobile-intro-content">
+        <button class="mobile-intro-close" onclick="document.getElementById('mobileIntroOverlay').style.display='none'">&times;</button>
+        <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/intro-01.png" alt="회사 소개">
+    </div>
+</div>
     
     <div id="searchListContainer">
         </div>
@@ -1591,10 +1678,30 @@ new naver.maps.LatLng(37.570969, 126.982094),
         };
 
         document.head.appendChild(script);
-        
+       /* ------------------------------------------------ */
+    /* [추가] 우측 하단 버튼 이벤트 처리 */
+    /* ------------------------------------------------ */
+
+    // 1. 지하철 버튼 클릭 시 -> 새 창으로 서울교통공사 연결
+    document.getElementById('subwayBtn').addEventListener('click', function() {
+        window.open('http://www.seoulmetro.co.kr/kr/cyberStation.do', '_blank');
+    });
+
+    // 2. 소개 버튼 클릭 시 -> 팝업 열기
+    document.getElementById('introBtn').addEventListener('click', function() {
+        document.getElementById('mobileIntroOverlay').style.display = 'flex';
+    });
+
+    // 3. 팝업 배경 클릭 시 -> 팝업 닫기 (선택사항: 편의성 위해 추가)
+    document.getElementById('mobileIntroOverlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+        }
+    }); 
     </script>
 </body>
 </html>
+
 
 
 
