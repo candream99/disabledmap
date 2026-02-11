@@ -770,6 +770,37 @@ color:#777;">×</span>
                         operating_hours: '10:00 - 21:00 (매일 운영)'
                     }
                 },
+                        lm: { // 르메이에르
+            polygonCoords: [
+                new naver.maps.LatLng(37.571147, 126.979629),
+                new naver.maps.LatLng(37.571143, 126.980194),
+                new naver.maps.LatLng(37.570545, 126.980193),
+                new naver.maps.LatLng(37.570545, 126.979501),
+                new naver.maps.LatLng(37.570992, 126.979503),
+                new naver.maps.LatLng(37.570994, 126.979629),
+            ],
+            floors: ['2f', '1f', 'b1', 'b2'],
+            images: {
+                '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lm2f.png',
+                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lm1f.png',
+'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lmb1.png',
+                'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lmb2.png',
+            },
+            floorBounds: { 
+                '2f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
+'1f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
+                'b1': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
+                'b2': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
+            },
+            currentFloor: '1f',
+            accessInfo: {'주출입구 경사로': false, '장애인 화장실': true, '장애인 주차장': true, '엘리베이터': true, '주출입구 단차': false},
+            buildingInfo: {
+                name: '르메이에르 종로타운',
+                image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lmmain.png',
+                address: '서울특별시 종로구 종로 19',
+                operating_hours: '09:00 - 21:00 (매일 운영)'
+            }
+        },
                 't8': { // 건물 3: 타워8
                     polygonCoords: [
                         new naver.maps.LatLng(37.570859, 126.980318),
@@ -1726,6 +1757,7 @@ new naver.maps.LatLng(37.570969, 126.982094),
     </script>
 </body>
 </html>
+
 
 
 
