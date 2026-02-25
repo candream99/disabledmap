@@ -729,18 +729,22 @@ script.onload = function() {
                 new naver.maps.LatLng(37.570992, 126.979503),
                 new naver.maps.LatLng(37.570994, 126.979629),
             ],
-            floors: ['2f', '1f', 'b1', 'b2'],
+            floors: [`5f', '2f', '1f', 'b1', 'b2', `b4'],
             images: {
-                '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lm2f.png',
+'5f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lm5f.png',                
+'2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lm2f.png',
                 '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lm1f.png',
 'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lmb1.png',
                 'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lmb2.png',
+'b5': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lmb5.png',
             },
             floorBounds: { 
+5f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
                 '2f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
 '1f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
                 'b1': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
                 'b2': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
+'b4': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
             },
             currentFloor: '1f',
             accessInfo: {'주출입구 경사로': false, '장애인 화장실': true, '장애인 주차장': true, '엘리베이터': true, '주출입구 단차': false},
@@ -989,6 +993,7 @@ document.head.appendChild(script);
 </script>
 </body>
 </html>
+
 
 
 
