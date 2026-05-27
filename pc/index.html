@@ -755,6 +755,39 @@ script.onload = function() {
                 operating_hours: '09:00 - 21:00 (매일 운영)'
             }
         },
+         cent: { // 센트럴폴리스
+            polygonCoords: [
+                new naver.maps.LatLng(37.571945, 126.983322),
+                new naver.maps.LatLng(37.571954, 126.983734),
+                new naver.maps.LatLng(37.571417, 126.983747),
+                new naver.maps.LatLng(37.571416, 126.984249),
+                new naver.maps.LatLng(37.571178, 126.984256),
+                new naver.maps.LatLng(37.571187, 126.983330),
+            ],
+            floors: ['b3', 'b2', 'b1', '1f', '2f'],
+            images: {
+                'b3': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/B_3.jpg',
+                'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/B_2.jpg',
+                'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/B_1.jpg',
+                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/1_F.jpg',
+                '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/2_F.jpg',
+            },
+            floorBounds: {
+                'b3': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571148, 126.983250), new naver.maps.LatLng(37.572241, 126.984551)),
+                'b2': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571148, 126.983250), new naver.maps.LatLng(37.572241, 126.984551)),
+                'b1': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571148, 126.983250), new naver.maps.LatLng(37.572241, 126.984551)),
+                '1f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571148, 126.983250), new naver.maps.LatLng(37.572241, 126.984551)),
+                '2f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571148, 126.983250), new naver.maps.LatLng(37.572241, 126.984551)),
+            },
+            currentFloor: '1f',
+            accessInfo: {'주출입구 경사로': false, '장애인 화장실': true, '장애인 주차장': true, '엘리베이터': true, '주출입구 단차': false},
+            buildingInfo: {
+                name: '센트럴폴리스',
+                image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/cent_image.jpg',
+                address: '서울 종로구 우정국로 26',
+                operating_hours: '09:00 - 22:00'
+            }
+        },
         officia: { // 광화문 오피시아
             polygonCoords: [
                 new naver.maps.LatLng(37.569884, 126.974610),
