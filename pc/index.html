@@ -720,6 +720,37 @@ script.onload = function() {
                 operating_hours: '09:00 - 21:00 (매일 운영)'
             }
         },
+        kmuseum: { // 대한민국역사박물관
+            polygonCoords: [
+                new naver.maps.LatLng(37.574217, 126.977689),
+                new naver.maps.LatLng(37.574219, 126.978233),
+                new naver.maps.LatLng(37.573650, 126.978244),
+                new naver.maps.LatLng(37.573654, 126.977705),
+            ],
+            floors: ['1f', '3f', '4f', '5f', '6f'],
+            images: {
+                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/1F.png',
+                '3f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/3F.png',
+                '4f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/4F.png',
+                '5f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/5F.png',
+                '6f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/6F.png',
+            },
+            floorBounds: {
+                '1f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.573590, 126.977539), new naver.maps.LatLng(37.574270, 126.978341)),
+                '3f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.573590, 126.977539), new naver.maps.LatLng(37.574270, 126.978341)),
+                '4f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.573590, 126.977539), new naver.maps.LatLng(37.574270, 126.978341)),
+                '5f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.573590, 126.977539), new naver.maps.LatLng(37.574270, 126.978341)),
+                '6f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.573590, 126.977539), new naver.maps.LatLng(37.574270, 126.978341)),
+            },
+            currentFloor: '1f',
+            accessInfo: {'주출입구 경사로': false, '장애인 화장실': true, '장애인 주차장': false, '엘리베이터': true, '주출입구 단차': false},
+            buildingInfo: {
+                name: '대한민국역사박물관',
+                image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/k_museum.jpg',
+                address: '서울특별시 종로구 세종대로 198',
+                operating_hours: '09:00 - 18:00'
+            }
+        },
                 lm: { // 르메이에르
             polygonCoords: [
                 new naver.maps.LatLng(37.571147, 126.979629),
