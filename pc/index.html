@@ -629,6 +629,47 @@ script.onload = function() {
 
    /* 빌딩 데이터 정의 (전체 통합) */
     const buildings = {
+        c1: { // 미래에셋 센터원
+            polygonCoords: [
+                new naver.maps.LatLng(37.567573, 126.984679),
+                new naver.maps.LatLng(37.567792, 126.985604),
+                new naver.maps.LatLng(37.566862, 126.985644),
+                new naver.maps.LatLng(37.566865, 126.985255),
+                new naver.maps.LatLng(37.567096, 126.985261),
+                new naver.maps.LatLng(37.567107, 126.984687)
+            ],
+            floors: ['b3', 'b2', 'b1', '1f', '2f', '3f'],
+            images: {
+                'b3': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/B3.jpg',
+                'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/B2.jpg',
+                'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/B1.jpg',
+                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/1F.jpg',
+                '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/2F.jpg',
+                '3f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/3F.jpg'
+            },
+            floorBounds: { 
+                'b3': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.566782, 126.984456), new naver.maps.LatLng(37.567957, 126.985725)),
+                'b2': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.566782, 126.984456), new naver.maps.LatLng(37.567957, 126.985725)),
+                'b1': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.566782, 126.984456), new naver.maps.LatLng(37.567957, 126.985725)),
+                '1f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.566782, 126.984456), new naver.maps.LatLng(37.567957, 126.985725)),
+                '2f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.566782, 126.984456), new naver.maps.LatLng(37.567957, 126.985725)),
+                '3f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.566782, 126.984456), new naver.maps.LatLng(37.567957, 126.985725))
+            },
+            currentFloor: '1f',
+            accessInfo: {
+                '주출입구 경사로': false,
+                '장애인 화장실': true, 
+                '장애인 주차장': false,
+                '엘리베이터': true,
+                '주출입구 단차': false
+            },
+            buildingInfo: {
+                name: '미래에셋 센터원',
+                image_url: 'https://github.com/candream99/disabledmap/raw/main/ct/c1.jpg',
+                address: '서울특별시 중구 을지로5길 26',
+                operating_hours: '오전 9:00 ~ 오후 10:00'
+            }
+        },
         ky: { // 교보빌딩
             buildingInfo: {
                 name: "교보빌딩",
@@ -1061,25 +1102,3 @@ document.head.appendChild(script);
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
