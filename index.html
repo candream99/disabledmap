@@ -965,6 +965,79 @@ lm: { // 르메이에르
                         operating_hours: '09:00 - 21:00 (매일 운영)' // 임의 운영시간
                     }
                 },
+                                'miraeasset': { // 미래에셋 센터원
+                    polygonCoords: [
+                        new naver.maps.LatLng(37.567573, 126.984679),
+                        new naver.maps.LatLng(37.567792, 126.985604),
+                        new naver.maps.LatLng(37.566862, 126.985644),
+                        new naver.maps.LatLng(37.566865, 126.985255),
+                        new naver.maps.LatLng(37.567096, 126.985261),
+                        new naver.maps.LatLng(37.567107, 126.984687)
+                    ],
+
+                    floors: ['b3', 'b2', 'b1', '1f', '2f', '3f'],
+
+                    images: {
+                        'b3': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/B3.png',
+                        'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/B2.png',
+                        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/B1.png',
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/1F.png',
+                        '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/2F.png',
+                        '3f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/3F.png'
+                    },
+
+                    // 모든 층에 동일한 이미지 경계 적용
+                    floorBounds: {
+                        'b3': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456), // SW / 왼쪽 아래
+                            new naver.maps.LatLng(37.567957, 126.985725)  // NE / 오른쪽 위
+                        ),
+
+                        'b2': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456),
+                            new naver.maps.LatLng(37.567957, 126.985725)
+                        ),
+
+                        'b1': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456),
+                            new naver.maps.LatLng(37.567957, 126.985725)
+                        ),
+
+                        '1f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456),
+                            new naver.maps.LatLng(37.567957, 126.985725)
+                        ),
+
+                        '2f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456),
+                            new naver.maps.LatLng(37.567957, 126.985725)
+                        ),
+
+                        '3f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456),
+                            new naver.maps.LatLng(37.567957, 126.985725)
+                        )
+                    },
+
+                    currentFloor: '1f',
+                    polygon: null,
+
+                    accessInfo: {
+                        '주출입구 경사로': false,
+                        '장애인 화장실': true,
+                        '장애인 주차장': false,
+                        '엘리베이터': true,
+                        '주출입구 단차': false
+                    },
+
+                    // 건물 상세 정보
+                    buildingInfo: {
+                        name: '미래에셋 센터원',
+                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/c1.jpg',
+                        address: '서울특별시 중구 을지로5길 26',
+                        operating_hours: '09:00 - 22:00'
+                    }
+                },
                 'cent': { // 센트럴폴리스
     polygonCoords: [
         new naver.maps.LatLng(37.571945, 126.983322),
