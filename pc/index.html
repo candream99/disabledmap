@@ -670,6 +670,44 @@ script.onload = function() {
                 operating_hours: '오전 9:00 ~ 오후 10:00'
             }
         },
+                lotte: { // 롯데 소공동 백화점
+            polygonCoords: [
+                new naver.maps.LatLng(37.565818, 126.979825),
+                new naver.maps.LatLng(37.565820, 126.980437),
+                new naver.maps.LatLng(37.565550, 126.980453),
+                new naver.maps.LatLng(37.565533, 126.982301),
+                new naver.maps.LatLng(37.565254, 126.982309),
+                new naver.maps.LatLng(37.564499, 126.982041),
+                new naver.maps.LatLng(37.564635, 126.981429),
+                new naver.maps.LatLng(37.565144, 126.981577),
+                new naver.maps.LatLng(37.565150, 126.980520),
+                new naver.maps.LatLng(37.565190, 126.980528),
+                new naver.maps.LatLng(37.565195, 126.980155),
+                new naver.maps.LatLng(37.565252, 126.980142),
+                new naver.maps.LatLng(37.565248, 126.979828)
+            ],
+            floors: ['b2', 'b1', '1f', '2f'],
+            images: {
+                'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_2.png',
+                'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_1.png',
+                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/1_F.png',
+                '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/2_F.png',
+            },
+            floorBounds: { 
+                'b2': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.563737, 126.979560), new naver.maps.LatLng(37.565938, 126.982497)),
+                'b1': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.563737, 126.979560), new naver.maps.LatLng(37.565938, 126.982497)),
+                '1f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.563737, 126.979560), new naver.maps.LatLng(37.565938, 126.982497)),
+                '2f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.563737, 126.979560), new naver.maps.LatLng(37.565938, 126.982497)),
+            },
+            currentFloor: '1f',
+            accessInfo: {'주출입구 경사로': false, '장애인 화장실': true, '장애인 주차장': true, '엘리베이터': true, '주출입구 단차': false},
+            buildingInfo: {
+                name: '롯데 소공동 백화점',
+                image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/lotte.png', 
+                address: '서울특별시 중구 소공동 남대문로 81',
+                operating_hours: '오전 10:30 ~ 오후 8:00'
+            }
+        },
         ky: { // 교보빌딩
             buildingInfo: {
                 name: "교보빌딩",
