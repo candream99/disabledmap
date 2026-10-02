@@ -876,15 +876,22 @@ lm: { // 르메이에르
                         new naver.maps.LatLng(37.565252, 126.980142),
                         new naver.maps.LatLng(37.565248, 126.979828),
                     ],
-                    floors: ['b2', 'b1', '1f', '2f'],
+                    floors: ['b3', 'b2', 'b1', '1f', '2f', '3f', '4f'],
                     images: {
+                        'b3': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_3.png',
                         'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_2.png',
                         'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_1.png',
                         '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/1_F.png',
                         '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/2_F.png',
+                        '3f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/3_F.png',
+                        '4f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/4_F.png',
                     },
                     // 층별 이미지 경계 정보 (4개 층 모두 동일한 경계 사용)
                     floorBounds: { 
+                        'b3': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
                         'b2': new naver.maps.LatLngBounds(
                             new naver.maps.LatLng(37.563737, 126.979560), // SW
                             new naver.maps.LatLng(37.565938, 126.982497)  // NE
@@ -898,6 +905,14 @@ lm: { // 르메이에르
                             new naver.maps.LatLng(37.565938, 126.982497)  // NE
                         ),
                         '2f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '3f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '4f': new naver.maps.LatLngBounds(
                             new naver.maps.LatLng(37.563737, 126.979560), // SW
                             new naver.maps.LatLng(37.565938, 126.982497)  // NE
                         ),
