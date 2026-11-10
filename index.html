@@ -295,16 +295,15 @@
         /* 층 컨트롤: 버튼 크기와 간격은 고정하고, 공간이 부족하면 여러 열로 배치 */
         #floorControls {
             position: absolute;
-            bottom: 88px;
+            bottom: 106px; /* 기존: bottom 88px + i 버튼 하단 여백 18px (i 버튼 위치 동일 유지) */
             left: 10px;
             display: none;
-            flex-direction: column-reverse;
-            flex-wrap: wrap;
-            align-items: center;
-            align-content: flex-start;
+            flex-direction: column-reverse; /* i 버튼 → 저층 → 고층 순서로 아래에서 위로 쌓음 */
+            flex-wrap: wrap;                /* 높이가 부족하면 오른쪽 열로 이어서 배치 */
+            align-items: flex-start;
+            align-content: flex-start;      /* 새 열은 오른쪽으로 추가 */
             gap: 8px;
-            max-height: calc(100vh - 158px);
-            width: max-content;
+            max-height: calc(100vh - 176px); /* 위쪽 70px 여백 유지 (JS에서 실제 화면 높이로 재계산) */
             z-index: 1500;
             background: transparent;
             padding: 0;
@@ -337,7 +336,10 @@
         /* 무장애 시설 버튼 이미지 스타일 */
         /* ------------------------------------- */
         #accessInfoBtn {
-            margin-bottom: 18px;
+            margin-top: 18px; /* column-reverse 이므로 i 버튼과 층 버튼 사이 간격은 margin-top */
+            flex: 0 0 40px;
+            min-width: 40px;
+            min-height: 40px;
             font-size: 0;
             line-height: 0; 
         }
@@ -1614,7 +1616,7 @@ new naver.maps.LatLng(37.570969, 126.982094),
             // 화면 높이가 부족하면 CSS flex-wrap이 자동으로 다음 열에 배치한다.
             function fitFloorButtons() {
                 floorControlsContainer.style.maxHeight =
-                    Math.max(200, window.innerHeight - 158) + 'px';
+                    Math.max(200, window.innerHeight - 176) + 'px';
             }
             window.addEventListener('resize', fitFloorButtons);
 
@@ -1632,8 +1634,8 @@ new naver.maps.LatLng(37.570969, 126.982094),
                     btn.dataset.floor = floor;
                     btn.textContent = floor.toUpperCase();
                     
-                    // 'i' 버튼 바로 위에 오도록 prepend
-                    floorControlsContainer.prepend(btn);
+                    // column-reverse 이므로 append 하면 'i' 버튼 바로 위부터 저층 → 고층 순으로 쌓임
+                    floorControlsContainer.appendChild(btn);
 
                     if (floor === defaultFloor) {
                         btn.classList.add('active');
