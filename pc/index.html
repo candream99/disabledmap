@@ -362,8 +362,10 @@
     position: absolute;
     bottom: 86px;
     left: 18px;
-    display: none; /* 자바스크립트에서 flex로 변경하여 표시함 */
-    flex-direction: column; /* 버튼을 세로로 나열 */
+    display: none; /* 실내모드에서 표시 */
+    grid-template-columns: repeat(4, 44px);
+    grid-template-rows: repeat(5, 44px);
+    grid-auto-flow: column;
     gap: 10px;
     z-index: 2200;
 }
@@ -546,7 +548,7 @@ script.onload = function() {
         labelLayer.setMap(null);
         coordDisplay.textContent = "일반지도로 돌아가려면 실내지도를 클릭하세요";
         renderFloorButtons(buildingId);
-        floorControls.style.display = "flex";
+        floorControls.style.display = "grid";
         showFloor(buildingId, config.currentFloor || "1f");
 
         for (let id in buildings){
