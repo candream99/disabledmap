@@ -299,7 +299,8 @@
             left: 10px;
             display: none;
             flex-direction: column-reverse; 
-            gap: 8px; 
+            align-items: center;
+            gap: var(--floor-gap, 8px); 
             z-index: 1500;
             background: transparent;
             padding: 0;
@@ -309,6 +310,13 @@
         /* 층 버튼/액세스 버튼 스타일 (공통 원형 스타일 상속) */
         .floor-btn {
             font-size: 14px;
+        }
+
+        /* 층 버튼(i 버튼 제외) 크기를 변수로 제어 - 층이 많아도 한 화면에 표시 */
+        .floor-btn:not(#accessInfoBtn) {
+            width: var(--floor-size, 40px);
+            height: var(--floor-size, 40px);
+            font-size: clamp(9px, calc(var(--floor-size, 40px) * 0.35), 14px);
         }
 
         /* 클릭된 버튼 활성 스타일 */
@@ -1595,6 +1603,26 @@ new naver.maps.LatLng(37.570969, 126.982094),
                 });
             }
 
+            // 층 버튼이 한 화면에 모두 보이도록 크기/간격 자동 조절
+            function fitFloorButtons() {
+                var btns = floorControlsContainer.querySelectorAll('.floor-btn:not(#accessInfoBtn)');
+                var n = btns.length;
+                if (!n) return;
+
+                var bottomOffset = 88;      // #floorControls의 bottom 값
+                var topReserve = 70;        // 화면 위쪽에 남겨둘 여백
+                var accessH = 40 + 18;      // i 버튼 높이 + margin-bottom
+                var gap = (n > 10) ? 4 : 8;
+
+                var avail = window.innerHeight - bottomOffset - topReserve - accessH;
+                var size = Math.floor((avail - n * gap) / n);
+                size = Math.max(22, Math.min(40, size));   // 최소 22px, 최대 40px
+
+                floorControlsContainer.style.setProperty('--floor-size', size + 'px');
+                floorControlsContainer.style.setProperty('--floor-gap', gap + 'px');
+            }
+            window.addEventListener('resize', fitFloorButtons);
+
             // 층 버튼 동적 생성 및 렌더링
             function renderFloorButtons(buildingId) {
                 var config = buildings[buildingId];
@@ -1620,6 +1648,8 @@ new naver.maps.LatLng(37.570969, 126.982094),
                        showFloor(buildingId, floor);
                     });
                 });
+
+                fitFloorButtons();
             }
 
             /**
@@ -2078,8 +2108,3 @@ new naver.maps.LatLng(37.570969, 126.982094),
     </script>
 </body>
 </html>
-
-
-
-
-
