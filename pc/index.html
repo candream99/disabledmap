@@ -362,11 +362,12 @@
     position: absolute;
     bottom: 86px;
     left: 18px;
-    display: none; /* 실내모드에서 표시 */
-    grid-template-columns: repeat(4, 44px);
-    grid-template-rows: repeat(5, 44px);
-    grid-auto-flow: column;
-    gap: 10px;
+    display: none; /* 자바스크립트에서 flex로 변경하여 표시함 */
+    flex-direction: column-reverse; /* 아래(저층)에서 위(고층)로 쌓음 */
+    flex-wrap: wrap;                /* 화면 높이를 넘으면 오른쪽 열로 이어서 배치 */
+    align-content: flex-start;      /* 새 열은 오른쪽으로 추가 */
+    gap: 10px;                      /* 버튼 간격(세로/가로 동일) 유지 */
+    max-height: calc(100% - 86px - 18px); /* 지도 영역 높이 안에서만 배치 (위쪽 여백 18px) */
     z-index: 2200;
 }
 
@@ -548,7 +549,7 @@ script.onload = function() {
         labelLayer.setMap(null);
         coordDisplay.textContent = "일반지도로 돌아가려면 실내지도를 클릭하세요";
         renderFloorButtons(buildingId);
-        floorControls.style.display = "grid";
+        floorControls.style.display = "flex";
         showFloor(buildingId, config.currentFloor || "1f");
 
         for (let id in buildings){
@@ -606,7 +607,7 @@ script.onload = function() {
             btn.dataset.floor = f;
             btn.textContent = f.toUpperCase();
             btn.addEventListener("click", ()=> showFloor(buildingId,f));
-            floorControls.prepend(btn);
+            floorControls.appendChild(btn); // column-reverse 이므로 append 하면 첫 층이 맨 아래
         });
     }
 
