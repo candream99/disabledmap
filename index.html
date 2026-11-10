@@ -292,14 +292,19 @@
         }
         /* ------------------------------------- */
         
-        /* 층 컨트롤 컨테이너 스타일 */
+        /* 층 컨트롤: 버튼 크기와 간격은 고정하고, 공간이 부족하면 여러 열로 배치 */
         #floorControls {
             position: absolute;
-            bottom: 88px; 
+            bottom: 88px;
             left: 10px;
             display: none;
-            flex-direction: column-reverse; 
-            gap: 8px; 
+            flex-direction: column-reverse;
+            flex-wrap: wrap;
+            align-items: center;
+            align-content: flex-start;
+            gap: 8px;
+            max-height: calc(100vh - 158px);
+            width: max-content;
             z-index: 1500;
             background: transparent;
             padding: 0;
@@ -308,6 +313,16 @@
 
         /* 층 버튼/액세스 버튼 스타일 (공통 원형 스타일 상속) */
         .floor-btn {
+            font-size: 14px;
+        }
+
+        /* 층 버튼 크기 고정: 40px × 40px */
+        .floor-btn:not(#accessInfoBtn) {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            min-height: 40px;
+            flex: 0 0 40px;
             font-size: 14px;
         }
 
@@ -437,6 +452,104 @@
         .status-negative {
             color: #ef4444;
         }
+        /* [추가] 우측 하단 버튼 그룹 (지하철, 소개) 스타일 */
+/* [수정] 우측 하단 버튼 그룹 (지하철, 소개) 스타일 - 원형으로 변경 */
+.right-bottom-btn {
+    position: absolute;
+    right: 20px;
+    width: 45px;        /* 현재위치 버튼과 동일한 크기 */
+    height: 45px;
+    background-color: #ffffff;
+    border: 1px solid #ccc; /* 테두리 색상 */
+    border-radius: 50%; /* ★ 핵심: 50%로 설정하여 완벽한 원형으로 만듦 ★ */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* 그림자 효과 */
+    z-index: 1000;
+    cursor: pointer;
+    display: flex;
+    justify-content: center; /* 아이콘 가로 중앙 정렬 */
+    align-items: center;     /* 아이콘 세로 중앙 정렬 */
+    padding: 0;
+}
+
+/* 버튼 내부 이미지 크기 (원형 버튼 안에 알맞게 들어가는 크기) */
+.right-bottom-btn img {
+    width: 24px;  /* 이미지 크기를 약간 줄여 원 안에 예쁘게 담기게 조정 */
+    height: 24px;
+    object-fit: contain;
+}
+
+/* 위치 지정 (기존과 동일) */
+#introBtn {
+    bottom: 20px; 
+}
+
+#subwayBtn {
+    bottom: 75px; 
+}
+
+/* [수정] 소개 팝업창 스타일 - 스크롤 및 화면 잘림 해결 */
+#mobileIntroOverlay {
+    display: none; /* 기본 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* 반투명 검은 배경 */
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    /* 내용이 넘칠 경우 오버레이 자체에서도 스크롤 가능하도록 설정 (선택사항) */
+    overflow-y: auto; 
+    padding: 20px; /* 화면 가장자리와 팝업 사이 여백 확보 */
+    box-sizing: border-box; /* padding을 width/height에 포함 */
+}
+
+.mobile-intro-content {
+    position: relative;
+    width: 90%;
+    max-width: 400px;
+    /* ★ 핵심 수정: 화면 높이의 80%까지만 차지하고, 넘치면 스크롤 ★ */
+    max-height: 80vh; 
+    overflow-y: auto; /* 세로 스크롤 허용 */
+    background: transparent; 
+    text-align: center;
+    /* 스크롤바 디자인 (크롬, 사파리 등) */
+    scrollbar-width: thin; /* 파이어폭스 */
+}
+
+/* 스크롤바 숨기기 (깔끔하게 보이기 위해 선택사항) */
+.mobile-intro-content::-webkit-scrollbar {
+    display: none; 
+}
+
+.mobile-intro-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    display: block; /* 이미지 하단 여백 제거 */
+}
+
+.mobile-intro-close {
+    position: absolute;
+    top: 10px;    /* 이미지 안쪽 우측 상단으로 이동 (잘림 방지) */
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;     /* 배경이 밝은 이미지일 경우 잘 보이도록 어둡게 */
+    background: rgba(255, 255, 255, 0.8); /* 반투명 흰색 배경 추가 */
+    border: none;
+    border-radius: 50%; /* 닫기 버튼도 원형으로 */
+    cursor: pointer;
+    z-index: 10001; /* 이미지보다 위에 오도록 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
 
     </style>
 </head>
@@ -466,6 +579,20 @@
     <div id="coordDisplay" 
 class="outdoor-mode-coord">건물을 
  클릭하면 실내지도를 볼 수 있어요</div>
+    <button id="subwayBtn" class="right-bottom-btn" title="지하철 노선도 보기">
+    <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/pc/subway.png" alt="지하철">
+</button>
+
+<button id="introBtn" class="right-bottom-btn" title="서비스 소개">
+    <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/pc/document.jpg" alt="소개">
+</button>
+
+<div id="mobileIntroOverlay">
+    <div class="mobile-intro-content">
+        <button class="mobile-intro-close" onclick="document.getElementById('mobileIntroOverlay').style.display='none'">&times;</button>
+        <img src="https://raw.githubusercontent.com/candream99/disabledmap/main/intro-01.png" alt="회사 소개">
+    </div>
+</div>
     
     <div id="searchListContainer">
         </div>
@@ -658,6 +785,220 @@ color:#777;">×</span>
                         operating_hours: '10:00 - 21:00 (매일 운영)'
                     }
                 },
+lm: { // 르메이에르
+            polygonCoords: [
+                new naver.maps.LatLng(37.571147, 126.979629),
+                new naver.maps.LatLng(37.571143, 126.980194),
+                new naver.maps.LatLng(37.570545, 126.980193),
+                new naver.maps.LatLng(37.570545, 126.979501),
+                new naver.maps.LatLng(37.570992, 126.979503),
+                new naver.maps.LatLng(37.570994, 126.979629),
+            ],
+            floors: ['5f', '2f', '1f', 'b1', 'b2', 'b4'],
+            images: {
+'5f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lm5f.png',                
+'2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lm2f.png',
+                '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lm1f.png',
+'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lmb1.png',
+                'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lmb2.png',
+'b4': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lmb4.png',
+            },
+            floorBounds: { 
+'5f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
+                '2f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
+'1f': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
+                'b1': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
+                'b2': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
+'b4': new naver.maps.LatLngBounds(new naver.maps.LatLng(37.571232, 126.980316), new naver.maps.LatLng(37.570381, 126.979337)),
+            },
+            currentFloor: '1f',
+            accessInfo: {'주출입구 경사로': false, '장애인 화장실': true, '장애인 주차장': true, '엘리베이터': true, '주출입구 단차': false},
+            buildingInfo: {
+                name: '르메이에르 종로타운',
+                image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/lm/lmmain.png',
+                address: '서울특별시 종로구 종로 19',
+                operating_hours: '09:00 - 21:00 (매일 운영)'
+            }
+        },
+'kmuseum': { // 대한민국역사박물관
+                    polygonCoords: [
+                        new naver.maps.LatLng(37.574217, 126.977689),
+                        new naver.maps.LatLng(37.574219, 126.978233),
+                        new naver.maps.LatLng(37.573650, 126.978244),
+                        new naver.maps.LatLng(37.573654, 126.977705),
+                    ],
+                    floors: ['1f', '3f', '4f', '5f', '6f'],
+                    images: {
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/1F.png',
+                        '3f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/3F.png',
+                        '4f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/4F.png',
+                        '5f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/5F.png',
+                        '6f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/6F.png',
+                    },
+                    // 층별 경계 정보 (모든 층 동일한 경계 적용)
+                    floorBounds: {
+                        '1f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.573590, 126.977539), // SW (왼쪽 꼭지점)
+                            new naver.maps.LatLng(37.574270, 126.978341)  // NE (오른쪽 꼭지점)
+                        ),
+                        '3f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.573590, 126.977539),
+                            new naver.maps.LatLng(37.574270, 126.978341)
+                        ),
+                        '4f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.573590, 126.977539),
+                            new naver.maps.LatLng(37.574270, 126.978341)
+                        ),
+                        '5f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.573590, 126.977539),
+                            new naver.maps.LatLng(37.574270, 126.978341)
+                        ),
+                        '6f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.573590, 126.977539),
+                            new naver.maps.LatLng(37.574270, 126.978341)
+                        ),
+                    },
+                    currentFloor: '1f',
+                    polygon: null,
+                    accessInfo: {
+                        '주출입구 경사로': false,
+                        '장애인 화장실': true,
+                        '장애인 주차장': false,
+                        '엘리베이터': true,
+                        '주출입구 단차': false
+                    },
+                    // 건물 상세 정보 (검색 리스트 및 팝업용)
+                    buildingInfo: {
+                        name: '대한민국역사박물관',
+                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/k_museum/k_museum.jpg',
+                        address: '서울특별시 종로구 세종대로 198',
+                        operating_hours: '09:00 - 18:00'
+                    }
+                },
+'lotte': { // 롯데 소공동 백화점
+                    polygonCoords: [
+                        new naver.maps.LatLng(37.565818, 126.979825),
+                        new naver.maps.LatLng(37.565820, 126.980437),
+                        new naver.maps.LatLng(37.565550, 126.980453),
+                        new naver.maps.LatLng(37.565533, 126.982301),
+                        new naver.maps.LatLng(37.565254, 126.982309),
+                        new naver.maps.LatLng(37.564499, 126.982041),
+                        new naver.maps.LatLng(37.564635, 126.981429),
+                        new naver.maps.LatLng(37.565144, 126.981577),
+                        new naver.maps.LatLng(37.565150, 126.980520),
+                        new naver.maps.LatLng(37.565190, 126.980528),
+                        new naver.maps.LatLng(37.565195, 126.980155),
+                        new naver.maps.LatLng(37.565252, 126.980142),
+                        new naver.maps.LatLng(37.565248, 126.979828),
+                    ],
+                    floors: ['b3', 'b2', 'b1', '1f', '2f', '3f', '4f', '5f', '6f', '7f', '8f', '9f', '10f', '11f', '12f', '13f', '14f'],
+                    images: {
+                        'b3': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_3.png',
+                        'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_2.png',
+                        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_1.png',
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/1_F.png',
+                        '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/2_F.png',
+                        '3f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/3_F.png',
+                        '4f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/4_F.png',
+                        '5f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/5_F.png',
+                        '6f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/6_F.png',
+                        '7f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/7_F.png',
+                        '8f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/8_F.png',
+                        '9f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/9_F.png',
+                        '10f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/10_F.png',
+                        '11f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/11_F.png',
+                        '12f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/12_F.png',
+                        '13f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/13_F.png',
+                        '14f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/14_F.png',
+                    },
+                    // 층별 이미지 경계 정보 (4개 층 모두 동일한 경계 사용)
+                    floorBounds: { 
+                        'b3': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        'b2': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        'b1': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '1f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '2f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '3f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '4f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                         '5f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                         '6f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                         '7f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '8f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '9f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '10f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '11f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '12f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '13f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                        '14f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
+                        ),
+                    },
+                    currentFloor: '1f',
+                    polygon: null,
+                    accessInfo: {
+                        '주출입구 경사로': false,
+                        '장애인 화장실': true, 
+                        '장애인 주차장': true,
+                        '엘리베이터': true,
+                        '주출입구 단차': false 
+                    },
+                    // 건물 상세 정보 (검색 리스트 및 팝업용)
+                    buildingInfo: {
+                        name: '롯데 소공동 백화점',
+                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/lotte.png', 
+                        address: '서울특별시 중구 소공동 남대문로 81',
+                        operating_hours: '오전 10:30 ~ 오후 8:00'
+                    }
+                },
                 't8': { // 건물 3: 타워8
                     polygonCoords: [
                         new naver.maps.LatLng(37.570859, 126.980318),
@@ -763,6 +1104,144 @@ color:#777;">×</span>
                         operating_hours: '09:00 - 21:00 (매일 운영)' // 임의 운영시간
                     }
                 },
+                                'miraeasset': { // 미래에셋 센터원
+                    polygonCoords: [
+                        new naver.maps.LatLng(37.567573, 126.984679),
+                        new naver.maps.LatLng(37.567792, 126.985604),
+                        new naver.maps.LatLng(37.566862, 126.985644),
+                        new naver.maps.LatLng(37.566865, 126.985255),
+                        new naver.maps.LatLng(37.567096, 126.985261),
+                        new naver.maps.LatLng(37.567107, 126.984687)
+                    ],
+
+                    floors: ['b3', 'b2', 'b1', '1f', '2f', '3f'],
+
+                    images: {
+                        'b3': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/B3.jpg',
+                        'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/B2.jpg',
+                        'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/B1.jpg',
+                        '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/1F.jpg',
+                        '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/2F.jpg',
+                        '3f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/3F.jpg'
+                    },
+
+                    // 모든 층에 동일한 이미지 경계 적용
+                    floorBounds: {
+                        'b3': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456), // SW / 왼쪽 아래
+                            new naver.maps.LatLng(37.567957, 126.985725)  // NE / 오른쪽 위
+                        ),
+
+                        'b2': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456),
+                            new naver.maps.LatLng(37.567957, 126.985725)
+                        ),
+
+                        'b1': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456),
+                            new naver.maps.LatLng(37.567957, 126.985725)
+                        ),
+
+                        '1f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456),
+                            new naver.maps.LatLng(37.567957, 126.985725)
+                        ),
+
+                        '2f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456),
+                            new naver.maps.LatLng(37.567957, 126.985725)
+                        ),
+
+                        '3f': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.566782, 126.984456),
+                            new naver.maps.LatLng(37.567957, 126.985725)
+                        )
+                    },
+
+                    currentFloor: '1f',
+                    polygon: null,
+
+                    accessInfo: {
+                        '주출입구 경사로': false,
+                        '장애인 화장실': true,
+                        '장애인 주차장': false,
+                        '엘리베이터': true,
+                        '주출입구 단차': false
+                    },
+
+                    // 건물 상세 정보
+                    buildingInfo: {
+                        name: '미래에셋 센터원',
+                        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/ct/c1.jpg',
+                        address: '서울특별시 중구 을지로5길 26',
+                        operating_hours: '09:00 - 22:00'
+                    }
+                },
+                'cent': { // 센트럴폴리스
+    polygonCoords: [
+        new naver.maps.LatLng(37.571945, 126.983322),
+        new naver.maps.LatLng(37.571954, 126.983734),
+        new naver.maps.LatLng(37.571417, 126.983747),
+        new naver.maps.LatLng(37.571416, 126.984249),
+        new naver.maps.LatLng(37.571178, 126.984256),
+        new naver.maps.LatLng(37.571187, 126.983330),
+    ],
+    floors: ['b5', 'b4', 'b3', 'b2', 'b1', '1f', '2f'],
+    images: {
+    'b5': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/B_5.png',
+    'b4': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/B_4.png',
+    'b3': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/B_3.png',
+    'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/B_2.png',
+    'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/B_1.png',
+    '1f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/1_F.png',
+    '2f': 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/2_F.png',
+},
+    floorBounds: {
+        'b5': new naver.maps.LatLngBounds(
+        new naver.maps.LatLng(37.571148, 126.983250), // SW
+        new naver.maps.LatLng(37.572241, 126.984551)  // NE
+    ),
+    'b4': new naver.maps.LatLngBounds(
+        new naver.maps.LatLng(37.571148, 126.983250), // SW
+        new naver.maps.LatLng(37.572241, 126.984551)  // NE
+    ),
+        'b3': new naver.maps.LatLngBounds(
+            new naver.maps.LatLng(37.571148, 126.983250), // SW (왼쪽 꼭지점)
+            new naver.maps.LatLng(37.572241, 126.984551)  // NE (오른쪽 꼭지점)
+        ),
+        'b2': new naver.maps.LatLngBounds(
+            new naver.maps.LatLng(37.571148, 126.983250),
+            new naver.maps.LatLng(37.572241, 126.984551)
+        ),
+        'b1': new naver.maps.LatLngBounds(
+            new naver.maps.LatLng(37.571148, 126.983250),
+            new naver.maps.LatLng(37.572241, 126.984551)
+        ),
+        '1f': new naver.maps.LatLngBounds(
+            new naver.maps.LatLng(37.571148, 126.983250),
+            new naver.maps.LatLng(37.572241, 126.984551)
+        ),
+        '2f': new naver.maps.LatLngBounds(
+            new naver.maps.LatLng(37.571148, 126.983250),
+            new naver.maps.LatLng(37.572241, 126.984551)
+        ),
+    },
+    currentFloor: '1f',
+    polygon: null,
+    accessInfo: {
+        '주출입구 경사로': false,
+        '장애인 화장실': true,
+        '장애인 주차장': true,
+        '엘리베이터': true,
+        '주출입구 단차': false
+    },
+    buildingInfo: {
+        name: '센트럴폴리스',
+        image_url: 'https://raw.githubusercontent.com/candream99/disabledmap/main/cent/cent_image.jpg',
+        address: '서울 종로구 우정국로 26',
+        operating_hours: '09:00 - 22:00'
+    }
+},
                 'officia': { // 건물 4: 광화문 오피시아
     polygonCoords: [
         new naver.maps.LatLng(37.569884, 126.974610), // 위도, 경도
@@ -1131,6 +1610,14 @@ new naver.maps.LatLng(37.570969, 126.982094),
                 });
             }
 
+            // 층 버튼의 크기(40px)와 간격(8px)은 유지한다.
+            // 화면 높이가 부족하면 CSS flex-wrap이 자동으로 다음 열에 배치한다.
+            function fitFloorButtons() {
+                floorControlsContainer.style.maxHeight =
+                    Math.max(200, window.innerHeight - 158) + 'px';
+            }
+            window.addEventListener('resize', fitFloorButtons);
+
             // 층 버튼 동적 생성 및 렌더링
             function renderFloorButtons(buildingId) {
                 var config = buildings[buildingId];
@@ -1156,6 +1643,8 @@ new naver.maps.LatLng(37.570969, 126.982094),
                        showFloor(buildingId, floor);
                     });
                 });
+
+                fitFloorButtons();
             }
 
             /**
@@ -1591,36 +2080,26 @@ new naver.maps.LatLng(37.570969, 126.982094),
         };
 
         document.head.appendChild(script);
-        
+       /* ------------------------------------------------ */
+    /* [추가] 우측 하단 버튼 이벤트 처리 */
+    /* ------------------------------------------------ */
+
+    // 1. 지하철 버튼 클릭 시 -> 새 창으로 서울교통공사 연결
+    document.getElementById('subwayBtn').addEventListener('click', function() {
+        window.open('http://www.seoulmetro.co.kr/kr/cyberStation.do', '_blank');
+    });
+
+    // 2. 소개 버튼 클릭 시 -> 팝업 열기
+    document.getElementById('introBtn').addEventListener('click', function() {
+        document.getElementById('mobileIntroOverlay').style.display = 'flex';
+    });
+
+    // 3. 팝업 배경 클릭 시 -> 팝업 닫기 (선택사항: 편의성 위해 추가)
+    document.getElementById('mobileIntroOverlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+        }
+    }); 
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
