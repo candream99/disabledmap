@@ -893,8 +893,9 @@ lm: { // 르메이에르
                         new naver.maps.LatLng(37.565252, 126.980142),
                         new naver.maps.LatLng(37.565248, 126.979828),
                     ],
-                    floors: ['b3', 'b2', 'b1', '1f', '2f', '3f', '4f', '5f', '6f', '7f', '8f', '9f', '10f', '11f', '12f', '13f', '14f'],
+                    floors: ['b4','b3', 'b2', 'b1', '1f', '2f', '3f', '4f', '5f', '6f', '7f', '8f', '9f', '10f', '11f', '12f', '13f', '14f'],
                     images: {
+                        'b4': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_4.png',
                         'b3': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_3.png',
                         'b2': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_2.png',
                         'b1': 'https://raw.githubusercontent.com/candream99/disabledmap/main/lotte/B_1.png',
@@ -915,6 +916,9 @@ lm: { // 르메이에르
                     },
                     // 층별 이미지 경계 정보 (4개 층 모두 동일한 경계 사용)
                     floorBounds: { 
+                        'b4': new naver.maps.LatLngBounds(
+                            new naver.maps.LatLng(37.563737, 126.979560), // SW
+                            new naver.maps.LatLng(37.565938, 126.982497)  // NE
                         'b3': new naver.maps.LatLngBounds(
                             new naver.maps.LatLng(37.563737, 126.979560), // SW
                             new naver.maps.LatLng(37.565938, 126.982497)  // NE
